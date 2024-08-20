@@ -34,10 +34,12 @@ const Design = () => {
         const responseMain = await api.get(
           `designs/${encodeURIComponent(designId)}`
         );
-        const responseInfo = await api.get(
+        /*const responseInfo = await api.get(
           `ui-helpers/get-design-info/${encodeURIComponent(designId)}`
+        );*/
+        setDesignData(
+          Object.assign({}, responseMain.data /*, responseInfo.data*/)
         );
-        setDesignData(Object.assign({}, responseMain.data, responseInfo.data));
         if (designData) {
           try {
             setPicture(designData.display_picture_data);
@@ -68,6 +70,9 @@ const Design = () => {
           alt="Cake"
           fit="contain"
         />
+        <Title variant="subtitle1">
+          Pink Butter Cake Studio Original Design
+        </Title>
       </>
     );
   }
