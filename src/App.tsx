@@ -19,6 +19,8 @@ const Custom = lazy(() => import("./scenes/custom"));
 const Results = lazy(() => import("./scenes/results"));
 const Forbidden = lazy(() => import("./scenes/forbidden"));
 const NotFound = lazy(() => import("./scenes/not-found"));
+const Login = lazy(() => import("./scenes/login"));
+const Register = lazy(() => import("./scenes/register"));
 
 // Customer Pages
 const Home = lazy(() => import("./scenes/home"));
@@ -28,7 +30,7 @@ const Profile = lazy(() => import("./scenes/profile"));
 
 // Management Pages
 const Dashboard = lazy(() => import("./scenes/management/dashboard"));
-const Register = lazy(() => import("./scenes/management/register"));
+const ManualRegister = lazy(() => import("./scenes/management/register"));
 const Calendar = lazy(() => import("./scenes/management/calendar"));
 const Users = lazy(() => import("./scenes/management/users"));
 const Orders = lazy(() => import("./scenes/management/orders"));
@@ -52,15 +54,17 @@ function App() {
     >
       <UserProvider>
         <CuloAppShell>
-          {/* Public */}
           <Suspense fallback={<FullscreenThrobber />}>
             <AuthGuard role={"Guest"}>
+              {/* Public */}
               <Routes>
                 <Route path="/" element={<Landing />}></Route>
                 <Route path="/shop" element={<Shop />}></Route>
                 <Route path="/view-design" element={<Design />}></Route>
                 <Route path="/custom" element={<Custom />}></Route>
                 <Route path="/results" element={<Results />}></Route>
+                <Route path="/login" element={<Login />}></Route>
+                <Route path="/register" element={<Register />}></Route>
                 <Route path="/about" element={<About />}></Route>
                 <Route path="/forbidden" element={<Forbidden />}></Route>
                 <Route path="*" element={<NotFound />} />
@@ -96,7 +100,7 @@ function App() {
               {/* Manager */}
               <Routes>
                 <Route path="/" element={<Dashboard />}></Route>
-                <Route path="/register" element={<Register />}></Route>
+                <Route path="/register" element={<ManualRegister />}></Route>
                 <Route path="/calendar" element={<Calendar />}></Route>
                 <Route path="/orders" element={<Orders />}></Route>
                 <Route path="/sales" element={<Sales />}></Route>
@@ -109,7 +113,7 @@ function App() {
               </Routes>
             </AuthGuard>
 
-            <AuthGuard role={"Manager"}>
+            <AuthGuard role={"Admin"}>
               {/* Admin */}
               <Routes>
                 <Route path="/" element={<Dashboard />}></Route>
