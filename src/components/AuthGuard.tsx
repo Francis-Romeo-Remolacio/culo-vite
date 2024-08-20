@@ -1,8 +1,5 @@
-// /src/components/AuthGuard.tsx
-
-import { ReactNode, useContext, useEffect, useState } from "react";
-import { Center, Loader } from "@mantine/core";
-import { UserContext } from "./UserProvider";
+import { ReactNode, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import FullscreenThrobber from "./FullscreenThrobber.tsx";
 
 interface AuthGuardProps {
@@ -11,18 +8,28 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children, role }: AuthGuardProps) => {
-  const currentUser = useContext(UserContext);
   const [currentRole, setCurrentRole] = useState<string>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkRoles = async () => {
       try {
-        if (currentUser) {
-          setCurrentRole(currentUser.roles?.[0]);
+        const currentUserCookie = Cookies.get("currentUser");
+
+        if (currentUserCookie) {
+          const currentUser = JSON.parse(decodeURIComponent(currentUserCookie));
+
+          if (currentUser.roles && currentUser.roles.length > 0) {
+            setCurrentRole(currentUser.roles[0]);
+          } else {
+            setCurrentRole("Guest");
+          }
         } else {
           setCurrentRole("Guest");
         }
+      } catch (error) {
+        console.error("Error parsing currentUser cookie:", error);
+        setCurrentRole("Guest");
       } finally {
         setLoading(false);
       }
@@ -35,8 +42,10 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
   }
 
   if (currentRole === role) {
-    return children;
+    return <>{children}</>;
   }
+
+  return null; // or render an unauthorized message/component
 };
 
 export default AuthGuard;

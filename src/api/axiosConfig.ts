@@ -38,15 +38,15 @@ const retryWithSecondaryBaseUrl = (
   return Promise.reject(error);
 };
 
-// Add a request interceptor to include the token
+// Add a request interceptor to include the session token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get("token");
-    if (token) {
+    const sessionToken = Cookies.get("sessionToken");
+    if (sessionToken) {
       if (!config.headers) {
         config.headers = {} as AxiosRequestHeaders;
       }
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${sessionToken}`;
     }
     return config;
   },
