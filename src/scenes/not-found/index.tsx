@@ -1,11 +1,7 @@
-import { Title } from "@mantine/core";
+import { Typography } from "@mui/material";
 
 const NotFound = () => {
-  return (
-    <>
-      <Title>404 NOT FOUND</Title>
-    </>
-  );
+  return <Typography variant="h6">404 NOT FOUND</Typography>;
 };
 
 export default NotFound;

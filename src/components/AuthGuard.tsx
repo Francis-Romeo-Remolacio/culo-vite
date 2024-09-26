@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import Cookies from "js-cookie";
-import FullscreenThrobber from "./FullscreenThrobber.tsx";
+import { CircularProgress, Container } from "@mui/material";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -8,44 +8,58 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children, role }: AuthGuardProps) => {
-  const [currentRole, setCurrentRole] = useState<string>();
+  const [currentRole, setCurrentRole] = useState("");
   const [loading, setLoading] = useState(true);
+  const token = Cookies.get("token");
 
   useEffect(() => {
-    const checkRoles = async () => {
+    const checkRoles = () => {
       try {
-        const currentUserCookie = Cookies.get("currentUser");
+        if (!token) {
+          // If no token is present, user is unauthenticated
+          setCurrentRole("Guest");
+        } else {
+          // Token exists, check user role
+          const currentUserStored = localStorage.getItem("currentUser");
 
-        if (currentUserCookie) {
-          const currentUser = JSON.parse(decodeURIComponent(currentUserCookie));
+          if (currentUserStored) {
+            const currentUser = JSON.parse(
+              decodeURIComponent(currentUserStored)
+            );
 
-          if (currentUser.roles && currentUser.roles.length > 0) {
-            setCurrentRole(currentUser.roles[0]);
+            if (currentUser.roles && currentUser.roles.length > 0) {
+              setCurrentRole(currentUser.roles[0]);
+            } else {
+              setCurrentRole("Guest");
+            }
           } else {
             setCurrentRole("Guest");
           }
-        } else {
-          setCurrentRole("Guest");
         }
       } catch (error) {
-        console.error("Error parsing currentUser cookie:", error);
+        console.error("Error checking authentication and roles:", error);
         setCurrentRole("Guest");
       } finally {
         setLoading(false);
       }
     };
+
     checkRoles();
-  }, []);
+  }, [token]);
 
   if (loading) {
-    return <FullscreenThrobber />;
+    return (
+      <Container>
+        <CircularProgress />
+      </Container>
+    ); // or a loading spinner
   }
 
   if (currentRole === role) {
-    return <>{children}</>;
+    return children;
   }
 
-  return null; // or render an unauthorized message/component
+  return null;
 };
 
 export default AuthGuard;

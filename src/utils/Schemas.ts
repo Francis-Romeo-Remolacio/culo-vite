@@ -1,72 +1,92 @@
 // src/utils/Schemas.ts
 
 export interface User {
-  id: string | null;
+  user_id: string | null;
   email: string | null;
   username: string | null;
-  roles: string[] | null;
-  phone_number: number | null;
-  is_email_confirmed: boolean;
-  join_date: string;
+  roles: string[];
+  phoneNumber: number | null;
+  isEmailConfirmed: boolean;
+  joinDate: Date;
 }
 
 export interface Ingredient {
-  name: string;
+  name?: string;
   quantity: number;
-  measurements: string;
+  measurements?: string;
   price: number;
   type: string;
+  good: number;
+  bad: number;
+}
+
+export interface AddOn {
+  id: number;
+  name: string;
+  price: number;
+  size?: string;
+}
+
+export interface VariantAddOn extends AddOn {
+  pastryMaterialAddOnId: string;
+  amount: number;
+  stock: number;
+}
+
+export interface Tag {
+  designTagId: string;
+  designTagName: string;
 }
 
 export interface Design {
-  design_id: string;
-  display_name: string;
-  cake_description: string;
-  //design_picture_url: string;
-  display_picture_data: string;
-  design_tags: Tag[];
-  pastry_material_id: string;
+  designId: string;
+  displayName: string;
+  cakeDescription: string;
+  designPictureUrl: URL;
+  displayPictureData: Blob;
+  designTags: Tag[];
+}
+
+export interface Design {
+  pastryMaterialId: string;
   variants: DesignVariant[];
 }
 
 export interface DesignVariant {
-  variant_id: string;
-  variant_name: string;
-  cost_estimate: number;
-  in_stock: boolean;
-  add_ons: AddOn[];
-}
-
-export interface AddOn {
-  pastry_material_add_on_id: string;
-  add_on_id: number;
-  add_on_name: string;
-  amount: number;
-  stock: number;
-  price: number;
-}
-
-export interface Tag {
-  design_tag_id: string;
-  design_tag_name: string;
+  variantId: string;
+  variantName: string;
+  costEstimate: number;
+  inStock: boolean;
+  addOns: VariantAddOn[];
 }
 
 export interface Order {
-  orderId: string;
-  customerId: string;
   type: string;
-  pickup: string;
-  suborders: Suborder[];
+  pickupDate: string;
+  pickupTime: string;
+  payment: string;
+  orderItem: Suborder;
 }
 
 export interface Suborder {
   suborderId: string;
   orderId: string | null;
-  customerId: string;
-  employeeId: string | null;
   designId: string;
   variantId: string;
   size: string;
   flavor: string;
   quantity: number;
+}
+
+export interface Notification {
+  notifId: string;
+  dateCreated: Date;
+  message: string;
+  isRead: boolean;
+}
+
+export interface Message {
+  text: string;
+  sender: string;
+  sender_message_time_sent: Date;
 }

@@ -2,29 +2,38 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { CssBaseline } from "@mui/material";
-// import { ColorModeContext, useMode } from "./theme";
-// import { tokens } from "./theme.js";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { ColorModeContext, useMode } from "./theme"
 import { createTheme, MantineProvider } from "@mantine/core";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import App from "./App";
 
-const theme = createTheme({
-  /** Put your mantine theme override here */
-});
+const Index = () => {
+  const [theme, colorMode] = useMode();
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <BrowserRouter>
-        {/*<ColorModeContext.Provider value={colorMode}>
-          <ThemeProvider theme={theme}>*/}
-        <CssBaseline />
-        <MantineProvider theme={theme}>
+  return (
+    <React.StrictMode>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <HelmetProvider>
+        <BrowserRouter>
+          <ColorModeContext.Provider value={colorMode}>
+          <ThemeProvider theme={theme}>     
+          {
+            //<MantineProvider theme={theme}>
+          }<CssBaseline />
           <App />
-        </MantineProvider>
-        {/*</ThemeProvider>
-          </ColorModeContext.Provider>*/}
-      </BrowserRouter>
-    </HelmetProvider>
-  </React.StrictMode>
-);
+          {
+            //</MantineProvider>
+          }
+          </ThemeProvider>
+          </ColorModeContext.Provider>
+        </BrowserRouter>
+      </HelmetProvider>
+      <></>
+    </React.StrictMode>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<Index />);

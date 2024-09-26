@@ -1,78 +1,102 @@
-import { useEffect, useState } from "react";
-import { Badge, Button, Card, Group, Image, Text } from "@mantine/core";
-import DefaultImage from "./../assets/design.png";
-import { IconShoppingCartPlus, IconCreditCardPay } from "@tabler/icons-react";
-import { Tag } from "./../utils/Schemas.ts";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+import TagChip from "./TagChip";
+import { Design, Tag } from "../utils/Schemas";
 
-interface DesignCardProps {
-  isSale?: boolean;
-  id: string;
-  designName: string;
-  description: string;
-  picture: string;
-  tags: Tag[];
-}
+type DesignCardProps = {
+  design: Design;
+  manager?: boolean;
+};
 
-const DesignCard = ({
-  isSale,
-  id,
-  designName,
-  description,
-  picture,
-  tags,
-}: DesignCardProps) => {
-  const [imageType, setImageType] = useState<string>();
+const DesignCard = ({ design, manager }: DesignCardProps) => {
+  const [imageType, setImageType] = useState("");
 
   useEffect(() => {
-    const getImageType = (data: string) => {
-      const firstChar = data.charAt(0);
-      switch (firstChar) {
-        case "/":
-          setImageType("jpeg");
-          break;
-        case "i":
-          setImageType("png");
-          break;
-        default:
-          throw new Error("Unknown image type.");
+    const determineImageType = async () => {
+      try {
+        const type = getImageType(design.displayPictureData);
+        setImageType(type);
+      } catch (err) {
+        console.error("Error determining image type:", err);
       }
     };
-    getImageType(picture);
+
+    determineImageType();
   }, []);
 
+  // Function to get the image type by reading the base64 header
+  const getImageType = (blob: Blob) => {
+    const firstChar = blob.text.toString().charAt(0);
+    switch (firstChar) {
+      case "/":
+        return "jpeg";
+      case "i":
+        return "png";
+      default:
+        throw new Error("Unknown image type.");
+    }
+  };
+
   return (
-    <Link to={`/view-design/?q=${id}`} style={{ textDecoration: "none" }}>
-      <Card shadow="sm">
-        <Card.Section>
-          <Image
-            src={`data:image/${imageType};base64,${picture}`}
-            height={160}
-            alt="Cake"
-            fit="contain"
-          />
-        </Card.Section>
-
-        <Group justify="space-between" mt="md" mb="xs">
-          <Text fw={500}>{designName}</Text>
-          {isSale && <Badge color="pink">On Sale</Badge>}
-        </Group>
-
-        <Text size="sm" c="dimmed">
-          {description}
-        </Text>
-
-        <Group grow mt={4}>
-          <Button color="blue" radius="md">
-            <IconShoppingCartPlus />
-          </Button>
-
-          <Button color="blue" radius="md">
-            <IconCreditCardPay />
-          </Button>
-        </Group>
-      </Card>
-    </Link>
+    <Card
+      elevation={2}
+      sx={
+        manager
+          ? { height: 300, display: "inline-block" }
+          : { width: 200, height: 300, display: "inline-block" }
+      }
+    >
+      <CardActionArea
+        href={
+          manager ? "" : `/view-design?q=${encodeURIComponent(design.designId)}`
+        }
+        sx={{
+          height: "inherit",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "start",
+        }}
+      >
+        <CardMedia
+          sx={
+            manager
+              ? { height: 140, width: "100%" }
+              : { height: 200, width: "100%" }
+          }
+          image={
+            design.designPictureUrl
+              ? `data:image/${imageType};base64,${design.designPictureUrl}`
+              : "/assets/design.png"
+          }
+        />
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            {design.displayName}
+          </Typography>
+          <Typography
+            variant="body2"
+            align="left"
+            sx={{
+              display: "-webkit-box",
+              overflow: "hidden",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 3,
+            }}
+          >
+            {manager ? design.cakeDescription : ""}
+          </Typography>
+          <div style={{ marginTop: "8px" }}>
+            {design.designTags.map((tag: Tag) => (
+              <TagChip id={tag.designTagId} name={tag.designTagName} />
+            ))}
+          </div>
+        </CardContent>
+      </CardActionArea>
+    </Card>
   );
 };
 
