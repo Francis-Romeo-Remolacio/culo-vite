@@ -1,13 +1,15 @@
-// src/yup.d.ts
-import { ObjectSchema, StringSchema } from "yup";
-import { Dayjs } from "dayjs";
+// src/yup-dayjs.d.ts
+import * as yup from "yup";
+import dayjs from "dayjs";
 
+// Extend the Yup ObjectSchema to include the custom 'dayjs' method
 declare module "yup" {
-  interface ObjectSchema<TShape, TContext, TDefault, TFlags> {
-    dayjs(message?: string): this;
-  }
-
-  interface StringSchema<TContext = any, TDefault = any, TFlags = any> {
+  interface ObjectSchema<
+    TIn extends {},
+    TContext = any,
+    TOut = TIn,
+    TFlags = any
+  > {
     dayjs(message?: string): this;
   }
 }

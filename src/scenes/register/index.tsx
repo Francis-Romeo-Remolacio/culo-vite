@@ -9,15 +9,15 @@ import {
   CircularProgress,
   Stack,
   Skeleton,
+  Paper,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
-import Panel from "./../../components/Panel.jsx";
 import ButtonBack from "./../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
-import { registerSchema } from "../../schemas/index.js";
+import { registerSchema } from "../../utils/Validation.js";
 import { useState } from "react";
 
 const Register = () => {
@@ -54,7 +54,7 @@ const Register = () => {
     }
   };
 
-  function navigate(destination, subdomain = "") {
+  function navigate(destination: string, subdomain = "") {
     const { protocol, hostname, port } = window.location;
 
     // Construct the base URL with protocol, subdomain (if provided), hostname, and port (if present)
@@ -75,6 +75,7 @@ const Register = () => {
     useFormik({
       initialValues: {
         username: "",
+        email: "",
         contactNumber: "",
         password: "",
         confirmPassword: "",
@@ -92,7 +93,7 @@ const Register = () => {
         <ButtonBack />
       </Box>
       <Box>
-        <Panel>
+        <Paper>
           <Header
             title="Register"
             subtitle="Create an account at The Pink Butter Cake Studio"
@@ -120,8 +121,12 @@ const Register = () => {
             />
           </Box>
 
-          <form onSubmit={handleSubmit} display="flex" alignItems="center">
-            <Stack container spacing={2} direction="column">
+          <form onSubmit={handleSubmit}>
+            <Stack
+              spacing={2}
+              direction="column"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
               <TextField
                 label="Username"
                 id="username"
@@ -209,7 +214,7 @@ const Register = () => {
               to login.
             </Typography>
           </Box>
-        </Panel>
+        </Paper>
       </Box>
     </Container>
   );

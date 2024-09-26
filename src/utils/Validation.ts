@@ -104,9 +104,9 @@ export const registerAdminSchema = yup.object().shape({
     .oneOf(["customer", "artist", "manager", "admin"], "Invalid type")
     .default("customer"),
   secret_key: yup.string().when("type", {
-    is: (type) => type === "admin",
-    then: yup.string().required("Secret key is required for Admin"),
-    otherwise: yup.string().notRequired(),
+    is: "admin",
+    then: (schema) => schema.required("Secret key is required for Admin"),
+    otherwise: (schema) => schema.notRequired(),
   }),
 });
 

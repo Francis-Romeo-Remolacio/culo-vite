@@ -10,10 +10,9 @@ import {
   TextField,
 } from "@mui/material";
 import { useFormik } from "formik";
-import React from "react";
 import dayjs from "dayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { customOrderSchema } from "../../schemas";
+import { customOrderSchema } from "../../utils/Validation.js";
 
 const Custom = () => {
   const availableFlavors = [

@@ -9,10 +9,11 @@ import {
   Link as MuiLink,
   List,
   ListItem,
+  Paper,
+  ListItemText,
 } from "@mui/material";
 import { Tokens } from "../../theme";
 import { Helmet } from "react-helmet-async";
-import Panel from "./../../components/Panel.jsx";
 import TagFilteredGallery from "./../../components/TagFilteredGallery.jsx";
 
 const Landing = () => {
@@ -25,7 +26,7 @@ const Landing = () => {
         <title>The Pink Butter Cake Studio</title>
       </Helmet>
       {/* Section 1: Hero */}
-      <Panel elevation={1}>
+      <Paper elevation={1}>
         <Typography variant="h1" gutterBottom>
           Delicious Artistry in Every Bite
         </Typography>
@@ -38,12 +39,12 @@ const Landing = () => {
         <Link to="custom">
           <Button variant="outlined">Custom Order</Button>
         </Link>
-      </Panel>
+      </Paper>
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6} lg={4}>
           {/* Section 2: About */}
-          <Panel>
+          <Paper>
             <Typography variant="h4" gutterBottom>
               About The Pink Butter Cake Studio?
             </Typography>
@@ -55,11 +56,11 @@ const Landing = () => {
               Located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon City,
               Philippines.
             </Typography>
-          </Panel>
+          </Paper>
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
           {/* Section 3: Premade Designs */}
-          <Panel>
+          <Paper>
             <Typography variant="h4" gutterBottom>
               Browse Our Premade Cake Designs
             </Typography>
@@ -68,7 +69,7 @@ const Landing = () => {
               <TagFilteredGallery />
             </Typography>
             {/*<Button variant="contained">View More Designs</Button>*/}
-          </Panel>
+          </Paper>
         </Grid>
         {/* Section 4: Custom Order */}
         {/*<Grid item xs={12} md={6} lg={4}>
@@ -82,37 +83,47 @@ const Landing = () => {
 
         {/* Section 5: Testimonials */}
         <Grid item xs={12} md={6} lg={4}>
-          <Panel>
+          <Paper>
             <Typography variant="h4" gutterBottom>
               What Our Customers Say
             </Typography>
             <List>
-              <ListItem
-                primary="Maria Gonzales"
-                secondary="The custom cake I ordered for my daughter's birthday was absolutely stunning! The attention to detail and the delicious flavors exceeded all my expectations. The Pink Butter Cake Studio made our celebration truly special."
-              />
-              <ListItem
-                primary="John Santos"
-                secondary="I've ordered several cakes from The Pink Butter Cake Studio for different occasions, and they never disappoint. Their premade designs are beautiful and taste amazing. Highly recommended!"
-              />
-              <ListItem
-                primary="Aileen Reyes"
-                secondary="The team at The Pink Butter Cake Studio is incredibly talented. They turned my vague idea into a gorgeous custom cake that was the highlight of our event. The cake was not only beautiful but also incredibly delicious."
-              />
-              <ListItem
-                primary="Mark Lim"
-                secondary="I needed a cake on short notice, and The Pink Butter Cake Studio delivered an incredible premade design that everyone loved. Their service is top-notch, and the cake was a hit!"
-              />
-              <ListItem
-                primary="Grace Tan"
-                secondary="Ordering a custom cake from The Pink Butter Cake Studio was a breeze. They listened to all my requests and created a masterpiece that was both beautiful and tasty. I'll definitely be coming back for more!"
-              />
+              <ListItem>
+                <ListItemText
+                  primary="Maria Gonzales"
+                  secondary="The custom cake I ordered for my daughter's birthday was absolutely stunning! The attention to detail and the delicious flavors exceeded all my expectations. The Pink Butter Cake Studio made our celebration truly special."
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="John Santos"
+                  secondary="I've ordered several cakes from The Pink Butter Cake Studio for different occasions, and they never disappoint. Their premade designs are beautiful and taste amazing. Highly recommended!"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Aileen Reyes"
+                  secondary="The team at The Pink Butter Cake Studio is incredibly talented. They turned my vague idea into a gorgeous custom cake that was the highlight of our event. The cake was not only beautiful but also incredibly delicious."
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Mark Lim"
+                  secondary="I needed a cake on short notice, and The Pink Butter Cake Studio delivered an incredible premade design that everyone loved. Their service is top-notch, and the cake was a hit!"
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Grace Tan"
+                  secondary="Ordering a custom cake from The Pink Butter Cake Studio was a breeze. They listened to all my requests and created a masterpiece that was both beautiful and tasty. I'll definitely be coming back for more!"
+                />
+              </ListItem>
             </List>
-          </Panel>
+          </Paper>
         </Grid>
         <Grid item xs={12} md={6} lg={4}>
           {/* Section 6: Contact  */}
-          <Panel>
+          <Paper>
             <Typography variant="h4" gutterBottom>
               Get in Touch
             </Typography>
@@ -138,7 +149,7 @@ const Landing = () => {
               Pinterest{" "}
               <MuiLink href="https://ph.pinterest.com/thepinkbutter/" />
             </Typography>
-          </Panel>
+          </Paper>
         </Grid>
       </Grid>
     </Stack>

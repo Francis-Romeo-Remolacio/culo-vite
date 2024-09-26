@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Box, Grid, Typography, useTheme } from "@mui/material";
-import { Tokens } from "../../theme";
+import { useEffect, useState } from "react";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 import api from "../../api/axiosConfig";
 import { Helmet } from "react-helmet-async";
 import Header from "./../../components/Header.jsx";
-import Panel from "./../../components/Panel.jsx";
 import CheckboxList from "./../../components/CheckboxList.jsx";
 import TagFilteredGallery from "./../../components/TagFilteredGallery.jsx";
 
 const Shop = () => {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
   const [designTags, setDesignTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,17 +39,17 @@ const Shop = () => {
           <title>Home - The Pink Butter Cake Studio</title>
         </Helmet>
         <Grid item xs={2} sx={{ display: { xs: "none", lg: "block" } }}>
-          <Panel>
+          <Paper>
             <Typography variant="h3">Popular Categories</Typography>
             <CheckboxList
               designTags={designTags}
               selectedTags={selectedTags}
               setSelectedTags={setSelectedTags}
             />
-          </Panel>
+          </Paper>
         </Grid>
         <Grid container item xs={12} lg={10}>
-          <Panel>
+          <Paper>
             <Header
               title="The Pink Butter Cake Studio"
               subtitle="Take a look at our various offerings"
@@ -61,7 +57,7 @@ const Shop = () => {
             <Grid container spacing={2} justifyContent="center">
               <TagFilteredGallery designTags={designTags} />
             </Grid>
-          </Panel>
+          </Paper>
         </Grid>
       </Grid>
     </Box>

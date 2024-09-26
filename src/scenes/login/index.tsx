@@ -10,15 +10,15 @@ import {
   Link,
   CircularProgress,
   Skeleton,
+  Paper,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
-import Panel from "./../../components/Panel.jsx";
 import ButtonBack from "../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
-import { loginSchema } from "../../schemas/index.js";
+import { loginSchema } from "../../utils/Validation.js";
 
 const Login = () => {
   const location = useLocation();
@@ -76,7 +76,7 @@ const Login = () => {
     }
   };
 
-  function navigate(destination, subdomain = "") {
+  function navigate(destination: string, subdomain = "") {
     const { protocol, hostname, port } = window.location;
 
     // Construct the base URL with protocol, subdomain (if provided), hostname, and port (if present)
@@ -117,7 +117,7 @@ const Login = () => {
         <ButtonBack />
       </Box>
       <Box>
-        <Panel>
+        <Paper>
           <Header
             title="Login"
             subtitle="Welcome to The Pink Butter Cake Studio"
@@ -145,7 +145,7 @@ const Login = () => {
             />
           </Box>
 
-          <form onSubmit={handleSubmit} display="flex" alignItems="center">
+          <form onSubmit={handleSubmit}>
             <Grid container spacing={2} direction="column">
               <Grid item>
                 <TextField
@@ -191,13 +191,13 @@ const Login = () => {
           <Box mt={2}>
             <Typography variant="body2">
               Don't have an account?{" "}
-              <Link to="/register" color="primary">
+              <Link href="/register" sx={{ color: "primary" }}>
                 Click here
               </Link>{" "}
               to register.
             </Typography>
           </Box>
-        </Panel>
+        </Paper>
       </Box>
     </Container>
   );
