@@ -18,7 +18,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
   useEffect(() => {
     const determineImageType = async () => {
       try {
-        const type = getImageType(design.displayPictureData);
+        const type = getImageType(design.pictureData);
         setImageType(type);
       } catch (err) {
         console.error("Error determining image type:", err);
@@ -51,9 +51,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
       }
     >
       <CardActionArea
-        href={
-          manager ? "" : `/view-design?q=${encodeURIComponent(design.designId)}`
-        }
+        href={manager ? "" : `/view-design?q=${encodeURIComponent(design.id)}`}
         sx={{
           height: "inherit",
           display: "flex",
@@ -68,14 +66,16 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
               : { height: 200, width: "100%" }
           }
           image={
-            design.designPictureUrl
-              ? `data:image/${imageType};base64,${design.designPictureUrl}`
+            design.pictureData
+              ? `data:image/${imageType};base64,${design.pictureData}`
+              : design.pictureUrl
+              ? design.pictureUrl.toString()
               : "/assets/design.png"
           }
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            {design.displayName}
+            {design.name}
           </Typography>
           <Typography
             variant="body2"
@@ -87,11 +87,11 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
               WebkitLineClamp: 3,
             }}
           >
-            {manager ? design.cakeDescription : ""}
+            {manager ? design.description : ""}
           </Typography>
           <div style={{ marginTop: "8px" }}>
-            {design.designTags.map((tag: Tag) => (
-              <TagChip id={tag.designTagId} name={tag.designTagName} />
+            {design.tags.map((tag: Tag) => (
+              <TagChip id={tag.id} name={tag.name} />
             ))}
           </div>
         </CardContent>

@@ -13,6 +13,7 @@ import { useFormik } from "formik";
 import dayjs from "dayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { customOrderSchema } from "../../utils/Validation.js";
+import { renderTimeViewClock } from "@mui/x-date-pickers";
 
 const Custom = () => {
   const availableFlavors = [
@@ -27,34 +28,25 @@ const Custom = () => {
 
   const onSubmit = () => {};
 
-  const {
-    values,
-    errors,
-    touched,
-    isSubmitting,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-    setFieldValue,
-    validateForm,
-  } = useFormik({
-    initialValues: {
-      color: "",
-      shape: "",
-      tier: null,
-      quantity: 1,
-      cover: "",
-      description: "",
-      size: "",
-      flavor: "",
-      picture: "",
-      message: "",
-      type: "",
-      pickupDateTime: minDate,
-    },
-    validationSchema: customOrderSchema,
-    onSubmit,
-  });
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
+    useFormik({
+      initialValues: {
+        color: "",
+        shape: "",
+        tier: null,
+        quantity: 1,
+        cover: "",
+        description: "",
+        size: "",
+        flavor: "",
+        picture: "",
+        message: "",
+        type: "",
+        pickupDateTime: minDate,
+      },
+      validationSchema: customOrderSchema,
+      onSubmit,
+    });
 
   return (
     <Container>
@@ -62,14 +54,17 @@ const Custom = () => {
         <Stack maxWidth="sm" spacing={2}>
           <DateTimePicker
             label="Pickup Date & Time"
-            id="pickupDateTime"
             name="pickupDateTime"
             minDate={minDate}
             minTime={dayjs("2018-01-01T09:00")}
             maxTime={dayjs("2018-01-01T16:00")}
             value={values.pickupDateTime}
             onChange={handleChange}
-            renderInput={(params) => <TextField {...params} />}
+            viewRenderers={{
+              hours: renderTimeViewClock,
+              minutes: renderTimeViewClock,
+              seconds: renderTimeViewClock,
+            }}
           />
           <TextField label="Tiers" id="tier" name="tier" value={values.tier} />
           <TextField
@@ -77,7 +72,8 @@ const Custom = () => {
             label="Custom Size"
             id="customSize"
             name="customSize"
-            value={values.customSize}
+            value={values.size}
+            onChange={handleChange}
           />
           <FormControl>
             <TextField
@@ -101,7 +97,6 @@ const Custom = () => {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.flavor && Boolean(errors.flavor)}
-              helperText={touched.flavor && errors.flavor}
             >
               {availableFlavors.map((flavor) => (
                 <MenuItem key={flavor} value={flavor}>
@@ -121,7 +116,6 @@ const Custom = () => {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.cover && Boolean(errors.cover)}
-              helperText={touched.cover && errors.cover}
             >
               <MenuItem key="fondant" value="fondant">
                 Fondant

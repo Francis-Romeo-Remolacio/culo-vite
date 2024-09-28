@@ -1,7 +1,9 @@
 // src/utils/Schemas.ts
 
+import { Dayjs } from "dayjs";
+
 export interface User {
-  user_id: string | null;
+  id: string | null;
   email: string | null;
   username: string | null;
   roles: string[];
@@ -28,23 +30,29 @@ export interface AddOn {
 }
 
 export interface VariantAddOn extends AddOn {
-  pastryMaterialAddOnId: string;
+  pastryMaterialAddOnId?: string;
   amount: number;
   stock: number;
 }
 
+export interface Shape {
+  id: string;
+  name: string;
+}
+
 export interface Tag {
-  designTagId: string;
-  designTagName: string;
+  id: string;
+  name: string;
 }
 
 export interface Design {
-  designId: string;
-  displayName: string;
-  cakeDescription: string;
-  designPictureUrl: URL;
-  displayPictureData: Blob;
-  designTags: Tag[];
+  id: string;
+  name: string;
+  description: string;
+  pictureUrl?: URL;
+  pictureData: Blob;
+  tags: Tag[];
+  shapes: Shape[];
 }
 
 export interface Design {
@@ -53,24 +61,29 @@ export interface Design {
 }
 
 export interface DesignVariant {
-  variantId: string;
-  variantName: string;
+  id: string;
+  name: string;
   costEstimate: number;
   inStock: boolean;
   addOns: VariantAddOn[];
 }
 
 export interface Order {
-  type: string;
-  pickupDate: string;
-  pickupTime: string;
-  payment: string;
-  orderItem: Suborder;
+  id: string;
+  type: "normal" | "rush";
+  pickupDateTime: Dayjs;
+  payment: "half" | "full";
+  suborders: Suborder[];
+}
+
+export interface ManagementOrder extends Order {
+  customerId: string;
+  customerName: string;
 }
 
 export interface Suborder {
-  suborderId: string;
-  orderId: string | null;
+  id: string;
+  orderId?: string;
   designId: string;
   variantId: string;
   size: string;
@@ -79,8 +92,8 @@ export interface Suborder {
 }
 
 export interface Notification {
-  notifId: string;
-  dateCreated: Date;
+  id: string;
+  created: Date;
   message: string;
   isRead: boolean;
 }
@@ -89,4 +102,10 @@ export interface Message {
   text: string;
   sender: string;
   sender_message_time_sent: Date;
+}
+
+export interface Units {
+  Mass: readonly string[];
+  Volume: readonly string[];
+  Count: readonly string[];
 }

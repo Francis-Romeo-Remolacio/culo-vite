@@ -1,22 +1,15 @@
 import { useState, useEffect } from "react";
-import FullCalendar, { formatDate } from "@fullcalendar/react";
+import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import {
-  Box,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  useTheme,
-} from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import Header from "../../../components/Header";
 import { Tokens } from "../../../theme";
 import api from "../../../api/axiosConfig"; // Ensure this path is correct
+import { ManagementOrder } from "../../../utils/Schemas";
+import { formatDate } from "@fullcalendar/core/index.js";
 
 const Calendar = () => {
   const theme = useTheme();
@@ -31,13 +24,12 @@ const Calendar = () => {
         const ordersRes = await api.get("orders/admin/partial-details");
         const orders = ordersRes.data;
 
-        const events = orders.map((order) => ({
+        const events = orders.map((order: ManagementOrder) => ({
           id: order.id,
-          title: order.designName,
+          title: `${order.customerName}'s Order`,
           start: order.pickupDateTime,
           extendedProps: {
             pickupDate: order.pickupDateTime,
-            designName: order.designName, // Add designName to extendedProps
             orderId: order.id, // Add orderId to extendedProps
           },
         }));
@@ -51,7 +43,7 @@ const Calendar = () => {
     fetchOrders();
   }, []);
 
-  const handleDateClick = (selected) => {
+  const handleDateClick = (selected: any) => {
     const title = prompt("Please enter a new title for your event");
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
@@ -67,13 +59,13 @@ const Calendar = () => {
     }
   };
 
-  const handleEventClick = (selected) => {
+  const handleEventClick = (selected: any) => {
     // Handle event click if necessary
     // For now, it does nothing as we removed the `handleCustomerNameClick`
     console.log("Event clicked:", selected.event.extendedProps.orderId);
   };
 
-  const eventContent = (eventInfo) => {
+  const eventContent = (eventInfo: any) => {
     return (
       <>
         <div style={{ cursor: "pointer" }}>
@@ -95,10 +87,6 @@ const Calendar = () => {
 
   return (
     <Box
-      m="1rem"
-      backgroundColor={colors.panel || "#fff"} // Fallback to default color
-      p="1rem"
-      borderRadius="1rem"
       sx={{
         backdropFilter: "blur(24px)",
       }}

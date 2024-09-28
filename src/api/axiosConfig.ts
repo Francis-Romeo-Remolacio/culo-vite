@@ -3,14 +3,16 @@ import Cookies from "js-cookie";
 
 const apiName = "culo-api";
 const apiVer = "v1";
-const apiAddress1 = "localhost";
-const apiAddress2 = "192.168.1.8";
-const apiPort1 = "5155";
-const apiPort2 = "5155";
+const apiProtocol1 = "https";
+const apiAddress1 = "resentekaizen280-001-site1.etempurl.com";
+const apiPort1 = "";
+const apiProtocol2 = "https";
+const apiAddress2 = "45.58.159.46";
+const apiPort2 = "";
 
 // Primary and Secondary API URLs
-const primaryBaseUrl = `http://${apiAddress1}:${apiPort1}/${apiName}/${apiVer}`;
-const secondaryBaseUrl = `http://${apiAddress2}:${apiPort2}/${apiName}/${apiVer}`;
+const primaryBaseUrl = `${apiProtocol1}://${apiAddress1}${apiPort1}/${apiName}/${apiVer}`;
+const secondaryBaseUrl = `${apiProtocol2}://${apiAddress2}${apiPort2}/${apiName}/${apiVer}`;
 
 // Create an Axios instance with primary and fallback options
 const api = axios.create({

@@ -103,7 +103,7 @@ export const registerAdminSchema = yup.object().shape({
     .string()
     .oneOf(["customer", "artist", "manager", "admin"], "Invalid type")
     .default("customer"),
-  secret_key: yup.string().when("type", {
+  secretKey: yup.string().when("type", {
     is: "admin",
     then: (schema) => schema.required("Secret key is required for Admin"),
     otherwise: (schema) => schema.notRequired(),
@@ -158,11 +158,14 @@ export const customOrderSchema = yup.object().shape({
 });
 
 export const ingredientSchema = yup.object().shape({
+  id: yup.string().nullable(),
   name: yup.string().required("Required"),
   quantity: yup.number().required("Required"),
-  measurements: yup.string().required("Required"),
+  measurement: yup.string().required("Required"),
   price: yup.number().required("Required"),
   type: yup.string().required("Required"),
+  good: yup.number().required("Required"),
+  bad: yup.number().required("Required"),
 });
 
 export const addOnSchema = yup.object().shape({

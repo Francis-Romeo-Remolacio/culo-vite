@@ -1,5 +1,6 @@
 // src/scenes/ViewDesign.jsx
-import { MouseEvent, useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Typography,
@@ -60,7 +61,7 @@ const ViewDesign = () => {
 
   const navigate = useNavigate();
 
-  const [designData, setDesignData] = useState<Design>();
+  const [design, setDesignData] = useState<Design>();
   const [loading, setLoading] = useState(true);
   const [imageType, setImageType] = useState("");
   const [picture, setPicture] = useState<Blob>();
@@ -94,7 +95,7 @@ const ViewDesign = () => {
         // Add the main order
         const cartResponse = await api.post("current-user/cart", {
           quantity: values.quantity,
-          designId: designData?.designId,
+          designId: design?.id,
           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
           flavor: values.flavor,
           size: values.size,
@@ -168,14 +169,6 @@ const ViewDesign = () => {
     setOpenAddOn(false);
   };
 
-  const handleCloseSnackbar = (reason: string) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setOpenSucc(false);
-    setOpenFail(false);
-  };
-
   const handleToggleAddOn = (newAddOnId: number, list: string) => {
     if (list === "variant") {
       console.log(`Before: ${selectedAddOns}`);
@@ -241,18 +234,22 @@ const ViewDesign = () => {
 
   const fetchAddOns = async (variant: DesignVariant) => {
     try {
-      const response = await api.get("add-ons");
-      if (response.status === 200) {
-        const fetchedAddOns = response.data;
-        const filteredAddOns = fetchedAddOns.filter(
+      await api.get("add-ons").then((response) => {
+        const parsedAddOns: AddOn[] = response.data.map((addOn: any) => ({
+          id: addOn.addOnsId,
+          name: addOn.addOnName,
+          measurement: addOn.measurement,
+          price: addOn.pricePerUnit,
+          size: addOn.size,
+        }));
+        const filteredAddOns = parsedAddOns.filter(
           (addOn: AddOn) =>
             !variant.addOns.some(
               (variantAddOn: VariantAddOn) => variantAddOn.id === addOn.id
             )
         );
-
         setAvailableAddOns(filteredAddOns);
-      }
+      });
     } catch (error) {
       console.error("Failed to fetch add-ons: ", error);
     }
@@ -277,30 +274,65 @@ const ViewDesign = () => {
 
   useEffect(() => {
     const fetchDesignData = async () => {
+      const [parsedDesign, setParsedDesign] = useState<Partial<Design>>();
       try {
-        const response = await api.get(
-          `designs/${encodeURIComponent(designId)}`
-        );
-        setDesignData(response.data);
-        try {
-          setPicture(response.data.displayPictureData);
-        } catch (err) {
-          console.error("Error setting picture: ", err);
-        }
-        try {
-          const response = await api.get(
-            `ui-helpers/get-design-info/${encodeURIComponent(designId)}`
-          );
-          setDesignData(response.data);
-          console.log("DesignInfo: " + designData);
-        } catch (error) {
-          console.error("Error fetching design info: ", error);
-        }
+        await api
+          .get(`designs/${encodeURIComponent(designId)}`)
+          .then((response) => {
+            const design = response.data;
+            const parsedData: Partial<Design> = {
+              id: design.designId,
+              name: design.displayName,
+              description: design.cakeDescription,
+              pictureUrl: design.designPictureUrl,
+              pictureData: design.displayPictureData,
+              tags: design.designTags.map((tag: any) => ({
+                id: tag.designTagId,
+                name: tag.designTagName,
+              })),
+              shapes: design.designShapes.map((shape: any) => ({
+                id: shape.designShapeId,
+                name: shape.shapeName,
+              })),
+            };
+            setParsedDesign(parsedData);
+          });
       } catch (error) {
         console.error("Error fetching design data: ", error);
-      } finally {
-        setLoading(false);
       }
+      try {
+        const response = await api
+          .get(`ui-helpers/get-design-info/${encodeURIComponent(designId)}`)
+          .then((response) => {
+            const design = response.data;
+            const parsedInfo: Partial<Design> = {
+              pastryMaterialId: design.pastryMaterialId,
+              variants: design.variants.map((variant: any) => ({
+                id: variant.variantId,
+                name: variant.variantName,
+                cost: variant.costEstimate,
+                inStock: variant.inStock,
+                addOns: variant.addOns.map((addOn: any) => ({
+                  id: addOn.addOnId,
+                  name: addOn.addOnName,
+                  price: addOn.price,
+                  amount: addOn.amount,
+                  stock: addOn.stock,
+                })),
+              })),
+            };
+            setParsedDesign(parsedInfo);
+          });
+      } catch (error) {
+        console.error("Error fetching design info: ", error);
+      }
+      setDesignData(parsedDesign as Design);
+      try {
+        setPicture(design?.pictureData);
+      } catch (err) {
+        console.error("Error setting picture: ", err);
+      }
+      setLoading(false);
     };
 
     if (designId) {
@@ -339,8 +371,8 @@ const ViewDesign = () => {
 
   useEffect(() => {
     if (values.size) {
-      const variant = designData?.variants.find(
-        (variant) => variant.variantName === values.size
+      const variant = design?.variants.find(
+        (variant) => variant.name === values.size
       );
       setSelectedVariant(variant);
       if (variant) {
@@ -386,7 +418,7 @@ const ViewDesign = () => {
   return (
     <Container sx={{ maxWidth: "600px" }}>
       <Helmet>
-        <title>{designData?.displayName} - The Pink Butter Cake Studio</title>
+        <title>{design?.name} - The Pink Butter Cake Studio</title>
       </Helmet>
       {loading ? (
         <CircularProgress />
@@ -396,7 +428,7 @@ const ViewDesign = () => {
             {picture ? (
               <img
                 src={`data:image/${imageType};base64,${picture}`}
-                alt={designData?.displayName}
+                alt={design?.name}
                 style={{
                   maxWidth: "100%",
                   height: "auto",
@@ -413,15 +445,15 @@ const ViewDesign = () => {
                 Pink Butter Cake Studio Original Design
               </Typography>
               <Typography variant="h1" gutterBottom>
-                {designData?.displayName}
+                {design?.name}
               </Typography>
               <Typography variant="h3">
                 {ceilThenFormat(
                   values.size
-                    ? designData?.variants.find(
-                        (variant) => variant.variantName === values.size
+                    ? design?.variants.find(
+                        (variant) => variant.name === values.size
                       )?.costEstimate ?? 0
-                    : designData?.variants[0]?.costEstimate ?? 0
+                    : design?.variants[0]?.costEstimate ?? 0
                 )}
               </Typography>
               {/*
@@ -444,8 +476,8 @@ const ViewDesign = () => {
                 )}
               </Typography>
               <Stack direction="row" spacing={1}>
-                {designData?.designTags.map((tag) => (
-                  <TagChip key={tag.designTagId} id={tag.designTagId} />
+                {design?.tags.map((tag) => (
+                  <TagChip key={tag.id} id={tag.id} />
                 ))}
               </Stack>
               <form onSubmit={handleSubmit}>
@@ -462,12 +494,9 @@ const ViewDesign = () => {
                       onBlur={handleBlur}
                       error={touched.size && Boolean(errors.size)}
                     >
-                      {designData?.variants.map((variant) => (
-                        <MenuItem
-                          key={variant.variantName}
-                          value={variant.variantName}
-                        >
-                          {variant.variantName}
+                      {design?.variants.map((variant) => (
+                        <MenuItem key={variant.name} value={variant.name}>
+                          {variant.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -748,9 +777,7 @@ const ViewDesign = () => {
                 <li>Available for Pick-up</li>
                 <li>Available for Delivery</li>
               </ul>
-              <Typography variant="body1">
-                {designData?.cakeDescription}
-              </Typography>
+              <Typography variant="body1">{design?.description}</Typography>
             </Stack>
           </Grid>
         </Grid>

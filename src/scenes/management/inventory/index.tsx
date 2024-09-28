@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
-  useTheme,
   Dialog,
   DialogActions,
   DialogContent,
@@ -16,18 +15,23 @@ import {
   Chip,
   IconButton,
   Typography,
+  CircularProgress,
 } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.jsx";
 import { Edit, Delete, Restore } from "@mui/icons-material";
+import { useFormik } from "formik";
+import { ingredientSchema } from "../../../utils/Validation.js";
+import { Units } from "../../../utils/Schemas.js";
 
 const Team = () => {
+  const [mode, setMode] = useState<"add" | "edit">("add");
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState([]);
-  const [selectedRow, setSelectedRow] = useState({});
-  const [validUnits, setValidUnits] = useState([]);
+  const [selectedRow, setSelectedRow] = useState<any>({});
+  const [validUnits, setValidUnits] = useState<Units>();
   const [formData, setFormData] = useState({
     name: "",
     quantity: 0,
@@ -40,6 +44,43 @@ const Team = () => {
   const [priceLabel, setPriceLabel] = useState("Price");
   const [error, setError] = useState(null);
 
+  const onSubmit = async () => {
+    try {
+      switch (mode) {
+        case "add":
+          await api.post(`ingredient`, values);
+        case "edit":
+          await api.patch(`ingredient/${values.id}`, values);
+      }
+      setOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error("Registration error: ", error);
+    }
+  };
+
+  const {
+    values,
+    isSubmitting,
+    handleChange,
+    setValues,
+    setFieldValue,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      id: "",
+      name: "",
+      quantity: null,
+      measurement: "",
+      price: null,
+      type: "",
+      good: null,
+      bad: null,
+    },
+    validationSchema: ingredientSchema,
+    onSubmit,
+  });
+
   useEffect(() => {
     const fetchUnits = async () => {
       try {
@@ -49,13 +90,18 @@ const Team = () => {
         console.error("Error fetching valid measurement units:", error);
       }
     };
-
     fetchUnits();
   }, []);
 
-  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await api.get("ingredients/active");
+      setRows(response.data);
+    } catch (error) {
+      console.error("Error fetching active ingredients:", error);
+    }
     fetchData();
-  }, []);
+  };
 
   useEffect(() => {
     if (formData.type === "count") {
@@ -66,94 +112,37 @@ const Team = () => {
     }
   }, [formData.type]);
 
-  const fetchData = async () => {
-    try {
-      const response = await api.get("ingredients/active");
-      setRows(response.data);
-    } catch (error) {
-      console.error("Error fetching active ingredients:", error);
+  useEffect(() => {
+    if (values.type === "count") {
+      setFieldValue("measurements", "piece");
     }
-  };
+  }, [values.type]);
 
   const handleAddNew = () => {
-    setFormData({
-      quantity: "",
-      price: "",
-      name: "",
-      measurements: "",
-      type: "",
-      good: "",
-      bad: "",
-    });
-    setSelectedRow({});
+    resetForm;
+    setSelectedRow([]);
     setOpen(true);
   };
 
-  const handleClickEdit = (row) => {
+  const handleClickEdit = (row: any) => {
     setSelectedRow(row);
-    setFormData({
-      quantity: row.quantity,
-      price: row.price,
-      name: row.name,
-      measurements: row.measurements,
-      type: row.type,
-    });
+    setValues(row);
     setOpen(true);
   };
 
-  const handleSave = async () => {
+  const handleClickDelete = async (id: string) => {
     try {
-      const requestData = {
-        name: formData.name,
-        quantity: formData.quantity,
-        measurements: formData.measurements,
-        price: formData.price,
-        type: formData.type,
-        good: formData.good,
-        bad: formData.bad,
-      };
-
-      if (selectedRow.id) {
-        const response = await api.patch(
-          `ingredients/${selectedRow.id}`,
-          requestData
-        );
-        console.log("Ingredient saved successfully:", response.data);
-      } else {
-        const response = await api.post("ingredients", requestData);
-        console.log("Ingredient saved successfully:", response.data);
-      }
-
-      setOpen(false);
+      await api.delete(`ingredients/${id}`);
       fetchData();
     } catch (error) {
-      console.error("Error saving ingredient:", error);
-    }
-  };
-
-  const handleClickDelete = async (id) => {
-    try {
-      // Sending a DELETE request to the server with the specified ingredient ID
-      const response = await api.delete(`ingredients/${id}`);
-
-      // Logging the response from the server
-      console.log("Ingredient deleted successfully:", response.data);
-
-      // Refreshing the data to reflect the deletion
-      fetchData();
-    } catch (error) {
-      // Logging any errors that occur during the request
       console.error("Error deleting ingredient:", error);
     }
   };
 
-  const handleClickRestore = async (id) => {
+  const handleClickRestore = async (id: string) => {
     try {
-      const response = await api.put("ingredients", null, {
-        params: { restore: id },
-      });
-      console.log("Ingredient reactivated successfully:", response.data);
-      fetchData(); // Refresh the data after restoring
+      await api.put("ingredients", null, { params: { restore: id } });
+      fetchData();
     } catch (error) {
       console.error("Error reactivating ingredient:", error);
     }
@@ -163,33 +152,17 @@ const Team = () => {
     setOpen(false);
   };
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleMeasurementChange = (event, value) => {
-    setFormData({
-      ...formData,
-      measurements: value,
-    });
-  };
-
   useEffect(() => {
-    formData.measurements.length > 0
-      ? setPriceLabel(`Price per ${formData.measurements}`)
+    values.measurement.length > 0
+      ? setPriceLabel(`Price per ${values.measurement}`)
       : setPriceLabel("Price");
-  }, [formData]);
+  }, [values]);
 
-  const columns = [
+  const columns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
       cellClassName: "name-column--cell",
-      hide: true,
     },
     {
       field: "name",
@@ -208,7 +181,7 @@ const Team = () => {
     {
       field: "price",
       headerName: "Price",
-      renderCell: (params) => {
+      renderCell: (params: any) => {
         if (!params.value) return "";
         const finalFormat = `₱ ${params.value}`;
         return finalFormat;
@@ -221,7 +194,7 @@ const Team = () => {
     {
       field: "status",
       headerName: "Status",
-      renderCell: (params) => {
+      renderCell: (params: any) => {
         switch (params.value) {
           case "good":
             return <Chip label="Good" color="success"></Chip>;
@@ -257,24 +230,21 @@ const Team = () => {
       field: "action",
       type: "actions",
       minWidth: 250,
-      renderCell: (params) => (
+      renderCell: (params: any) => (
         <>
           <IconButton
-            variant="outlined"
             color="primary"
             onClick={() => handleClickEdit(params.row)}
           >
             <Edit />
           </IconButton>
           <IconButton
-            variant="outlined"
             color="error"
             onClick={() => handleClickDelete(params.row.id)}
           >
             <Delete />
           </IconButton>
           <IconButton
-            variant="outlined"
             color="success"
             onClick={() => handleClickRestore(params.row.id)}
           >
@@ -288,14 +258,31 @@ const Team = () => {
   return (
     <>
       <Header title="INVENTORY" subtitle="Items and Updates" />
-      <Button variant="contained" color="primary" onClick={handleAddNew} mb={2}>
+      <Button
+        variant="contained"
+        onClick={() => {
+          handleAddNew;
+        }}
+      >
         Add Ingredient
       </Button>
       <DataGridStyler>
         <DataGrid
           rows={rows}
           columns={columns}
-          components={{ Toolbar: GridToolbar }}
+          slots={{ toolbar: GridToolbar }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [{ field: "id", operator: "is", value: true }],
+              },
+            },
+          }}
         />
       </DataGridStyler>
       <Dialog
@@ -317,8 +304,8 @@ const Team = () => {
               label="Name"
               fullWidth
               variant="filled"
-              value={formData.name}
-              onChange={handleInputChange}
+              value={values.name}
+              onChange={handleChange}
             />
             <FormControl required variant="filled" fullWidth>
               <InputLabel id="typeLabel">Type</InputLabel>
@@ -327,16 +314,16 @@ const Team = () => {
                 id="type"
                 name="type"
                 label="Type"
-                value={formData.type}
-                onChange={handleInputChange}
+                value={values.type}
+                onChange={handleChange}
               >
                 <MenuItem value={"solid"}>Solid</MenuItem>
                 <MenuItem value={"liquid"}>Liquid</MenuItem>
                 <MenuItem value={"count"}>Count</MenuItem>
               </Select>
             </FormControl>
-            {formData.type ? (
-              formData.type == "count" ? (
+            {values.type ? (
+              values.type == "count" ? (
                 <FormControl required variant="filled" fullWidth>
                   <InputLabel id="measurementsLabel">Measurement</InputLabel>
                   <Select
@@ -347,7 +334,7 @@ const Team = () => {
                     value="Piece"
                     defaultValue="Piece"
                     disabled
-                    onChange={handleInputChange}
+                    onChange={handleChange}
                   >
                     <MenuItem value="Piece">Piece</MenuItem>
                   </Select>
@@ -355,16 +342,17 @@ const Team = () => {
               ) : (
                 <Autocomplete
                   id="measurements"
-                  name="measurements"
-                  value={formData.measurements}
+                  value={values.measurement}
                   disablePortal
                   options={
-                    formData.type === "solid"
-                      ? validUnits.Mass
-                      : validUnits.Volume
+                    validUnits
+                      ? values.type === "solid"
+                        ? validUnits?.Mass
+                        : validUnits?.Volume
+                      : []
                   }
                   ListboxProps={{ style: { maxHeight: 128 } }}
-                  onChange={handleMeasurementChange}
+                  onChange={handleChange}
                   disableClearable
                   renderInput={(params) => (
                     <TextField
@@ -372,7 +360,7 @@ const Team = () => {
                       {...params}
                       label="Measurement"
                       variant="filled"
-                      value={formData.measurements}
+                      value={values.measurement}
                     />
                   )}
                 />
@@ -382,55 +370,63 @@ const Team = () => {
             )}
             <TextField
               required
+              label={priceLabel}
               id="price"
               name="price"
-              label={priceLabel}
-              onChange={handleInputChange}
+              value={values.price}
+              onChange={handleChange}
               type="number"
               fullWidth
               variant="filled"
-              value={formData.price}
             />
             <TextField
               required
+              label="Quantity"
               id="quantity"
               name="quantity"
-              label="Quantity"
-              onChange={handleInputChange}
+              value={values.quantity}
+              onChange={handleChange}
               type="number"
               fullWidth
               variant="filled"
-              value={formData.quantity}
             />
             <TextField
               required
               label="Good Threshold"
               id="good"
               name="good"
-              onChange={handleInputChange}
+              value={values.good}
+              onChange={handleChange}
               type="number"
               fullWidth
               variant="filled"
-              value={formData.good}
             />
             <TextField
               required
               label="Bad Threshold"
               id="bad"
               name="bad"
-              onChange={handleInputChange}
+              value={values.bad}
+              onChange={handleChange}
               type="number"
               fullWidth
               variant="filled"
-              value={formData.bad}
             />
           </Stack>
           {error ? <Typography color="error">{error}</Typography> : <></>}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSave}>
-            {selectedRow.id ? "Save" : "Add"}
+          <Button type="submit" disabled={isSubmitting}>
+            {!isSubmitting ? (
+              selectedRow.id ? (
+                "Save"
+              ) : (
+                "Add"
+              )
+            ) : (
+              <CircularProgress size={21} />
+            )}
           </Button>
         </DialogActions>
       </Dialog>

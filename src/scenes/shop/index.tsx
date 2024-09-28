@@ -4,7 +4,7 @@ import api from "../../api/axiosConfig";
 import { Helmet } from "react-helmet-async";
 import Header from "./../../components/Header.jsx";
 import CheckboxList from "./../../components/CheckboxList.jsx";
-import TagFilteredGallery from "./../../components/TagFilteredGallery.jsx";
+import TagFilteredGalleryProps from "./../../components/TagFilteredGallery.jsx";
 
 const Shop = () => {
   const [designTags, setDesignTags] = useState([]);

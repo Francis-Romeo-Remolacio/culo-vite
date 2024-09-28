@@ -17,10 +17,17 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import api from "../api/axiosConfig";
 import { useFormik } from "formik";
-import { orderSchema } from "../schemas";
+import { orderSchema } from "../utils/Validation.js";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import { Suborder } from "../utils/Schemas.js";
+import { renderTimeViewClock } from "@mui/x-date-pickers";
 
-const ButtonSend = ({ suborders, fetchCart }) => {
+type ButtonCheckoutProps = {
+  suborders: Suborder[];
+  fetchCart: Function;
+};
+
+const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
   const [open, setOpen] = useState(false);
   const minDate = dayjs().add(7, "day");
 
@@ -57,17 +64,7 @@ const ButtonSend = ({ suborders, fetchCart }) => {
     }
   };
 
-  const {
-    values,
-    errors,
-    touched,
-    isSubmitting,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-    setFieldValue,
-    resetForm,
-  } = useFormik({
+  const { values, isSubmitting, handleChange, handleSubmit } = useFormik({
     initialValues: {
       type: "normal",
       pickupDateTime: minDate,
@@ -100,14 +97,12 @@ const ButtonSend = ({ suborders, fetchCart }) => {
                 value={values.type}
                 label="Type"
                 onChange={handleChange}
-                renderInput={(params) => <TextField {...params} />}
               >
                 <MenuItem value="normal">Normal</MenuItem>
                 <MenuItem value="rush">Rush</MenuItem>
               </Select>
             </FormControl>
             <DateTimePicker
-              id="datetime-pickup"
               label="Pickup Date & Time"
               name="pickupDateTime"
               value={values.pickupDateTime}
@@ -115,9 +110,11 @@ const ButtonSend = ({ suborders, fetchCart }) => {
               minTime={dayjs("2018-01-01T09:00")}
               maxTime={dayjs("2018-01-01T16:00")}
               onChange={handleChange}
-              renderInput={(params) => (
-                <TextField variant="filled" {...params} />
-              )}
+              viewRenderers={{
+                hours: renderTimeViewClock,
+                minutes: renderTimeViewClock,
+                seconds: renderTimeViewClock,
+              }}
             />
             <FormControl fullWidth variant="filled">
               <InputLabel id="select-payment-label">Payment</InputLabel>
@@ -128,7 +125,6 @@ const ButtonSend = ({ suborders, fetchCart }) => {
                 value={values.payment}
                 label="Payment"
                 onChange={handleChange}
-                renderInput={(params) => <TextField {...params} />}
               >
                 <MenuItem value="full">Full</MenuItem>
                 <MenuItem value="half">Half</MenuItem>
@@ -141,7 +137,7 @@ const ButtonSend = ({ suborders, fetchCart }) => {
           <Button
             type="submit"
             variant="contained"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit}
             endIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
             disabled={isSubmitting}
           >
@@ -153,4 +149,4 @@ const ButtonSend = ({ suborders, fetchCart }) => {
   );
 };
 
-export default ButtonSend;
+export default ButtonCheckout;

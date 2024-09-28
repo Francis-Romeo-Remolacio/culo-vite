@@ -11,7 +11,7 @@ import {
   Container,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { registerAdminSchema } from "../../../schemas";
+import { registerAdminSchema } from "../../../utils/Validation.js";
 import { useFormik } from "formik";
 
 const Form = () => {
@@ -27,10 +27,12 @@ const Form = () => {
     useFormik({
       initialValues: {
         username: "",
+        email: "",
         contactNumber: "",
         password: "",
         confirmPassword: "",
         type: "",
+        secretKey: null,
       },
       validationSchema: registerAdminSchema,
       onSubmit,
@@ -38,7 +40,7 @@ const Form = () => {
 
   return (
     <Container maxWidth={"sm"}>
-      <form onSubmit={handleSubmit} display="flex" alignItems="center">
+      <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
           <TextField
             label="Username"
@@ -62,7 +64,6 @@ const Form = () => {
             fullWidth
             required
             error={touched.email && Boolean(errors.email)}
-            helperText={touched.email && errors.email}
           />
           <TextField
             label="Contact Number"
@@ -131,7 +132,7 @@ const Form = () => {
               label="Secret Key"
               id="secret_key"
               name="secret_key"
-              value={values.secret_key}
+              value={values.secretKey}
               onChange={handleChange}
               variant="filled"
               fullWidth

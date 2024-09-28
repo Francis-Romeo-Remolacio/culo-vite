@@ -73,9 +73,6 @@ type MainAppBarProps = {
 };
 
 export default function MainAppBar({ children }: MainAppBarProps) {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
-
   // AppBar
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -158,8 +155,8 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     setOpen((prev) => !prev);
   };
 
-  const handleProfileMenuOpen = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleProfileMenuOpen = (event: MouseEvent) => {
+    setAnchorEl(event.currentTarget as HTMLElement);
   };
 
   const handleMobileMenuClose = () => {
