@@ -18,7 +18,7 @@ import {
   MenuItem,
   useTheme,
 } from "@mui/material";
-import { Tokens } from "../../theme";
+import { Tokens } from "../../Theme";
 import ChatIcon from "@mui/icons-material/Chat";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
@@ -89,7 +89,7 @@ const FabChat: React.FC = () => {
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
-      setBearerToken(`Bearer ${token}`);
+      setBearerToken(`Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs, ${token}`);
     }
 
     const newConnection = new signalR.HubConnectionBuilder()
