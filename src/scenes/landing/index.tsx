@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Helmet } from "react-helmet-async";
-import TagFilteredGallery from "./../../components/TagFilteredGallery.jsx";
+import DesignGallery from "./../../components/DesignGallery.jsx";
 
 const Landing = () => {
   return (
@@ -78,7 +78,7 @@ const Landing = () => {
               </Typography>
 
               <Typography variant="body1" paragraph>
-                <TagFilteredGallery />
+                <DesignGallery />
               </Typography>
               {/*<Button variant="contained">View More Designs</Button>*/}
             </Paper>

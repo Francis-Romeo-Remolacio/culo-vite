@@ -24,8 +24,6 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import Cookies from "js-cookie";
 import api from "./../../api/axiosConfig.js";
 import { Popper } from "@mui/material";
-import { useTheme } from "@emotion/react";
-import { Tokens } from "../../theme.js";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 
@@ -317,21 +315,17 @@ export default function MainAppBar({ children }: MainAppBarProps) {
             >
               The Pink Butter Cake Studio
             </Typography>
-            {loggedIn ? (
-              <>
-                <Search>
-                  <SearchIconWrapper>
-                    <SearchIcon />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                    placeholder="Search…"
-                    inputProps={{ "aria-label": "search" }}
-                  />
-                </Search>
-              </>
-            ) : (
-              <></>
-            )}
+            <>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Search…"
+                  inputProps={{ "aria-label": "search" }}
+                />
+              </Search>
+            </>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {loggedIn ? (
@@ -402,16 +396,16 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         >
           {notifications.length > 0
             ? notifications.map((notif: Notification) => {
-                const labelId = `checkbox-list-label-${notif.notifId}`;
+                const labelId = `checkbox-list-label-${notif.id}`;
                 return (
                   <ListItem
-                    key={notif.notifId}
+                    key={notif.id}
                     secondaryAction={
                       notif.isRead === false ? (
                         <IconButton
                           edge="end"
                           aria-label="mark-as-read"
-                          onClick={() => readNotif(notif.notifId)}
+                          onClick={() => readNotif(notif.id)}
                         >
                           <CheckIcon />
                         </IconButton>

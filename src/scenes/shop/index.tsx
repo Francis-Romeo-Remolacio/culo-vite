@@ -1,30 +1,37 @@
 import { useEffect, useState } from "react";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2";
 import api from "../../api/axiosConfig";
 import { Helmet } from "react-helmet-async";
 import Header from "./../../components/Header.jsx";
-import CheckboxList from "./../../components/CheckboxList.jsx";
-import TagFilteredGalleryProps from "./../../components/TagFilteredGallery.jsx";
+import TagsCheckboxList from "./../../components/TagsCheckboxList.jsx";
+import DesignGallery from "./../../components/DesignGallery.jsx";
+import { Tag } from "../../utils/Schemas.js";
 
 const Shop = () => {
-  const [designTags, setDesignTags] = useState([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshingDesigns, setIsRefreshingDesigns] = useState(true);
 
   useEffect(() => {
     const fetchDesignTags = async () => {
       try {
-        const response = await api.get(
-          "/tags?page=1&record_per_page=30&sortBy=popular&sortOrder=desc"
-        );
-        setDesignTags(response.data);
+        await api
+          .get("/tags?page=1&record_per_page=30&sortBy=popular&sortOrder=desc")
+          .then((response) => {
+            const parsedTags: Tag[] = response.data.map((addOn: any) => ({
+              id: addOn.designTagId,
+              name: addOn.designTagName,
+            }));
+            setTags(parsedTags);
+          });
       } catch (error) {
         console.error("Error fetching design tags:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchDesignTags();
   }, []);
 
@@ -33,34 +40,34 @@ const Shop = () => {
   }
 
   return (
-    <Box p={{ xs: 1, sm: 2, md: 3 }}>
-      <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
-        <Helmet>
-          <title>Home - The Pink Butter Cake Studio</title>
-        </Helmet>
-        <Grid item xs={2} sx={{ display: { xs: "none", lg: "block" } }}>
-          <Paper>
-            <Typography variant="h3">Popular Categories</Typography>
-            <CheckboxList
-              designTags={designTags}
-              selectedTags={selectedTags}
-              setSelectedTags={setSelectedTags}
-            />
-          </Paper>
-        </Grid>
-        <Grid container item xs={12} lg={10}>
-          <Paper>
-            <Header
-              title="The Pink Butter Cake Studio"
-              subtitle="Take a look at our various offerings"
-            />
-            <Grid container spacing={2} justifyContent="center">
-              <TagFilteredGallery designTags={designTags} />
-            </Grid>
-          </Paper>
-        </Grid>
+    <Grid container spacing={2}>
+      <Helmet>
+        <title>Shop - The Pink Butter Cake Studio</title>
+      </Helmet>
+      <Grid xs={2} sx={{ display: { xs: "none", lg: "block" } }}>
+        <Paper>
+          <Typography variant="h3">Popular Categories</Typography>
+          <TagsCheckboxList
+            tags={tags}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            isRefreshingDesigns={isRefreshingDesigns}
+          />
+        </Paper>
       </Grid>
-    </Box>
+      <Grid xs={12} lg={10} sx={{ p: 2 }}>
+        <Paper>
+          <Header
+            title="The Pink Butter Cake Studio"
+            subtitle="Take a look at our various offerings"
+          />
+          <DesignGallery
+            selectedTags={selectedTags}
+            setIsRefreshingDesigns={setIsRefreshingDesigns}
+          />
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 

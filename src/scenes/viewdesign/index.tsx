@@ -301,7 +301,7 @@ const ViewDesign = () => {
         console.error("Error fetching design data: ", error);
       }
       try {
-        const response = await api
+        await api
           .get(`ui-helpers/get-design-info/${encodeURIComponent(designId)}`)
           .then((response) => {
             const design = response.data;
