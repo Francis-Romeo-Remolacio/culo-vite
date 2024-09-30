@@ -10,6 +10,10 @@ import {
   Stack,
   Skeleton,
   Paper,
+  FormControl,
+  InputLabel,
+  IconButton,
+  FilledInput,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
@@ -18,10 +22,18 @@ import { Helmet } from "react-helmet-async";
 import ButtonBack from "./../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
 import { registerSchema } from "../../utils/Validation.js";
-import { useState } from "react";
+import { MouseEvent, useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Register = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
   const onSubmit = async () => {
     // Trim leading zeroes from contactNumber
@@ -167,19 +179,31 @@ const Register = () => {
                 error={touched.contactNumber && Boolean(errors.contactNumber)}
                 helperText={touched.contactNumber && errors.contactNumber}
               />
-              <TextField
-                label="Password"
-                id="password"
-                name="password"
-                value={values.password}
-                onChange={handleChange}
-                type="password"
-                variant="filled"
-                fullWidth
-                required
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-              />
+              <FormControl variant="filled">
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <FilledInput
+                  id="password"
+                  name="password"
+                  value={values.password}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  error={touched.password && Boolean(errors.password)}
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
               <TextField
                 label="Confirm Password"
                 id="confirmPassword"
@@ -195,6 +219,33 @@ const Register = () => {
                 }
                 helperText={touched.confirmPassword && errors.confirmPassword}
               />
+              <FormControl variant="filled">
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <FilledInput
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  error={
+                    touched.confirmPassword && Boolean(errors.confirmPassword)
+                  }
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Register" : <CircularProgress size={21} />}
               </Button>

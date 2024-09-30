@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Box,
   Button,
   Container,
-  Grid,
   TextField,
   Typography,
   Link,
@@ -12,6 +11,11 @@ import {
   Skeleton,
   Paper,
   Stack,
+  FormControl,
+  InputLabel,
+  FilledInput,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
@@ -20,6 +24,7 @@ import { Helmet } from "react-helmet-async";
 import ButtonBack from "../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
 import { loginSchema } from "../../utils/Validation.js";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Login = () => {
   const location = useLocation();
@@ -27,6 +32,13 @@ const Login = () => {
   const fromLink = decodeURIComponent(query.get("from") || "");
 
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
 
   useEffect(() => {
     const checkToken = async () => {
@@ -160,19 +172,31 @@ const Login = () => {
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
               />
-              <TextField
-                label="Password"
-                id="password"
-                name="password"
-                value={values.password}
-                onChange={handleChange}
-                variant="filled"
-                type="password"
-                fullWidth
-                required
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-              />
+              <FormControl variant="filled">
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <FilledInput
+                  id="password"
+                  name="password"
+                  value={values.password}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                  error={touched.password && Boolean(errors.password)}
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Login" : <CircularProgress size={21} />}
               </Button>
