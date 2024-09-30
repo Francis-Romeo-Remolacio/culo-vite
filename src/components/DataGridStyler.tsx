@@ -1,7 +1,7 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Box } from "@mui/system";
 import { useTheme } from "@mui/material";
-import { Tokens } from "./../theme.js";
+import { Tokens } from "./../Theme.js";
 
 type DataGridStylerProps = {
   children: ReactNode;

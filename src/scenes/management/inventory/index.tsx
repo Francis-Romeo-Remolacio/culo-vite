@@ -25,6 +25,7 @@ import { Edit, Delete, Restore } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { ingredientSchema } from "../../../utils/Validation.js";
 import { Units } from "../../../utils/Schemas.js";
+import { Dayjs } from "dayjs";
 
 const Team = () => {
   const [mode, setMode] = useState<"add" | "edit">("add");
@@ -35,7 +36,7 @@ const Team = () => {
   const [formData, setFormData] = useState({
     name: "",
     quantity: 0,
-    measurements: "",
+    measurement: "",
     price: 0,
     type: "",
     good: 0,
@@ -49,8 +50,10 @@ const Team = () => {
       switch (mode) {
         case "add":
           await api.post(`ingredient`, values);
+          break;
         case "edit":
           await api.patch(`ingredient/${values.id}`, values);
+          break;
       }
       setOpen(false);
       fetchData();
@@ -95,26 +98,45 @@ const Team = () => {
 
   const fetchData = async () => {
     try {
-      const response = await api.get("ingredients/active");
-      setRows(response.data);
+      await api.get("ingredients").then((response) => {
+        const parsedIngredients = response.data.map((ingredient: any) => ({
+          id: ingredient.id,
+          name: ingredient.name,
+          quantity: ingredient.quantity,
+          measurement: ingredient.measurements,
+          price: ingredient.price,
+          status: ingredient.status,
+          type: ingredient.type,
+          created: new Date(ingredient.createdAt),
+          lastUpdatedBy: ingredient.lastUpdatedBy,
+          lastUpdated: new Date(ingredient.lastUpdatedAt),
+          isActive: ingredient.isActive,
+          good: ingredient.goodThreshold,
+          bad: ingredient.criticalThreshold,
+        }));
+        setRows(parsedIngredients);
+        console.log(parsedIngredients);
+      });
     } catch (error) {
-      console.error("Error fetching active ingredients:", error);
+      console.error("Error fetching ingredients:", error);
     }
-    fetchData();
   };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (formData.type === "count") {
       setFormData((prevData) => ({
         ...prevData,
-        measurements: "Piece",
+        measurement: "Piece",
       }));
     }
   }, [formData.type]);
 
   useEffect(() => {
     if (values.type === "count") {
-      setFieldValue("measurements", "piece");
+      setFieldValue("measurement", "piece");
     }
   }, [values.type]);
 
@@ -188,7 +210,7 @@ const Team = () => {
       },
     },
     {
-      field: "measurements",
+      field: "measurement",
       headerName: "Measurement",
     },
     {
@@ -208,8 +230,8 @@ const Team = () => {
       },
     },
     {
-      field: "createdAt",
-      headerName: "Date Created",
+      field: "created",
+      headerName: "Created",
       type: "date",
     },
     {
@@ -217,8 +239,8 @@ const Team = () => {
       headerName: "Last Updated By",
     },
     {
-      field: "lastUpdatedAt",
-      headerName: "Last Updated Time",
+      field: "lastUpdated",
+      headerName: "Last Updated",
       type: "date",
     },
     {
@@ -238,18 +260,21 @@ const Team = () => {
           >
             <Edit />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => handleClickDelete(params.row.id)}
-          >
-            <Delete />
-          </IconButton>
-          <IconButton
-            color="success"
-            onClick={() => handleClickRestore(params.row.id)}
-          >
-            <Restore />
-          </IconButton>
+          {params.row.isActive ? (
+            <IconButton
+              color="error"
+              onClick={() => handleClickDelete(params.row.id)}
+            >
+              <Delete />
+            </IconButton>
+          ) : (
+            <IconButton
+              color="success"
+              onClick={() => handleClickRestore(params.row.id)}
+            >
+              <Restore />
+            </IconButton>
+          )}
         </>
       ),
     },
@@ -279,7 +304,7 @@ const Team = () => {
             },
             filter: {
               filterModel: {
-                items: [{ field: "id", operator: "is", value: true }],
+                items: [{ field: "isActive", operator: "is", value: true }],
               },
             },
           }}
@@ -325,11 +350,11 @@ const Team = () => {
             {values.type ? (
               values.type == "count" ? (
                 <FormControl required variant="filled" fullWidth>
-                  <InputLabel id="measurementsLabel">Measurement</InputLabel>
+                  <InputLabel id="measurementLabel">Measurement</InputLabel>
                   <Select
-                    labelId="measurementsLabel"
-                    id="measurements"
-                    name="measurements"
+                    labelId="measurementLabel"
+                    id="measurement"
+                    name="measurement"
                     label="Measurement"
                     value="Piece"
                     defaultValue="Piece"
@@ -341,7 +366,7 @@ const Team = () => {
                 </FormControl>
               ) : (
                 <Autocomplete
-                  id="measurements"
+                  id="measurement"
                   value={values.measurement}
                   disablePortal
                   options={
