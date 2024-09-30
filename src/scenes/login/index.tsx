@@ -114,7 +114,7 @@ const Login = () => {
       <Helmet>
         <title>Login - The Pink Butter Cake Studio</title>
       </Helmet>
-      <Box position="absolute" sx={{ left: 0 }}>
+      <Box position="absolute" left={0}>
         <ButtonBack />
       </Box>
       <Paper sx={{ p: 2 }}>

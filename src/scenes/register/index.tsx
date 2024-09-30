@@ -89,11 +89,11 @@ const Register = () => {
       <Helmet>
         <title>Register - The Pink Butter Cake Studio</title>
       </Helmet>
-      <Box position="absolute">
+      <Box position="absolute" left={0}>
         <ButtonBack />
       </Box>
-      <Box>
-        <Paper>
+      <Paper sx={{ p: 2 }}>
+        <Box>
           <Header
             title="Register"
             subtitle="Create an account at The Pink Butter Cake Studio"
@@ -110,7 +110,7 @@ const Register = () => {
               />
             )}
             <img
-              src="/logo192.png"
+              src="src/assets/logo192.png"
               alt="Logo"
               style={{
                 width: "150px",
@@ -122,11 +122,7 @@ const Register = () => {
           </Box>
 
           <form onSubmit={handleSubmit}>
-            <Stack
-              spacing={2}
-              direction="column"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
+            <Stack spacing={2}>
               <TextField
                 label="Username"
                 id="username"
@@ -199,7 +195,7 @@ const Register = () => {
                 }
                 helperText={touched.confirmPassword && errors.confirmPassword}
               />
-              <Button type="submit" variant="contained">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Register" : <CircularProgress size={21} />}
               </Button>
             </Stack>
@@ -214,8 +210,8 @@ const Register = () => {
               to login.
             </Typography>
           </Box>
-        </Paper>
-      </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 };
