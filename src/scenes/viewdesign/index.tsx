@@ -624,7 +624,7 @@ const ViewDesign = () => {
                                 disableRipple
                               />
                               <ListItemText
-                                primary={addOn.id}
+                                primary={addOn.name}
                                 secondary={`₱${addOn.price}`}
                               />
                             </ListItem>

@@ -111,20 +111,28 @@ export const registerAdminSchema = yup.object().shape({
 });
 
 export const cartSchema = yup.object().shape({
-  dedication: yup.string().required("Required"),
+  dedication: yup.string(),
   requests: yup.string(),
   flavor: yup.string().required("Required"),
   size: yup.string().required("Required"),
   color: yup.string().required("Required"),
   customColor: yup.string(),
   quantity: yup.number().positive().integer().required("Required"),
-  /*addOns: yup.array().of(yup.object().shape({ addOn: yup.string })),*/
+  // addOns: yup
+  //   .array()
+  //   .of(
+  //     yup.object().shape({
+  //       id: yup.string().required("Required"),
+  //       quantity: yup.number().required("Required"),
+  //     })
+  //   )
+  //   .required("Required"),
 });
 
 export const suborderSchema = yup.object().shape({
   quantity: yup.number().positive().integer().required("Required"),
   designName: yup.string().required("Required"),
-  description: yup.string().required("Required"),
+  description: yup.string(),
   flavor: yup.string().required("Required"),
   size: yup.string().required("Required"),
   color: yup.string().required("Required"),
