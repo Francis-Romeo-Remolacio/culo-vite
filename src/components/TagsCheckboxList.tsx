@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useContext } from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -6,21 +6,21 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import { Tag } from "../utils/Schemas";
-import { Typography } from "@mui/material";
+import { RefreshContext } from "../scenes/shop";
 
 type TagsCheckboxListProps = {
   tags: Tag[];
   selectedTags: string[];
   setSelectedTags: Dispatch<SetStateAction<string[]>>;
-  isRefreshingDesigns: boolean;
 };
 
 const TagsCheckboxList = ({
   tags,
   selectedTags,
   setSelectedTags,
-  isRefreshingDesigns,
 }: TagsCheckboxListProps) => {
+  const { isRefreshing } = useContext(RefreshContext);
+
   const handleToggle = (tag: Tag) => {
     const currentIndex = selectedTags.indexOf(tag.id);
     const newSelectedTags = [...selectedTags];
@@ -48,7 +48,7 @@ const TagsCheckboxList = ({
                   handleToggle(tag);
                 }}
                 dense
-                disabled={isRefreshingDesigns}
+                disabled={isRefreshing}
               >
                 <ListItemIcon>
                   <Checkbox

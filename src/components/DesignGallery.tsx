@@ -1,23 +1,25 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Container, Grid, Typography } from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.jsx";
 import { Design } from "../utils/Schemas.js";
+import { RefreshContext } from "../scenes/shop/index.js";
 
 type TagFilteredGalleryProps = {
   tagFilter?: string[];
   selectedTags?: string[];
-  setIsRefreshingDesigns: Dispatch<SetStateAction<boolean>>;
 };
+
 const TagFilteredGallery = ({
   tagFilter,
   selectedTags,
-  setIsRefreshingDesigns,
 }: TagFilteredGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [filteredDesigns, setFilteredDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { setIsRefreshing } = useContext(RefreshContext);
 
   useEffect(() => {
     const fetchDesigns = async () => {
@@ -56,18 +58,17 @@ const TagFilteredGallery = ({
   }, []);
 
   const checkFilter = () => {
-    setIsRefreshingDesigns(true);
+    setIsRefreshing(true);
     if (selectedTags && selectedTags.length > 0 && fetchedDesigns.length > 0) {
-      setFilteredDesigns(
+      setOutputDesigns(
         fetchedDesigns.filter((design) =>
           design.tags.some((tag) => selectedTags.includes(tag.id))
         )
       );
-      setOutputDesigns(filteredDesigns);
     } else {
       setOutputDesigns(fetchedDesigns);
     }
-    setIsRefreshingDesigns(false);
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -87,7 +88,7 @@ const TagFilteredGallery = ({
   return (
     <Container>
       <Grid container spacing={1} sx={{ p: 2 }}>
-        <Typography>{tagFilter}</Typography>
+        <Typography>{selectedTags}</Typography>
         {outputDesigns.map((design) => (
           <Grid item>
             <DesignCard key={design.id} design={design} />
