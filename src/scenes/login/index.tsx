@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Skeleton,
   Paper,
+  Stack,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
@@ -113,11 +114,11 @@ const Login = () => {
       <Helmet>
         <title>Login - The Pink Butter Cake Studio</title>
       </Helmet>
-      <Box position="absolute">
+      <Box position="absolute" sx={{ left: 0 }}>
         <ButtonBack />
       </Box>
-      <Box>
-        <Paper>
+      <Paper sx={{ p: 2 }}>
+        <Stack>
           <Header
             title="Login"
             subtitle="Welcome to The Pink Butter Cake Studio"
@@ -134,7 +135,7 @@ const Login = () => {
               />
             )}
             <img
-              src="/logo192.png"
+              src="src/assets/logo192.png"
               alt="Logo"
               style={{
                 width: "150px",
@@ -146,46 +147,36 @@ const Login = () => {
           </Box>
 
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={2} direction="column">
-              <Grid item>
-                <TextField
-                  label="Email"
-                  id="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                  variant="filled"
-                  fullWidth
-                  required
-                  error={touched.email && Boolean(errors.email)}
-                  helperText={touched.email && errors.email}
-                />
-              </Grid>
-              <Grid item>
-                <TextField
-                  label="Password"
-                  id="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  variant="filled"
-                  type="password"
-                  fullWidth
-                  required
-                  error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password}
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={isSubmitting}
-                >
-                  {!isSubmitting ? "Login" : <CircularProgress size={21} />}
-                </Button>
-              </Grid>
-            </Grid>
+            <Stack spacing={2}>
+              <TextField
+                label="Email"
+                id="email"
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+                required
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+              />
+              <TextField
+                label="Password"
+                id="password"
+                name="password"
+                value={values.password}
+                onChange={handleChange}
+                variant="filled"
+                type="password"
+                fullWidth
+                required
+                error={touched.password && Boolean(errors.password)}
+                helperText={touched.password && errors.password}
+              />
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? "Login" : <CircularProgress size={21} />}
+              </Button>
+            </Stack>
           </form>
 
           <Box mt={2}>
@@ -197,8 +188,8 @@ const Login = () => {
               to register.
             </Typography>
           </Box>
-        </Paper>
-      </Box>
+        </Stack>
+      </Paper>
     </Container>
   );
 };
