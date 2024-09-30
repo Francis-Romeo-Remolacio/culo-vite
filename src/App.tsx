@@ -31,6 +31,7 @@ import Profile from "./scenes/management/profile";
 import AddOns from "./scenes/management/addons";
 import AuthGuard from "./components/AuthGuard";
 import NotFound from "./scenes/not-found/index.js";
+import PostPayment from "./scenes/post-payment/index.js";
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/view-design" element={<Design />} />
             <Route path="/custom" element={<Custom />} />
+            <Route path="/post-payment" element={<PostPayment />} />
             <Route path="/results" element={<Results />} />
             <Route path="/cart" element={<Cart />} />
             {
