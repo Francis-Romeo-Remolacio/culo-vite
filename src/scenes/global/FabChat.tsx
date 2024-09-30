@@ -22,8 +22,17 @@ import { Tokens } from "../../Theme";
 import ChatIcon from "@mui/icons-material/Chat";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
-import * as signalR from "@microsoft/signalr";
+import {
+  DefaultHttpClient,
+  HttpRequest,
+  HttpResponse,
+  HubConnectionBuilder,
+  ILogger,
+  LogLevel,
+  NullLogger,
+} from "@microsoft/signalr";
 import Cookies from "js-cookie";
+import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 
 // Message interface from the schema
 export interface Message {
@@ -35,6 +44,23 @@ export interface Message {
 // Props for MessageLeft and MessageRight
 interface MessageProps {
   message: Message;
+}
+
+class CustomHttpClient extends DefaultHttpClient {
+  private token: string;
+
+  constructor(logger: ILogger, token: string) {
+    super(logger);
+    this.token = token;
+  }
+
+  public send(request: HttpRequest): Promise<HttpResponse> {
+    request.headers = {
+      ...request.headers,
+      Authorization: `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs${this.token}`,
+    };
+    return super.send(request);
+  }
 }
 
 const MessageLeft: React.FC<MessageProps> = ({ message }) => {
@@ -87,35 +113,42 @@ const FabChat: React.FC = () => {
 
   // Start the SignalR connection
   useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      setBearerToken(`Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs, ${token}`);
-    }
+    try {
+      const cookieToken = Cookies.get("token");
+      if (cookieToken) {
+        setBearerToken(`, Bearer ${cookieToken}`);
+      }
 
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5155/live-chat/", {
-        accessTokenFactory: () => bearerToken,
-      })
-      .build();
+      const newConnection = new HubConnectionBuilder()
+        .withUrl("http://localhost:5155/live-chat/", {
+          httpClient: new CustomHttpClient(
+            new ConsoleLogger(LogLevel.Information),
+            bearerToken
+          ),
+        })
+        .build();
 
-    setConnection(newConnection);
+      setConnection(newConnection);
 
-    if (newConnection) {
-      newConnection.start().then(() => {
-        console.log("Connected to SignalR!");
-        newConnection.on("RecieveMessage", (parsed_message: Message) => {
-          setChatMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              sender: parsed_message.sender,
-              text: `${parsed_message.text}\n${parsed_message.sender_message_time_sent}`,
-              sender_message_time_sent: new Date(
-                parsed_message.sender_message_time_sent
-              ),
-            },
-          ]);
+      if (newConnection) {
+        newConnection.start().then(() => {
+          console.log("Connected to SignalR!");
+          newConnection.on("RecieveMessage", (parsed_message: Message) => {
+            setChatMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                sender: parsed_message.sender,
+                text: `${parsed_message.text}\n${parsed_message.sender_message_time_sent}`,
+                sender_message_time_sent: new Date(
+                  parsed_message.sender_message_time_sent
+                ),
+              },
+            ]);
+          });
         });
-      });
+      }
+    } catch (error) {
+      console.error(error);
     }
   }, [bearerToken]);
 
