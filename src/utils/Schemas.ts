@@ -1,6 +1,7 @@
 // src/utils/Schemas.ts
 
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
+import * as TimePeriods from "./TimePeriods";
 
 export interface User {
   id: string | null;
@@ -108,4 +109,76 @@ export interface Units {
   Mass: readonly string[];
   Volume: readonly string[];
   Count: readonly string[];
+}
+
+// Data Analysis
+export interface ItemOccurence {
+  asCakeIngredient: string[];
+  asMaterialIngredient: string[];
+  item: Partial<Ingredient>;
+  numOfUsesCakeIngredient: number;
+  numOfUsesMaterialIngredient: number;
+  ratioOfUsesCakeIngredient: number;
+  ratioOfUsesMaterialIngredient: number;
+}
+
+export interface TagOccurence {
+  tag: Tag;
+  occurenceCount: number;
+  ratio: number;
+}
+
+export interface SeasonalOccurence {
+  dateStart: Dayjs;
+  dateEnd: Dayjs;
+  itemList: TagOccurence[];
+}
+
+export interface TotalOrders {
+  tag: Tag;
+  occurenceCount: number;
+  ratio: number;
+}
+
+export interface OrderTotal {
+  totalOrders: number;
+}
+
+export interface OrdersOnDay extends OrderTotal {
+  day: typeof TimePeriods.Days | number;
+}
+
+export interface OrdersOnMonth extends OrderTotal {
+  month: typeof TimePeriods.Months;
+}
+
+export interface Total {
+  total: number;
+}
+
+export interface Sales {
+  name?: string;
+  total?: number;
+  totalSales?: number;
+}
+
+export interface FullSales extends Sales {
+  id: string;
+  number?: string;
+  email?: string;
+  price: number;
+  date: Dayjs;
+}
+
+export interface SalesOnDay extends Sales {
+  day: typeof TimePeriods.Days | number;
+}
+
+export interface SalesOnMonth extends Sales {
+  month: typeof TimePeriods.Months;
+}
+
+export interface ChartData {
+  id: string | number;
+  value: number;
 }

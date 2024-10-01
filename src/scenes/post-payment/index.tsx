@@ -1,6 +1,5 @@
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import { Tokens } from "../../Theme";
-import { Button, Stack, Typography, useTheme } from "@mui/material";
+import { Button, Grid, Stack, Typography, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../../api/axiosConfig";
@@ -37,7 +36,7 @@ const PostPayment = () => {
 
   return (
     <Stack spacing={2} alignItems="center">
-      <Grid2
+      <Grid
         container
         alignItems="center"
         justifyContent="center"
@@ -52,7 +51,7 @@ const PostPayment = () => {
           boxShadow: "0px 8px 8px #00000030 inset",
         }}
       >
-        <Grid2>
+        <Grid>
           <Stack>
             <Typography
               variant="h1"
@@ -69,8 +68,8 @@ const PostPayment = () => {
               {message2}
             </Typography>
           </Stack>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Stack spacing={1} direction="row">
         <Button href="/" variant="contained">
           Back to Store

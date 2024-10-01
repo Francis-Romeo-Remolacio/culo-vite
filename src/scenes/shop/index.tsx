@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Paper, Typography, Grid } from "@mui/material";
 import api from "../../api/axiosConfig";
 import { Helmet } from "react-helmet-async";
 import Header from "./../../components/Header.jsx";
@@ -53,7 +52,7 @@ const Shop = () => {
 
       <RefreshContext.Provider value={{ isRefreshing, setIsRefreshing }}>
         <Grid xs={2} sx={{ display: { xs: "none", lg: "block" } }}>
-          <Paper>
+          <Paper sx={{ p: 2 }}>
             <Typography variant="h3">Popular Categories</Typography>
             <TagsCheckboxList
               tags={tags}
@@ -62,8 +61,8 @@ const Shop = () => {
             />
           </Paper>
         </Grid>
-        <Grid xs={12} lg={10} sx={{ p: 2 }}>
-          <Paper>
+        <Grid xs={12} lg={10}>
+          <Paper sx={{ p: 2 }}>
             <Header
               title="The Pink Butter Cake Studio"
               subtitle="Take a look at our various offerings"

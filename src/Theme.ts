@@ -207,9 +207,9 @@ export const ThemeSettings = (mode: PaletteMode) => {
             // info: {
             //   main: colors.triadic1[200],
             // },
-            success: {
-              main: colors.triadic2[300],
-            },
+            // success: {
+            //   main: colors.triadic2[300],
+            // },
             complementary: {
               main: colors.complementary[200],
             },
@@ -234,25 +234,25 @@ export const ThemeSettings = (mode: PaletteMode) => {
         : {
             // palette values for light mode
             primary: {
-              main: colors.primary[500],
+              main: colors.primary[300],
             },
             secondary: {
-              main: colors.analogous1[400],
+              main: colors.analogous1[300],
             },
             complementary: {
-              main: colors.complementary[300],
+              main: colors.complementary[200],
             },
             analogous1: {
-              main: colors.analogous1[400],
+              main: colors.analogous1[300],
             },
             analogous2: {
-              main: colors.analogous2[700],
+              main: colors.analogous2[300],
             },
             triadic1: {
-              main: colors.triadic1[700],
+              main: colors.triadic1[200],
             },
             triadic2: {
-              main: colors.triadic2[500],
+              main: colors.triadic2[300],
             },
             neutral: {
               dark: colors.grey[700],

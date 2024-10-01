@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { ColorModeContext, useMode } from "./theme";
+import { ColorModeContext, useMode } from "./Theme";
 // import { createTheme, MantineProvider } from "@mantine/core";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -23,7 +23,7 @@ const Index = () => {
                   //<MantineProvider theme={theme}>
                 }
                 <CssBaseline />
-                <App />
+                  <App />
                 {
                   //</MantineProvider>
                 }

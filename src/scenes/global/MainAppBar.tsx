@@ -1,6 +1,6 @@
 import { MouseEvent, ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { styled, alpha } from "@mui/material/styles";
+import { styled, alpha, useTheme } from "@mui/material/styles";
 import {
   AppBar,
   Box,
@@ -15,6 +15,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Paper,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -26,6 +27,7 @@ import api from "./../../api/axiosConfig.js";
 import { Popper } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
+import { Tokens } from "../../Theme.js";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -71,6 +73,9 @@ type MainAppBarProps = {
 };
 
 export default function MainAppBar({ children }: MainAppBarProps) {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
   // AppBar
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -250,8 +255,12 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     >
       <MenuItem>
         <IconButton size="large" color="inherit">
-          <Badge badgeContent={notifications.length}>
-            <NotificationsIcon />
+          <Badge
+            badgeContent={notifications.length}
+            color="default"
+            sx={{ color: colors.background }}
+          >
+            <NotificationsIcon sx={{ color: colors.background }} />
           </Badge>
         </IconButton>
         <p>Notifications</p>
@@ -263,7 +272,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
           color="inherit"
         >
           <Badge badgeContent={cartData.length}>
-            <ShoppingCartIcon />
+            <ShoppingCartIcon sx={{ color: colors.background }} />
           </Badge>
         </IconButton>
         <p>Cart</p>
@@ -311,18 +320,19 @@ export default function MainAppBar({ children }: MainAppBarProps) {
               variant="h6"
               noWrap
               component="div"
-              sx={{ display: "block" }}
+              sx={{ display: "block", color: colors.background }}
             >
               The Pink Butter Cake Studio
             </Typography>
             <>
               <Search>
                 <SearchIconWrapper>
-                  <SearchIcon />
+                  <SearchIcon sx={{ color: colors.background }} />
                 </SearchIconWrapper>
                 <StyledInputBase
                   placeholder="Search…"
                   inputProps={{ "aria-label": "search" }}
+                  sx={{ color: colors.subtle }}
                 />
               </Search>
             </>
@@ -335,8 +345,12 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     onClick={handleClick}
                     color="inherit"
                   >
-                    <Badge badgeContent={notifications.length} color="error">
-                      <NotificationsIcon />
+                    <Badge
+                      badgeContent={notifications.length}
+                      color="default"
+                      sx={{ color: colors.background }}
+                    >
+                      <NotificationsIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
                   <IconButton
@@ -346,7 +360,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     color="inherit"
                   >
                     <Badge badgeContent={cartData.length}>
-                      <ShoppingCartIcon />
+                      <ShoppingCartIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
                 </>
@@ -362,7 +376,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 onClick={handleProfileMenuOpen}
                 color="inherit"
               >
-                <AccountCircle />
+                <AccountCircle sx={{ color: colors.background }} />
               </IconButton>
             </Box>
             <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -374,7 +388,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 onClick={handleMobileMenuOpen}
                 color="inherit"
               >
-                <MoreIcon />
+                <MoreIcon sx={{ color: colors.background }} />
               </IconButton>
             </Box>
           </Toolbar>
@@ -391,38 +405,40 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         placement="bottom"
         sx={{ padding: 2 }}
       >
-        <List
-          sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-        >
-          {notifications.length > 0
-            ? notifications.map((notif: Notification) => {
-                const labelId = `checkbox-list-label-${notif.id}`;
-                return (
-                  <ListItem
-                    key={notif.id}
-                    secondaryAction={
-                      notif.isRead === false ? (
-                        <IconButton
-                          edge="end"
-                          aria-label="mark-as-read"
-                          onClick={() => readNotif(notif.id)}
-                        >
-                          <CheckIcon />
-                        </IconButton>
-                      ) : (
-                        <></>
-                      )
-                    }
-                    disablePadding
-                  >
-                    <ListItemButton role={undefined}>
-                      <ListItemText id={labelId} primary={notif.message} />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })
-            : "No notifications"}
-        </List>
+        <Paper sx={{ p: 2 }}>
+          <List
+            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+          >
+            {notifications.length > 0
+              ? notifications.map((notif: Notification) => {
+                  const labelId = `checkbox-list-label-${notif.id}`;
+                  return (
+                    <ListItem
+                      key={notif.id}
+                      secondaryAction={
+                        notif.isRead === false ? (
+                          <IconButton
+                            edge="end"
+                            aria-label="mark-as-read"
+                            onClick={() => readNotif(notif.id)}
+                          >
+                            <CheckIcon />
+                          </IconButton>
+                        ) : (
+                          <></>
+                        )
+                      }
+                      disablePadding
+                    >
+                      <ListItemButton role={undefined}>
+                        <ListItemText id={labelId} primary={notif.message} />
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })
+              : "No notifications"}
+          </List>
+        </Paper>
       </Popper>
     </>
   );

@@ -28,6 +28,7 @@ import {
   DialogActions,
   Autocomplete,
   Paper,
+  useTheme,
 } from "@mui/material";
 import api from "../../api/axiosConfig.js";
 import { Helmet } from "react-helmet-async";
@@ -44,6 +45,7 @@ import {
   DesignVariant,
   VariantAddOn,
 } from "../../utils/Schemas.ts";
+import { Tokens } from "../../Theme.ts";
 
 type OrderAddOn = {
   id: number;
@@ -54,6 +56,9 @@ const ViewDesign = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const designId = query.get("q") || undefined;
+
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
 
   const navigate = useNavigate();
 
@@ -88,13 +93,15 @@ const ViewDesign = () => {
   const onSubmit = async () => {
     if (loggedIn) {
       try {
-        // Add the main order
+        const finalAddOns = [...selectedAddOns, ...userAddOns];
+
         const cartResponse = await api.post("current-user/cart", {
           quantity: values.quantity,
           designId: design?.id,
           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
           flavor: values.flavor,
           size: values.size,
+          addonItem: finalAddOns,
           color:
             values.color === "custom"
               ? `Custom: ${values.customColor}`
@@ -104,28 +111,7 @@ const ViewDesign = () => {
           console.log("Cart item added successfully");
         }
 
-        // Get the suborderId from the response
-        console.log(cartResponse.data[0].suborderId);
-
-        const suborderId = cartResponse.data[0].suborderId;
-
-        // Add new add-ons to the order
-        const [finalAddOns, setFinalAddOns] = useState<OrderAddOn[]>();
-
-        setFinalAddOns(selectedAddOns);
-
-        // Add user add-ons
-        userAddOns.forEach((addOn) => {
-          finalAddOns?.push(addOn);
-        });
-
-        // Show success message
         setOpenSucc(true);
-
-        await api.put(
-          `orders/current-user/${suborderId}/manage-add-ons`,
-          finalAddOns
-        );
       } catch (error) {
         console.error("There was an error adding the order:", error);
         setOpenFail(true);
@@ -761,6 +747,7 @@ const ViewDesign = () => {
                         fullWidth
                         startIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
                         disabled={isSubmitting}
+                        sx={{ color: colors.background }}
                       >
                         {!isSubmitting ? (
                           "Buy Now"

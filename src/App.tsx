@@ -7,11 +7,12 @@ import ManagementAppBar from "./scenes/management/global/ManagementAppBar.jsx";
 import Login from "./scenes/login";
 import Register from "./scenes/register";
 import Shop from "./scenes/shop";
-import Design from "./scenes/view-design/index.jsn";
+import Design from "./scenes/view-design";
 import Custom from "./scenes/custom";
 // import About from "./scenes/about/index";
 import Results from "./scenes/results";
 import Cart from "./scenes/cart";
+//import MyOrders from "./scenes/my-orders";
 // import Purchases from "./scenes/purchases";
 // import Forbidden from "./scenes/forbidden";
 // import NotFound from "./scenes/not-found";
@@ -73,9 +74,10 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/view-design" element={<Design />} />
             <Route path="/custom" element={<Custom />} />
-            <Route path="/post-payment" element={<PostPayment />} />
-            <Route path="/results" element={<Results />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/post-payment" element={<PostPayment />} />
+            {/* <Route path="/post-payment" element={<MyOrders />} /> */}
+            <Route path="/results" element={<Results />} />
             {
               //<Route path="/purchases" element={<Purchases />} />
             }

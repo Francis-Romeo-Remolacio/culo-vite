@@ -9,8 +9,8 @@ import {
   Paper,
   ListItemText,
   Box,
+  Grid,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
 import { Helmet } from "react-helmet-async";
 import DesignGallery from "./../../components/DesignGallery.jsx";
 
@@ -38,6 +38,9 @@ const Landing = () => {
         {/* Section 1: Hero */}
         <Stack alignItems="center" justifyContent="center" minHeight={400}>
           <Typography variant="h1" gutterBottom>
+            The Pink Butter Cake Studio
+          </Typography>
+          <Typography variant="h3" gutterBottom>
             Delicious Artistry in Every Bite
           </Typography>
           <Typography variant="h5" color="textSecondary" gutterBottom>
@@ -56,7 +59,7 @@ const Landing = () => {
         <Grid container spacing={2}>
           <Grid xs={12} md={6} lg={4}>
             {/* Section 2: About */}
-            <Paper sx={{ p: 2 }}>
+            <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 About The Pink Butter Cake Studio?
               </Typography>
@@ -72,7 +75,7 @@ const Landing = () => {
           </Grid>
           <Grid xs={12} md={6} lg={4}>
             {/* Section 3: Premade Designs */}
-            <Paper sx={{ p: 2 }}>
+            <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 Browse Our Premade Cake Designs
               </Typography>
@@ -95,7 +98,7 @@ const Landing = () => {
 
           {/* Section 5: Testimonials */}
           <Grid xs={12} md={6} lg={4}>
-            <Paper sx={{ p: 2 }}>
+            <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 What Our Customers Say
               </Typography>
@@ -135,7 +138,7 @@ const Landing = () => {
           </Grid>
           <Grid xs={12} md={6} lg={4}>
             {/* Section 6: Contact  */}
-            <Paper sx={{ p: 2 }}>
+            <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 Get in Touch
               </Typography>

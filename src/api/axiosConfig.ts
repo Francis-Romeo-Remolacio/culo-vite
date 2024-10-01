@@ -45,7 +45,9 @@ api.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs, Bearer ${token}`;
+    } else {
+      config.headers.Authorization = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
     }
     return config;
   },
