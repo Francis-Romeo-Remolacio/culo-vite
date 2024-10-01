@@ -92,6 +92,9 @@ const MessageRight: React.FC<MessageProps> = ({ message }) => {
 };
 
 const FabChat: React.FC = () => {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
@@ -192,6 +195,7 @@ const FabChat: React.FC = () => {
             onClick={handleClick}
             sx={{
               position: "sticky",
+              backgroundColor: colors.analogous1[300],
               bottom: 16,
               right: 16,
             }}
