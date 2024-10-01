@@ -31,10 +31,10 @@ import {
 } from "@mui/material";
 import api from "../../api/axiosConfig.js";
 import { Helmet } from "react-helmet-async";
-import TagChip from "../../components/TagChip.jsx";
+import TagChip from "../../components/TagChip.js";
 import Cookies from "js-cookie";
 import { useFormik } from "formik";
-import { cartSchema } from "./../../utils/Validation.ts";
+import { cartSchema } from "../../utils/Validation.ts";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { Add } from "@mui/icons-material";

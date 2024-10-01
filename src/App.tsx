@@ -7,7 +7,7 @@ import ManagementAppBar from "./scenes/management/global/ManagementAppBar.jsx";
 import Login from "./scenes/login";
 import Register from "./scenes/register";
 import Shop from "./scenes/shop";
-import Design from "./scenes/viewdesign";
+import Design from "./scenes/view-design/index.jsn";
 import Custom from "./scenes/custom";
 // import About from "./scenes/about/index";
 import Results from "./scenes/results";
