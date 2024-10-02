@@ -137,19 +137,20 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   useEffect(() => {
     const checkLogin = () => {
       try {
-        if (token?.length) {
-          // Token exists, check user role
-          const currentUserStored = localStorage.getItem("currentUser");
+        if (!token) return; // If there's no token, no need to proceed further.
 
-          if (currentUserStored) {
-            const currentUser = JSON.parse(
-              decodeURIComponent(currentUserStored)
-            );
-            if (currentUser.roles && currentUser.roles.length > 0) {
-              setLoggedIn(true);
-              fetchNotifs();
-              fetchCart();
-            }
+        const currentUserStored = localStorage.getItem("currentUser");
+        if (currentUserStored) {
+          const currentUser = JSON.parse(decodeURIComponent(currentUserStored));
+
+          // Check if roles are defined and non-empty
+          if (
+            Array.isArray(currentUser.roles) &&
+            currentUser.roles.length > 0
+          ) {
+            setLoggedIn(true);
+            fetchNotifs();
+            fetchCart();
           }
         }
       } catch (error) {
@@ -158,7 +159,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     };
 
     checkLogin();
-  }, []);
+  }, [token]);
 
   const readNotif = async (id: string) => {
     try {
