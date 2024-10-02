@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { ChangeEvent, SetStateAction, useState } from "react";
 import {
   Button,
   Dialog,
@@ -8,19 +8,25 @@ import {
   DialogTitle,
   TextField,
   Typography,
-  useTheme,
 } from "@mui/material";
-import { Tokens } from "../../../theme";
 import api from "../../../api/axiosConfig";
 
-const BulkAddDialog = ({ open, handleClose, handleSubmit }) => {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
+type BulkAddDialogProps = {
+  open: boolean;
+  setOpenBulkAddModal: (value: SetStateAction<boolean>) => void;
+  handleSubmit: (data: any) => Promise<void>;
+};
+
+const BulkAddDialog = ({
+  open,
+  setOpenBulkAddModal,
+  handleSubmit,
+}: BulkAddDialogProps) => {
   const [formData, setFormData] = useState("");
   const [progress, setProgress] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData(event.target.value);
   };
 
@@ -40,13 +46,13 @@ const BulkAddDialog = ({ open, handleClose, handleSubmit }) => {
 
     setLoading(false);
     setProgress("");
-    handleSubmit();
-    handleClose();
+    handleSubmit(formData);
+    setOpenBulkAddModal(false);
     setFormData("");
   };
 
   const handleCancel = () => {
-    handleClose();
+    setOpenBulkAddModal(false);
     setFormData("");
   };
 

@@ -1,16 +1,28 @@
 // src/utils/Schemas.ts
 
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import * as TimePeriods from "./TimePeriods";
 
 export interface User {
-  id: string | null;
-  email: string | null;
-  username: string | null;
+  id: string;
+  email: string;
+  username: string;
   roles: string[];
-  phoneNumber: number | null;
+  phoneNumber?: number;
   isEmailConfirmed: boolean;
-  joinDate: Date;
+  joinDate: Dayjs;
+}
+
+export interface Employee {
+  id: string;
+  userId: string;
+  employed: Dayjs;
+}
+
+export interface Customer {
+  id: string;
+  userId: string;
+  timesOrdered: number;
 }
 
 export interface Ingredient {
@@ -28,6 +40,12 @@ export interface AddOn {
   name: string;
   price: number;
   size?: string;
+}
+
+export interface ManagementAddOn {
+  measurement: string;
+  created: Dayjs;
+  lastModified: Dayjs;
 }
 
 export interface VariantAddOn extends AddOn {
@@ -69,6 +87,18 @@ export interface DesignVariant {
   addOns: VariantAddOn[];
 }
 
+export interface PastryMaterial {
+  pastryMaterialId: string;
+  designId: string;
+  designName: string;
+  dateAdded: string;
+  lastModifiedDate: string;
+  costEstimate: number;
+  ingredients: Array<{ itemName: string }>;
+  subVariants: Array<{ subVariantName: string }>;
+  mainVariantName: string;
+}
+
 export interface Order {
   id: string;
   type: "normal" | "rush";
@@ -86,10 +116,24 @@ export interface Suborder {
   id: string;
   orderId?: string;
   designId: string;
-  variantId: string;
+  pastryId: string;
+  description: string;
   size: string;
+  color: string;
   flavor: string;
   quantity: number;
+}
+
+export interface ManagementSuborder extends Required<Suborder> {
+  customerId: string;
+  employeeId: string;
+  employeeName: string;
+  customerName: string;
+  pastryId: string;
+  created: Date;
+  lastModified: Date;
+  lastModifiedBy: string;
+  isActive: boolean;
 }
 
 export interface Notification {

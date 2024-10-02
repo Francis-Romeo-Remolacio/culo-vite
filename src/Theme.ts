@@ -181,9 +181,6 @@ export const Tokens = (mode: PaletteMode) => ({
 });
 
 // mui theme settings
-type ThemeSettingsProps = {
-  mode: PaletteMode;
-};
 export const ThemeSettings = (mode: PaletteMode) => {
   const colors = Tokens(mode);
   return {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, SetStateAction, ChangeEvent } from "react";
 import {
   useTheme,
   Box,
@@ -14,7 +14,6 @@ import {
   FormControl,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { Tokens } from "../../../theme";
 
 const style = {
   position: "absolute",
@@ -28,22 +27,34 @@ const style = {
   p: 4,
 };
 
-const UpdateTagModal = ({ open, handleClose, handleSubmit, tag_id }) => {
+type ManualAddDialogProps = {
+  open: boolean;
+  setOpenEditModal: (value: SetStateAction<boolean>) => void;
+  handleSubmit: (data: any) => Promise<void>;
+  tagId: string;
+};
+
+const UpdateTagModal = ({
+  open,
+  setOpenEditModal,
+  handleSubmit,
+  tagId,
+}: ManualAddDialogProps) => {
   const [formData, setFormData] = useState({
     designTagId: "",
     designTagName: "",
   });
   const [error, setError] = useState(null);
 
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
-
   useEffect(() => {
     fetchDesignTagInfo();
   }, [open]);
 
-  const handleChange = async (e, index = null) => {
-    const { name, value } = e.target;
+  const handleChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+    index = null
+  ) => {
+    const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -51,9 +62,9 @@ const UpdateTagModal = ({ open, handleClose, handleSubmit, tag_id }) => {
   };
   const fetchDesignTagInfo = async () => {
     try {
-      const response = await api.get(`/tags/${tag_id}`);
+      const response = await api.get(`/tags/${tagId}`);
       setFormData({
-        designTagId: tag_id,
+        designTagId: tagId,
         designTagName: response.data.designTagName,
       });
     } catch {
@@ -62,19 +73,19 @@ const UpdateTagModal = ({ open, handleClose, handleSubmit, tag_id }) => {
   };
   const handleUpdateButtonClick = () => {
     handleSubmit(formData);
-    handleClose();
+    setOpenEditModal(false);
   };
 
   return (
     <Modal
       open={open}
-      onClose={handleClose}
+      onClose={setOpenEditModal}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={style} color={colors.text}>
+      <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          Update Tag {formData.designId}
+          Update Tag {formData.designTagId}
         </Typography>
         <Box component="form" mt={2} id="form_box_container">
           <TextField
@@ -84,11 +95,17 @@ const UpdateTagModal = ({ open, handleClose, handleSubmit, tag_id }) => {
             label="Design Tag Name"
             name="designTagName"
             value={formData.designTagName}
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
 
           <Box mt={2} display="flex" justifyContent="flex-end">
-            <Button onClick={handleClose} color="secondary" sx={{ mr: 2 }}>
+            <Button
+              onClick={() => {
+                setOpenEditModal;
+              }}
+              color="secondary"
+              sx={{ mr: 2 }}
+            >
               Cancel
             </Button>
             <Button

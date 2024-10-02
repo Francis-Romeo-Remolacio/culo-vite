@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { ChangeEvent, SetStateAction, useState } from "react";
 import {
   Button,
   Dialog,
@@ -7,27 +7,31 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-  useTheme,
 } from "@mui/material";
-import { Tokens } from "../../../theme";
 
-const ManualAddDialog = ({ open, handleClose, handleSubmit }) => {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
+type ManualAddDialogProps = {
+  open: boolean;
+  setOpenAddModal: (value: SetStateAction<boolean>) => void;
+  handleSubmit: (data: any) => Promise<void>;
+};
+
+const ManualAddDialog = ({
+  open,
+  setOpenAddModal,
+  handleSubmit,
+}: ManualAddDialogProps) => {
   const [formData, setFormData] = useState({
     designTagName: "",
   });
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleCreate = async () => {};
-
   const handleCancel = () => {
     // Close the dialog and clear the text field
-    handleClose();
+    setOpenAddModal(false);
     setFormData({ designTagName: "" });
   };
 
@@ -61,7 +65,7 @@ const ManualAddDialog = ({ open, handleClose, handleSubmit }) => {
             color="primary"
             onClick={() => {
               handleSubmit(formData);
-              handleClose();
+              setOpenAddModal(false);
               setFormData({ designTagName: "" });
             }}
           >

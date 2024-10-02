@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import {
-  GridRowModes,
   DataGrid,
   GridToolbar,
-  GridToolbarContainer,
   GridActionsCellItem,
-  GridRowEditStopReasons,
+  GridColDef,
 } from "@mui/x-data-grid";
-import { Tokens } from "../../../theme";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import EditIcon from "@mui/icons-material/Edit";
@@ -17,13 +14,10 @@ import ManualAddDialog from "./ManualAddDialog";
 import UpdateTagModal from "./updateModal";
 import BulkAddDialog from "./BulkAddDialog";
 import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import { Tag } from "../../../utils/Schemas.js";
 
 const Tags = () => {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
-
   const [rows, setRows] = useState([]);
-  const [rowModesModel, setRowModesModel] = useState({});
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openBulkAddModal, setOpenBulkAddModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -31,8 +25,13 @@ const Tags = () => {
 
   const fetchData = async () => {
     try {
-      const response = await api.get("/tags");
-      setRows(response.data);
+      await api.get("/tags").then((response) => {
+        const parsedTags: Tag[] = response.data.map((tag: any) => ({
+          id: tag.designTagId,
+          name: tag.designTagName,
+        }));
+        setRows(parsedTags as any);
+      });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -50,7 +49,7 @@ const Tags = () => {
     setOpenBulkAddModal(true);
   };
 
-  const handleAddTagModalSubmit = async (data) => {
+  const handleAddTagModalSubmit = async (data: any) => {
     try {
       await api.post("/tags", {
         designTagName: data.designTagName,
@@ -65,10 +64,10 @@ const Tags = () => {
     fetchData();
   };
 
-  const handleUpdateTagSubmit = async (data) => {
+  const handleUpdateTagSubmit = async (data: any) => {
     try {
       await api.patch(`/tags/${data.designTagId}`, {
-        designTagName: data.designTagName, // Assuming the name field is updated
+        designTagName: data.designTagName,
       });
     } catch {
       console.error("Error updating record:");
@@ -76,12 +75,12 @@ const Tags = () => {
     await fetchData();
   };
 
-  const handleEditClick = (id) => async () => {
+  const handleEditClick = (id: string) => async () => {
     setCurrentTagSelected(id);
     setOpenEditModal(true);
   };
 
-  const handleDeleteClick = async (id) => {
+  const handleDeleteClick = async (id: string) => {
     try {
       await api.delete(`/tags/${id}`);
     } catch {
@@ -90,33 +89,31 @@ const Tags = () => {
     await fetchData();
   };
 
-  const columns = [
-    { field: "designTagId", headerName: "ID", width: 180 },
-    { field: "designTagName", headerName: "Name", flex: 1, editable: true },
+  const columns: GridColDef[] = [
     {
-      field: "actions",
+      field: "action",
       type: "actions",
-      headerName: "Actions",
       width: 100,
-      cellClassName: "actions",
-      getActions: ({ id }) => {
+      renderCell: (params: any) => {
         return [
           <GridActionsCellItem
             icon={<EditIcon />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(params.row.id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            onClick={() => handleDeleteClick(id)}
+            onClick={() => handleDeleteClick(params.row.id)}
             color="inherit"
           />,
         ];
       },
     },
+    { field: "id", headerName: "ID", width: 180 },
+    { field: "name", headerName: "Name", flex: 1, editable: true },
   ];
 
   return (
@@ -124,18 +121,20 @@ const Tags = () => {
       <Header title="Tags" subtitle="Tags for categorizing designs" />
       <Stack direction="row" spacing={2}>
         <Button
-          onClick={handleAddTagButtonClick}
+          onClick={() => {
+            handleAddTagButtonClick;
+          }}
           variant="contained"
           color="primary"
-          mb={2}
         >
           Add new tag
         </Button>
         <Button
-          onClick={handleBulkAddTagButtonClick}
+          onClick={() => {
+            handleBulkAddTagButtonClick;
+          }}
           variant="contained"
           color="secondary"
-          mb={2}
         >
           Bulk add tags
         </Button>
@@ -144,27 +143,36 @@ const Tags = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          getRowId={(row) => row.designTagId}
-          editMode="row"
-          rowModesModel={rowModesModel}
-          components={{ Toolbar: GridToolbar }}
+          slots={{ toolbar: GridToolbar }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [{ field: "isActive", operator: "is", value: true }],
+              },
+            },
+          }}
         />
       </DataGridStyler>
       <ManualAddDialog
         open={openAddModal}
-        handleClose={() => setOpenAddModal(false)}
+        setOpenAddModal={() => setOpenAddModal(false)}
         handleSubmit={handleAddTagModalSubmit}
       />
       <BulkAddDialog
         open={openBulkAddModal}
-        handleClose={() => setOpenBulkAddModal(false)}
+        setOpenBulkAddModal={() => setOpenBulkAddModal(false)}
         handleSubmit={handleBulkAddTagModalSubmit}
       />
       <UpdateTagModal
         open={openEditModal}
-        handleClose={() => setOpenEditModal(false)}
+        setOpenEditModal={() => setOpenEditModal(false)}
         handleSubmit={handleUpdateTagSubmit}
-        tag_id={currentTagSelected}
+        tagId={currentTagSelected}
       />
     </Box>
   );

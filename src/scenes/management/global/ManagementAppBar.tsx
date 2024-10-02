@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
@@ -36,6 +35,12 @@ import {
   SettingsOutlined as SettingsOutlinedIcon,
   PersonOutlined as PersonOutlinedIcon,
 } from '@mui/icons-material';
+import { Badge, Paper, Popper } from '@mui/material';
+import { MouseEvent, useContext, useEffect, useState } from 'react';
+import Cookies from "js-cookie";
+import api from '../../../api/axiosConfig';
+import { Notification } from '../../../utils/Schemas';
+import CheckIcon from '@mui/icons-material/Check';
 
 const drawerWidth = 240;
 
@@ -120,7 +125,6 @@ const iconMapping = {
   tags: LabelIcon,
   users: PeopleIcon,
   sales: AttachMoneyIcon,
-  notification: LabelIcon,
   'faq-page': HelpOutlineIcon,
   default: HelpOutlineIcon,
 };
@@ -159,15 +163,76 @@ const SidebarItemHome = ({ text, open }:SidebarItemProps ) => {
 export default function ManagementAppBar({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
-  const colorMode = React.useContext(ColorModeContext);
+  const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
   const handleProfileClick = () => navigate('/profile');
 
+  // Notification Popper
+  const [notifAnchorEl, setNotifAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const token = Cookies.get("token");
+
+  const fetchNotifs = async () => {
+    try {
+      const response = await api.get("current-user/notifications");
+      setNotifications(response.data);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  useEffect(() => {
+    const checkLogin = () => {
+      try {
+        if (token?.length) {
+          // Token exists, check user role
+          const currentUserStored = localStorage.getItem("currentUser");
+
+          if (currentUserStored) {
+            const currentUser = JSON.parse(
+              decodeURIComponent(currentUserStored)
+            );
+            if (currentUser.roles && currentUser.roles.length > 0) {
+              setLoggedIn(true);
+              fetchNotifs();
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+      }
+    };
+
+    checkLogin();
+  }, []);
+  
+  const readNotif = async (id: string) => {
+    try {
+      const response = await api.post(
+        `current-user/notifications/${id}/mark-as-read`
+      );
+      fetchNotifs();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setNotifAnchorEl(event.currentTarget);
+    setNotifOpen((prev) => !prev);
+  };
+
   return (
+    <>
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open} enableColorOnDark>
@@ -182,12 +247,18 @@ export default function ManagementAppBar({ children }: { children: React.ReactNo
             <IconButton onClick={colorMode.toggleColorMode} style={{ backgroundColor: colors.panel }}>
               {theme.palette.mode === 'dark' ? <DarkModeOutlinedIcon /> : <LightModeOutlinedIcon />}
             </IconButton>
-            <IconButton style={{ backgroundColor: colors.panel }}>
-              <NotificationsOutlinedIcon />
-            </IconButton>
-            <IconButton style={{ backgroundColor: colors.panel }}>
-              <SettingsOutlinedIcon />
-            </IconButton>
+                  <IconButton
+                    onClick={handleClick}
+                    color="inherit"
+                    style={{ backgroundColor: colors.panel }}
+                  >
+                    <Badge
+                      badgeContent={notifications.length}
+                      color="default"
+                    >
+                      <NotificationsOutlinedIcon  />
+                    </Badge>
+                  </IconButton>
             <IconButton onClick={handleProfileClick} style={{ backgroundColor: colors.panel }}>
               <PersonOutlinedIcon />
             </IconButton>
@@ -218,15 +289,8 @@ export default function ManagementAppBar({ children }: { children: React.ReactNo
             "Tags",
             "Users",
             "Sales",
-            "Notification",
             "FAQ Page",
           ].map((text, index) => (
-            <SidebarItem key={text} text={text} open={open} />
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {["Users", "FAQ Page"].map((text, index) => (
             <SidebarItem key={text} text={text} open={open} />
           ))}
         </List>
@@ -236,5 +300,47 @@ export default function ManagementAppBar({ children }: { children: React.ReactNo
         {children}
       </Box>
     </Box>
+    <Popper
+        open={notifOpen}
+        anchorEl={notifAnchorEl}
+        placement="bottom"
+        sx={{ padding: 2 }}
+      >
+        <Paper sx={{ p: 2 }}>
+          <List
+            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+          >
+            {notifications.length > 0
+              ? notifications.map((notif: Notification) => {
+                  const labelId = `checkbox-list-label-${notif.id}`;
+                  return (
+                    <ListItem
+                      key={notif.id}
+                      secondaryAction={
+                        notif.isRead === false ? (
+                          <IconButton
+                            edge="end"
+                            aria-label="mark-as-read"
+                            onClick={() => readNotif(notif.id)}
+                          >
+                            <CheckIcon />
+                          </IconButton>
+                        ) : (
+                          <></>
+                        )
+                      }
+                      disablePadding
+                    >
+                      <ListItemButton role={undefined}>
+                        <ListItemText id={labelId} primary={notif.message} />
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })
+              : "No notifications"}
+          </List>
+        </Paper>
+      </Popper>
+      </>
   );
 }

@@ -27,7 +27,7 @@ import { ingredientSchema } from "../../../utils/Validation.js";
 import { Units } from "../../../utils/Schemas.js";
 import { Dayjs } from "dayjs";
 
-const Team = () => {
+const Inventory = () => {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState([]);
@@ -114,8 +114,7 @@ const Team = () => {
           good: ingredient.goodThreshold,
           bad: ingredient.criticalThreshold,
         }));
-        setRows(parsedIngredients);
-        console.log(parsedIngredients);
+        setRows(parsedIngredients as any);
       });
     } catch (error) {
       console.error("Error fetching ingredients:", error);
@@ -182,6 +181,36 @@ const Team = () => {
 
   const columns: GridColDef[] = [
     {
+      field: "action",
+      type: "actions",
+      minWidth: 100,
+      renderCell: (params: any) => (
+        <>
+          <IconButton
+            color="primary"
+            onClick={() => handleClickEdit(params.row)}
+          >
+            <Edit />
+          </IconButton>
+          {params.row.isActive ? (
+            <IconButton
+              color="error"
+              onClick={() => handleClickDelete(params.row.id)}
+            >
+              <Delete />
+            </IconButton>
+          ) : (
+            <IconButton
+              color="success"
+              onClick={() => handleClickRestore(params.row.id)}
+            >
+              <Restore />
+            </IconButton>
+          )}
+        </>
+      ),
+    },
+    {
       field: "id",
       headerName: "ID",
       cellClassName: "name-column--cell",
@@ -247,36 +276,6 @@ const Team = () => {
       field: "isActive",
       headerName: "Active",
       type: "boolean",
-    },
-    {
-      field: "action",
-      type: "actions",
-      minWidth: 250,
-      renderCell: (params: any) => (
-        <>
-          <IconButton
-            color="primary"
-            onClick={() => handleClickEdit(params.row)}
-          >
-            <Edit />
-          </IconButton>
-          {params.row.isActive ? (
-            <IconButton
-              color="error"
-              onClick={() => handleClickDelete(params.row.id)}
-            >
-              <Delete />
-            </IconButton>
-          ) : (
-            <IconButton
-              color="success"
-              onClick={() => handleClickRestore(params.row.id)}
-            >
-              <Restore />
-            </IconButton>
-          )}
-        </>
-      ),
     },
   ];
 
@@ -459,4 +458,4 @@ const Team = () => {
   );
 };
 
-export default Team;
+export default Inventory;

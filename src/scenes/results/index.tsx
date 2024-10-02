@@ -1,40 +1,84 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { useTheme } from "@emotion/react";
-import { Tokens } from "../../theme";
+import { useEffect, useState } from "react";
+import { Box, Typography, useTheme } from "@mui/material";
+import { Tokens } from "../../Theme";
 import api from "../../api/axiosConfig.js";
 import DesignCard from "../../components/DesignCard";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Design } from "../../utils/Schemas.js";
 
 const Results = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
-  const [designs, setDesigns] = useState([]);
+  const [designs, setDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
   const location = useLocation();
 
   useEffect(() => {
     const fetchDesigns = async () => {
       const queryParams = new URLSearchParams(location.search);
+      const searchQuery = queryParams.get("search-query");
       const tagId = queryParams.get("tag-id");
 
-      try {
-        const response = await api.get(
-          tagId ? `/designs/with-tags/${tagId}` : "/designs"
-        );
-        setDesigns(response.data);
-        if (response.data.length === 0) {
-          setError("No designs available for this tag.");
-        } else {
-          setError(null);
+      if (searchQuery) {
+        try {
+          await api
+            .get(
+              `designs/search/by-name/name=${encodeURIComponent(searchQuery)}`
+            )
+            .then((response) => {
+              const parsedDesigns: Design[] = response.data.map(
+                (design: any) => ({
+                  id: design.designId,
+                  name: design.displayName,
+                  description: design.cakeDescription,
+                  pictureUrl: design.designPictureUrl,
+                  pictureData: design.displayPictureData,
+                  tags: design.designTags.map((tag: any) => ({
+                    id: tag.designTagId,
+                    name: tag.designTagName,
+                  })),
+                  shapes: design.designShapes.map((shape: any) => ({
+                    id: shape.designShapeId,
+                    name: shape.shapeName,
+                  })),
+                })
+              );
+              setDesigns(parsedDesigns);
+            });
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error("Error fetching designs:", error);
-        setError("The tag does not exist.");
-      } finally {
-        setIsLoading(false);
+      } else {
+        try {
+          await api
+            .get(tagId ? `/designs/with-tags/${tagId}` : "/designs")
+            .then((response) => {
+              const parsedDesigns: Design[] = response.data.map(
+                (design: any) => ({
+                  id: design.designId,
+                  name: design.displayName,
+                  description: design.cakeDescription,
+                  pictureUrl: design.designPictureUrl,
+                  pictureData: design.displayPictureData,
+                  tags: design.designTags.map((tag: any) => ({
+                    id: tag.designTagId,
+                    name: tag.designTagName,
+                  })),
+                  shapes: design.designShapes.map((shape: any) => ({
+                    id: shape.designShapeId,
+                    name: shape.shapeName,
+                  })),
+                })
+              );
+              setDesigns(parsedDesigns);
+            });
+        } catch (error) {
+          console.error("Error fetching designs:", error);
+          setError("The tag does not exist.");
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -72,14 +116,7 @@ const Results = () => {
           }}
         >
           {designs.map((design) => (
-            <DesignCard
-              key={design.designId}
-              id={design.designId}
-              name={design.displayName}
-              picture={design.displayPictureData}
-              description={design.cakeDescription}
-              tags={design.designTags}
-            />
+            <DesignCard key={design.id} design={design} />
           ))}
         </Box>
       )}
