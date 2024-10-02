@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Container, Typography, Grid2 as Grid } from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.tsx";
 import { Design } from "../utils/Schemas.js";
