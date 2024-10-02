@@ -25,7 +25,7 @@ const Landing = () => {
           position: "absolute",
           top: 0,
           zIndex: -1,
-          opacity: 0.3,
+          opacity: 0.5,
           background: `url(/src/assets/banner.png) center/cover no-repeat`,
         }}
       />
