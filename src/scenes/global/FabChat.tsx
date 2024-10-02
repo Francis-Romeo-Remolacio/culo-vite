@@ -33,65 +33,94 @@ import {
 } from "@microsoft/signalr";
 import Cookies from "js-cookie";
 import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
-
-// Message interface from the schema
-export interface Message {
-  text: string;
-  sender: string;
-  sender_message_time_sent: Date;
-}
-
-// Props for MessageLeft and MessageRight
-interface MessageProps {
-  message: Message;
-}
+import { DirectMessage, User } from "../../utils/Schemas";
 
 class CustomHttpClient extends DefaultHttpClient {
   private token: string;
+  private bearer: string | null;
 
-  constructor(logger: ILogger, token: string) {
+  constructor(logger: ILogger, token: string, bearer: string | null = null) {
     super(logger);
     this.token = token;
+    this.bearer = bearer;
   }
 
   public send(request: HttpRequest): Promise<HttpResponse> {
+    const baseAuth = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
+    let authHeader = baseAuth;
+
+    if (this.bearer) {
+      authHeader += `, Bearer ${this.bearer}`;
+    }
+
     request.headers = {
       ...request.headers,
-      Authorization: `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs${this.token}`,
+      Authorization: authHeader,
     };
+
     return super.send(request);
   }
 }
 
-const MessageLeft: React.FC<MessageProps> = ({ message }) => {
+type MessageProps = {
+  directMessage: DirectMessage;
+};
+
+const MessageLeft = ({ directMessage }: MessageProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
   return (
     <Stack direction="row" mt={2}>
-      <Avatar>{message.sender.match(/\b\w/g)?.join("")}</Avatar>
-      <Container sx={{ backgroundColor: colors.panel, borderRadius: 2 }}>
-        {message.text}
+      <Avatar>{directMessage.sender.match(/\b\w/g)?.join("")}</Avatar>
+      <Container
+        sx={{
+          backgroundColor: colors.panel,
+          borderRadius: 2,
+          p: 1,
+          whiteSpace: "pre-wrap",
+          wordWrap: "break-word",
+          maxWidth: "70%",
+        }}
+      >
+        <Box fontSize="smaller" color="grey.600">
+          {directMessage.sender} -{" "}
+          {directMessage.timestamp.toLocaleTimeString()}
+        </Box>
+        {directMessage.message}
       </Container>
     </Stack>
   );
 };
 
-const MessageRight: React.FC<MessageProps> = ({ message }) => {
+const MessageRight = ({ directMessage }: MessageProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
   return (
     <Stack direction="row" mt={2}>
-      <Container sx={{ backgroundColor: colors.primary[400], borderRadius: 2 }}>
-        {message.text}
+      <Container
+        sx={{
+          backgroundColor: colors.panel,
+          borderRadius: 2,
+          p: 1,
+          whiteSpace: "pre-wrap",
+          wordWrap: "break-word",
+          maxWidth: "70%",
+        }}
+      >
+        <Box fontSize="smaller" color="grey.600">
+          {directMessage.sender} -{" "}
+          {directMessage.timestamp.toLocaleTimeString()}
+        </Box>
+        {directMessage.message}
       </Container>
-      <Avatar>{message.sender.match(/\b\w/g)?.join("")}</Avatar>
+      <Avatar>{directMessage.sender.match(/\b\w/g)?.join("")}</Avatar>
     </Stack>
   );
 };
 
-const FabChat: React.FC = () => {
+const FabChat = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
@@ -99,11 +128,9 @@ const FabChat: React.FC = () => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
   );
-  const [message, setMessage] = useState<string>("");
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<
-    { account_id: string; name: string; role: string }[]
-  >([]);
+  const [message, setMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<DirectMessage[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [bearerToken, setBearerToken] = useState<string>("");
 
@@ -116,71 +143,110 @@ const FabChat: React.FC = () => {
 
   // Start the SignalR connection
   useEffect(() => {
-    try {
-      const cookieToken = Cookies.get("token");
-      if (cookieToken) {
-        setBearerToken(`, Bearer ${cookieToken}`);
+    let isMounted = true;
+
+    const initializeConnection = async () => {
+      try {
+        const cookieToken = Cookies.get("token");
+        if (cookieToken) {
+          setBearerToken(`Bearer ${cookieToken}`);
+        }
+
+        const newConnection = new HubConnectionBuilder()
+          .withUrl("http://localhost:5155/live-chat/", {
+            httpClient: new CustomHttpClient(
+              new ConsoleLogger(LogLevel.Information),
+              "MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs",
+              cookieToken
+            ),
+          })
+          .withAutomaticReconnect()
+          .build();
+
+        if (isMounted) {
+          setConnection(newConnection);
+
+          newConnection
+            .start()
+            .then(() => {
+              console.log("Connected to SignalR!");
+
+              // Handle receiving messages
+              newConnection.on("RecieveMessage", (parsed_message) => {
+                const formattedMessage = {
+                  sender: parsed_message.senderName || "Unknown",
+                  message: `${parsed_message.senderMessage}\n${new Date(
+                    parsed_message.senderMessageTimeSent
+                  ).toLocaleString()}`,
+                  timestamp: new Date(parsed_message.senderMessageTimeSent),
+                };
+                setChatMessages((prevMessages) => [
+                  ...prevMessages,
+                  formattedMessage,
+                ]);
+              });
+            })
+            .catch((err) => console.error("SignalR Connection Error: ", err));
+        }
+      } catch (error) {
+        console.error("Error initializing connection:", error);
       }
+    };
 
-      const newConnection = new HubConnectionBuilder()
-        .withUrl("http://localhost:5155/live-chat/", {
-          httpClient: new CustomHttpClient(
-            new ConsoleLogger(LogLevel.Information),
-            bearerToken
-          ),
-        })
-        .build();
+    initializeConnection();
 
-      setConnection(newConnection);
+    return () => {
+      isMounted = false;
+      if (connection) connection.stop();
+    };
+  }, []);
 
-      if (newConnection) {
-        newConnection.start().then(() => {
-          console.log("Connected to SignalR!");
-          newConnection.on("RecieveMessage", (parsed_message: Message) => {
-            setChatMessages((prevMessages) => [
-              ...prevMessages,
-              {
-                sender: parsed_message.sender,
-                text: `${parsed_message.text}\n${parsed_message.sender_message_time_sent}`,
-                sender_message_time_sent: new Date(
-                  parsed_message.sender_message_time_sent
-                ),
-              },
-            ]);
-          });
-        });
-      }
-    } catch (error) {
-      console.error(error);
+  // Error Handling and Connection Management
+  useEffect(() => {
+    if (connection) {
+      connection
+        .start()
+        .then(() => console.log("Connected"))
+        .catch((err) => console.error("Failed to connect", err));
     }
-  }, [bearerToken]);
+  }, [connection]);
 
   // Fetch online users
-  const refreshConnections = () => {
-    fetch("http://localhost:5155/culo-api/v1/ui-helpers/live-chat/online-users")
-      .then((response) => response.json())
-      .then((jsonArray) => {
-        setOnlineUsers(jsonArray);
-      });
-  };
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      fetch(
+        "http://localhost:5155/culo-api/v1/ui-helpers/live-chat/online-users"
+      )
+        .then((response) => response.json())
+        .then((jsonArray) => {
+          setOnlineUsers(jsonArray);
+        });
+    }, 10000); // Refresh every 10 seconds
+
+    return () => clearInterval(refreshInterval);
+  }, []);
 
   // Send message as a customer or admin
-  const sendMessage = (role: "admin" | "customer") => {
-    if (connection) {
-      const sendMethod =
-        role === "admin" ? "admin-send-message" : "customer-send-message";
-      connection.invoke(sendMethod, message, selectedUser).then(() => {
+  const sendMessage = (role: string) => {
+    if (!connection || !message.trim()) return;
+
+    const sendMethod =
+      role === "admin" ? "admin-send-message" : "customer-send-message";
+
+    connection
+      .invoke(sendMethod, message.trim(), selectedUser)
+      .then(() => {
         setChatMessages((prevMessages) => [
           ...prevMessages,
           {
             sender: role === "admin" ? "Admin" : "Customer",
-            text: message,
-            sender_message_time_sent: new Date(),
+            message: message,
+            timestamp: new Date(),
           },
         ]);
         setMessage("");
-      });
-    }
+      })
+      .catch((err) => console.error(`Error sending ${role} message:`, err));
   };
 
   return (
@@ -229,18 +295,17 @@ const FabChat: React.FC = () => {
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
                   {onlineUsers.map((user) => (
-                    <MenuItem key={user.account_id} value={user.account_id}>
-                      {user.name} ({user.role})
+                    <MenuItem key={user.id} value={user.id}>
+                      {`${user.username} (${user.roles[0]})`}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              <Button onClick={refreshConnections}>Refresh Connections</Button>
               {chatMessages.map((msg, index) =>
                 msg.sender === "Admin" ? (
-                  <MessageRight key={index} message={msg} />
+                  <MessageRight key={index} directMessage={msg} />
                 ) : (
-                  <MessageLeft key={index} message={msg} />
+                  <MessageLeft key={index} directMessage={msg} />
                 )
               )}
             </Box>

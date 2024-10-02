@@ -100,8 +100,8 @@ export interface PastryMaterial {
   mainVariantName: string;
 }
 export interface OtherCost {
-  pastryMaterialAdditionalCostId: string,
-  additionalCost: number
+  pastryMaterialAdditionalCostId: string;
+  additionalCost: number;
 }
 
 export interface Order {
@@ -149,16 +149,19 @@ export interface Notification {
   isRead: boolean;
 }
 
-export interface Message {
-  text: string;
-  sender: string;
-  sender_message_time_sent: Date;
-}
-
 export interface Units {
   Mass: readonly string[];
   Volume: readonly string[];
   Count: readonly string[];
+}
+
+// Live Chat
+export interface DirectMessage {
+  id?: string;
+  sender: string;
+  receiver?: string;
+  timestamp: Date;
+  message: string;
 }
 
 // Data Analysis
@@ -242,13 +245,13 @@ export interface PastryMaterialAddForm {
   subVariants: PastryMaterialAddFormSubVariants[];
 }
 export interface PastryMaterialAddFormOtherCost {
-  additionalCost : number
+  additionalCost: number;
 }
 export interface PastryMaterialAddFormIngredients {
   ingredientType: string;
   itemId: string;
   itemName: string;
-  amountMeasurement : string;
+  amountMeasurement: string;
   amount: number;
   forInsertion: string;
 }
@@ -259,8 +262,8 @@ export interface PastryMaterialAddFormAddOns {
   forInsertion: string;
 }
 export interface PastryMaterialAddFormSubVariants {
-  subVariantName? : string;
+  subVariantName?: string;
   forInsertion?: string;
   subVariantIngredients?: PastryMaterialAddFormIngredients[];
-  subVariantAddOns? : PastryMaterialAddFormAddOns[]
+  subVariantAddOns?: PastryMaterialAddFormAddOns[];
 }
