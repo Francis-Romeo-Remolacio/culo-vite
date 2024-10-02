@@ -6,123 +6,75 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Stack,
+  Autocomplete,
+  IconButton,
+  Typography,
+  CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Stack,
-  Chip,
-  IconButton,
-  Typography,
-  CircularProgress,
 } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridRowsProp,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { Edit, Delete, Restore } from "@mui/icons-material";
+import { useFormik } from "formik";
+import { managementOrderSchema } from "../../../utils/Validation.js"; // Define a schema for ManagementOrder validation
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.jsx";
-import { Edit, Delete, Restore } from "@mui/icons-material";
-import { useFormik } from "formik";
-import { suborderSchema } from "../../../utils/Validation.js";
 import { Dayjs } from "dayjs";
-import { ManagementSuborder } from "../../../utils/Schemas.js";
 
-const Orders = () => {
+const ManagementOrders = () => {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<ManagementSuborder[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Partial<ManagementSuborder>>(
-    {}
-  );
-  const [error, setError] = useState<string | null>(null);
+  const [rows, setRows] = useState([]);
+  const [selectedRow, setSelectedRow] = useState<any>({});
+  const [error, setError] = useState(null);
 
   const onSubmit = async () => {
     try {
       switch (mode) {
         case "add":
-          await api.post(`suborder`, values);
+          await api.post(`orders`, values);
           break;
         case "edit":
-          await api.patch(`suborder/${values.id}`, values);
+          await api.patch(`orders/${values.id}`, values);
           break;
       }
       setOpen(false);
       fetchData();
     } catch (error) {
-      console.error("Error while submitting suborder:", error);
+      console.error("Order error: ", error);
     }
   };
 
-  const {
-    values,
-    isSubmitting,
-    handleChange,
-    setValues,
-    setFieldValue,
-    resetForm,
-  } = useFormik({
-    initialValues: {
-      id: "",
-      description: "",
-      quantity: 1,
-      size: "",
-      flavor: "",
-      color: "",
-      designId: "",
-      pastryId: "",
-      customerId: "",
-      employeeId: "",
-      employeeName: "",
-      customerName: "",
-      created: new Date(),
-      lastModified: new Date(),
-      lastModifiedBy: "",
-      isActive: true,
-    },
-    validationSchema: suborderSchema,
-    onSubmit,
-  });
+  const { values, isSubmitting, handleChange, setValues, resetForm } =
+    useFormik({
+      initialValues: {
+        id: "",
+        customerId: "",
+        customerName: "",
+        type: "normal",
+        pickupDateTime: null,
+        payment: "full",
+      },
+      validationSchema: managementOrderSchema,
+      onSubmit,
+    });
+
+  const fetchData = async () => {
+    try {
+      const response = await api.get("management-orders");
+      setRows(response.data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  const fetchData = async () => {
-    try {
-      const response = await api.get("current-user/artist/to-do");
-      const suborderData = response.data.map((suborder: any) => ({
-        id: suborder.suborderId,
-        orderId: suborder.orderId,
-        designId: suborder.designId,
-        pastryId: suborder.pastryId,
-        description: suborder.description,
-        size: suborder.size,
-        color: suborder.color,
-        flavor: suborder.flavor,
-        quantity: suborder.quantity,
-        customerId: suborder.customerId,
-        customerName: suborder.customerName,
-        employeeId: suborder.employeeId,
-        employeeName: suborder.employeeName,
-        status: suborder.status,
-        designName: suborder.designName,
-        shape: suborder.shape,
-        tier: suborder.tier,
-        price: suborder.price,
-        isActive: suborder.isActive,
-        created: new Date(suborder.createdAt),
-        lastModified: new Date(suborder.lastUpdatedAt),
-        lastUpdatedBy: suborder.lastUpdatedBy,
-      }));
-      setRows(suborderData);
-    } catch (error) {
-      console.error("Error fetching suborders:", error);
-    }
-  };
 
   const handleAddNew = () => {
     resetForm();
@@ -130,7 +82,7 @@ const Orders = () => {
     setOpen(true);
   };
 
-  const handleClickEdit = (row: ManagementSuborder) => {
+  const handleClickEdit = (row: any) => {
     setSelectedRow(row);
     setValues(row);
     setOpen(true);
@@ -138,19 +90,10 @@ const Orders = () => {
 
   const handleClickDelete = async (id: string) => {
     try {
-      await api.delete(`suborders/${id}`);
+      await api.delete(`management-orders/${id}`);
       fetchData();
     } catch (error) {
-      console.error("Error deleting suborder:", error);
-    }
-  };
-
-  const handleClickRestore = async (id: string) => {
-    try {
-      await api.put("suborders", null, { params: { restore: id } });
-      fetchData();
-    } catch (error) {
-      console.error("Error reactivating suborder:", error);
+      console.error("Error deleting order:", error);
     }
   };
 
@@ -171,86 +114,99 @@ const Orders = () => {
           >
             <Edit />
           </IconButton>
-          {params.row.isActive ? (
-            <IconButton
-              color="error"
-              onClick={() => handleClickDelete(params.row.id)}
-            >
-              <Delete />
-            </IconButton>
-          ) : (
-            <IconButton
-              color="success"
-              onClick={() => handleClickRestore(params.row.id)}
-            >
-              <Restore />
-            </IconButton>
-          )}
+          <IconButton
+            color="error"
+            onClick={() => handleClickDelete(params.row.id)}
+          >
+            <Delete />
+          </IconButton>
         </>
       ),
     },
     { field: "id", headerName: "ID" },
-    { field: "description", headerName: "Description", minWidth: 200 },
-    { field: "quantity", headerName: "Quantity" },
-    { field: "size", headerName: "Size" },
-    { field: "flavor", headerName: "Flavor" },
-    { field: "color", headerName: "Color" },
-    { field: "created", headerName: "Created", type: "date" },
-    { field: "lastModified", headerName: "Last Modified", type: "date" },
-    { field: "isActive", headerName: "Active", type: "boolean" },
+    { field: "customerName", headerName: "Customer Name", minWidth: 200 },
+    { field: "type", headerName: "Order Type" },
+    {
+      field: "pickupDateTime",
+      headerName: "Pickup Date & Time",
+      type: "dateTime",
+    },
+    { field: "payment", headerName: "Payment Status" },
   ];
 
   return (
     <>
-      <Header title="ORDERS" subtitle="Suborders Management" />
+      <Header
+        title="MANAGEMENT ORDERS"
+        subtitle="Order Management and Tracking"
+      />
       <Button variant="contained" onClick={handleAddNew}>
-        Add Suborder
+        Add Order
       </Button>
       <DataGridStyler>
         <DataGrid
-          rows={rows as GridRowsProp}
+          rows={rows}
           columns={columns}
           slots={{ toolbar: GridToolbar }}
           initialState={{
-            columns: {
-              columnVisibilityModel: {
-                id: false,
-              },
-            },
-            filter: {
-              filterModel: {
-                items: [{ field: "isActive", operator: "is", value: true }],
-              },
-            },
+            columns: { columnVisibilityModel: { id: false } },
           }}
         />
       </DataGridStyler>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>
-          {selectedRow.id ? "Edit Suborder" : "Add New Suborder"}
+          {selectedRow.id ? "Edit Order" : "Add New Order"}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2}>
             <TextField
-              id="description"
-              name="description"
-              label="Description"
+              autoFocus
+              required
+              id="customerName"
+              name="customerName"
+              label="Customer Name"
               fullWidth
               variant="filled"
-              value={values.description}
+              value={values.customerName}
               onChange={handleChange}
             />
             <TextField
-              id="quantity"
-              name="quantity"
-              label="Quantity"
+              required
+              id="pickupDateTime"
+              name="pickupDateTime"
+              label="Pickup Date & Time"
+              type="datetime-local"
               fullWidth
-              variant="filled"
-              type="number"
-              value={values.quantity}
+              value={values.pickupDateTime}
               onChange={handleChange}
+              variant="filled"
             />
-            {/* Additional Form Fields as needed */}
+            <FormControl fullWidth>
+              <InputLabel id="type-label">Type</InputLabel>
+              <Select
+                labelId="type"
+                id="type"
+                value={values.type}
+                label="Type"
+                onChange={handleChange}
+              >
+                <MenuItem value={"normal"}>Normal</MenuItem>
+                <MenuItem value={"rush"}>Rush</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="payment-label">Payment</InputLabel>
+              <Select
+                labelId="payment"
+                id="payment"
+                value={values.payment}
+                label="Payment"
+                onChange={handleChange}
+              >
+                <MenuItem value={"full"}>Full</MenuItem>
+                <MenuItem value={"half"}>Half</MenuItem>
+              </Select>
+            </FormControl>
           </Stack>
           {error && <Typography color="error">{error}</Typography>}
         </DialogContent>
@@ -273,4 +229,4 @@ const Orders = () => {
   );
 };
 
-export default Orders;
+export default ManagementOrders;

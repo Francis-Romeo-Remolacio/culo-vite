@@ -33,6 +33,7 @@ import AddOns from "./scenes/management/addons";
 import AuthGuard from "./components/AuthGuard";
 import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
+import Suborders from "./scenes/management/suborders/index.js";
 
 function App() {
   return (
@@ -68,7 +69,7 @@ function App() {
       <AuthGuard role={"Customer"}>
         {/* Customer */}
         <MainAppBar>
-          <FabChat />
+          {/* <FabChat /> */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
@@ -95,6 +96,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/suborders" element={<Suborders />} />
             <Route path="/designs" element={<Designs />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/profile" element={<Profile />} />
@@ -112,6 +114,7 @@ function App() {
             <Route path="/register" element={<ManualRegister />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/suborders" element={<Suborders />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/designs" element={<Designs />} />
             <Route path="/inventory" element={<Inventory />} />
@@ -134,6 +137,7 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/users" element={<Users />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/suborders" element={<Suborders />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/designs" element={<Designs />} />
             <Route path="/inventory" element={<Inventory />} />

@@ -165,6 +165,25 @@ export const customOrderSchema = yup.object().shape({
   pickupDateTime: yup.object().dayjs().required("Required"),
 });
 
+export const managementOrderSchema = yup.object({
+  id: yup.string().required("Order ID is required"),
+  type: yup
+    .string()
+    .oneOf(["normal", "rush"], "Type must be 'normal' or 'rush'")
+    .required("Order type is required"),
+  pickupDateTime: yup.object().dayjs().required("Required"),
+  payment: yup
+    .string()
+    .oneOf(["half", "full"], "Payment must be 'half' or 'full'")
+    .required("Payment status is required"),
+  suborders: yup
+    .array()
+    .of(suborderSchema)
+    .min(1, "At least one suborder is required"),
+  customerId: yup.string().required("Customer ID is required"),
+  customerName: yup.string().required("Customer name is required"),
+});
+
 export const ingredientSchema = yup.object().shape({
   id: yup.string().nullable(),
   name: yup.string().required("Required"),

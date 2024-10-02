@@ -12,6 +12,10 @@ import {
   MenuItem,
   Stack,
   CircularProgress,
+  AccordionSummary,
+  Accordion,
+  AccordionDetails,
+  Typography,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
@@ -21,6 +25,7 @@ import { orderSchema } from "../utils/Validation.js";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { Suborder } from "../utils/Schemas.js";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 type ButtonCheckoutProps = {
   suborders: Suborder[];
@@ -87,7 +92,22 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Order</DialogTitle>
         <DialogContent>
-          <Stack spacing={2}>
+          <Stack spacing={2} sx={{ minWidth: 512 }}>
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel2-content"
+                id="panel2-header"
+              >
+                DesignName
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>Size: </Typography>
+                <Typography>Color: </Typography>
+                <Typography>Flavor: </Typography>
+                <Typography>Description: </Typography>
+              </AccordionDetails>
+            </Accordion>
             <FormControl fullWidth variant="filled">
               <InputLabel id="select-type-label">Type</InputLabel>
               <Select

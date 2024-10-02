@@ -1,5 +1,10 @@
 import { useContext, useEffect, useState } from "react";
-import { Container, Grid, Typography } from "@mui/material";
+import {
+  Container,
+  //Grid,
+  Typography,
+} from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.jsx";
 import { Design } from "../utils/Schemas.js";
@@ -15,7 +20,6 @@ const TagFilteredGallery = ({
   selectedTags,
 }: TagFilteredGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
-  const [filteredDesigns, setFilteredDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -90,7 +94,7 @@ const TagFilteredGallery = ({
       <Grid container spacing={1} sx={{ p: 2 }}>
         <Typography>{selectedTags}</Typography>
         {outputDesigns.map((design) => (
-          <Grid item>
+          <Grid>
             <DesignCard key={design.id} design={design} />
           </Grid>
         ))}

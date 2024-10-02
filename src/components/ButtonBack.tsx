@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { IconButton } from "@mui/material";
+import { IconButton, useTheme } from "@mui/material";
 import { Tokens } from "../Theme.js";
-import { useTheme } from "@emotion/react";
 
 const ButtonBack = () => {
   const theme = useTheme();

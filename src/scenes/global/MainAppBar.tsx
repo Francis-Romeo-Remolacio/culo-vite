@@ -85,7 +85,8 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const [notifAnchorEl, setNotifAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState(false);
 
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unread, setUnread] = useState(0);
   const [cartData, setCartData] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -96,9 +97,18 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   const fetchNotifs = async () => {
     try {
-      const response = await api.get("current-user/notifications");
-      setNotifications(response.data);
-      console.log(response);
+      await api.get("current-user/notifications").then((response) => {
+        setUnread(response.data.unread);
+        const parsedNotifs: Notification[] = response.data.notifs.map(
+          (notif: any) => ({
+            id: notif.notifId,
+            created: notif.dateCreated,
+            message: notif.message,
+            isRead: notif.isRead,
+          })
+        );
+        setNotifications(parsedNotifs);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -108,7 +118,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     try {
       const response = await api.get(`current-user/cart`);
       setCartData(response.data);
-      console.log(cartData);
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
@@ -254,13 +263,9 @@ export default function MainAppBar({ children }: MainAppBarProps) {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton size="large" color="inherit">
-          <Badge
-            badgeContent={notifications.length}
-            color="default"
-            sx={{ color: colors.background }}
-          >
-            <NotificationsIcon sx={{ color: colors.background }} />
+        <IconButton size="large" color="inherit" disableTouchRipple>
+          <Badge badgeContent={unread} color="default">
+            <NotificationsIcon />
           </Badge>
         </IconButton>
         <p>Notifications</p>
@@ -272,7 +277,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
           color="inherit"
         >
           <Badge badgeContent={cartData.length}>
-            <ShoppingCartIcon sx={{ color: colors.background }} />
+            <ShoppingCartIcon />
           </Badge>
         </IconButton>
         <p>Cart</p>
@@ -347,8 +352,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   >
                     <Badge
                       badgeContent={notifications.length}
-                      color="default"
-                      sx={{ color: colors.background }}
+                      color="secondary"
                     >
                       <NotificationsIcon sx={{ color: colors.background }} />
                     </Badge>
@@ -359,7 +363,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     aria-label="show ${cartData.length} pending cart items"
                     color="inherit"
                   >
-                    <Badge badgeContent={cartData.length}>
+                    <Badge badgeContent={cartData.length} color="secondary">
                       <ShoppingCartIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
@@ -409,6 +413,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
+            <Typography>Notifications</Typography>
             {notifications.length > 0
               ? notifications.map((notif: Notification) => {
                   const labelId = `checkbox-list-label-${notif.id}`;
@@ -431,7 +436,11 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                       disablePadding
                     >
                       <ListItemButton role={undefined}>
-                        <ListItemText id={labelId} primary={notif.message} />
+                        <ListItemText
+                          id={labelId}
+                          primary={notif.message}
+                          secondary={String(notif.created)}
+                        />
                       </ListItemButton>
                     </ListItem>
                   );
