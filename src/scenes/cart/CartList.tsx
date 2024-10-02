@@ -15,16 +15,28 @@ import CartItem from "./CartItem.jsx";
 import ButtonCheckout from "./../../components/ButtonCheckout.jsx";
 import api from "./../../api/axiosConfig.js";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Suborder } from "../../utils/Schemas.js";
 
 const CartList = () => {
-  const [checked, setChecked] = useState([]);
-  const [cartData, setCartData] = useState([]);
+  const [checked, setChecked] = useState<Suborder[]>([]);
+  const [cartData, setCartData] = useState<Suborder[]>([]);
   const [open, setOpen] = useState(false);
 
   const fetchCart = async () => {
     try {
       const response = await api.get(`current-user/cart`);
-      setCartData(response.data);
+      const parsedCart: Suborder[] = response.data.map((item: any) => ({
+        id: item.suborderId,
+        designId: item.designId,
+        pastryId: item.pastryId,
+        description: item.description,
+        size: item.size,
+        color: item.color,
+        flavor: item.flavor,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+      setCartData(parsedCart);
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
@@ -37,21 +49,23 @@ const CartList = () => {
   const handleClickClear = () => {
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleToggle = (suborderId) => () => {
-    const currentIndex = checked.indexOf(suborderId);
-    const newChecked = [...checked];
+  const handleToggle = (suborder: Suborder) => () => {
+    const currentIndex = checked.findIndex((item) => item.id === suborder.id);
+    let newChecked = [...checked];
 
     if (currentIndex === -1) {
-      newChecked.push(suborderId);
+      newChecked.push(suborder);
     } else {
-      newChecked.splice(currentIndex, 1);
+      newChecked = newChecked.filter((item) => item.id !== suborder.id);
     }
 
     setChecked(newChecked);
+    console.log(checked);
   };
 
   const handleClear = async () => {
@@ -59,6 +73,7 @@ const CartList = () => {
       await api.delete(`current-user/cart`);
       handleClose();
       fetchCart();
+      setChecked([]); // Clear checked items when the cart is cleared
     } catch (error) {
       console.error("Error deleting cart item:", error);
     }
@@ -82,7 +97,7 @@ const CartList = () => {
       {cartData.length > 0 ? (
         <List sx={{ width: "100%" }}>
           {cartData.map((itemData) => (
-            <>
+            <React.Fragment key={itemData.id}>
               <CartItem
                 itemData={itemData}
                 checked={checked}
@@ -90,22 +105,19 @@ const CartList = () => {
                 fetchCart={fetchCart}
               />
               <Divider />
-            </>
+            </React.Fragment>
           ))}
         </List>
       ) : (
-        <Box height="100%" display="flex" alignItems="center">
+        <Box
+          height="100%"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
           <Typography variant="body1">No items in the cart.</Typography>
         </Box>
       )}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          width: "inherit",
-          textAlign: "center",
-        }}
-      ></Box>
       <ButtonCheckout suborders={checked} fetchCart={fetchCart} />
     </Stack>
   );

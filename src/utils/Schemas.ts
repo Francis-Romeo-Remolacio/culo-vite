@@ -122,6 +122,7 @@ export interface Suborder {
   color: string;
   flavor: string;
   quantity: number;
+  price: number;
 }
 
 export interface ManagementSuborder extends Required<Suborder> {

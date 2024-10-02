@@ -144,7 +144,7 @@ export const orderSchema = yup.object().shape({
   type: yup.string().required("Required"),
   pickupDateTime: yup.object().dayjs().required("Required"),
   payment: yup.string().required("Required"),
-  suborderIds: yup.array().of(yup.string()).required(),
+  // suborderIds: yup.array().of(yup.string()).required(),
 });
 
 export const customOrderSchema = yup.object().shape({

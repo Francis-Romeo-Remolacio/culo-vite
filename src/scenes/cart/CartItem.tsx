@@ -43,25 +43,23 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
 
   const deleteItem = async () => {
     try {
-      await api.delete(`current-user/cart/${itemData.suborderId}`);
+      await api.delete(`current-user/cart/${itemData.id}`);
       fetchCart();
     } catch (error) {
       console.error("Error deleting cart item:", error);
     }
   };
 
-  const formatToCurrency = (num) => {
-    num = new Intl.NumberFormat("en-PH", {
+  const formatToCurrency = (num: number): string => {
+    return new Intl.NumberFormat("en-PH", {
       style: "currency",
       currency: "PHP",
     }).format(num);
-
-    return num;
   };
 
   return (
     <ListItem
-      key={itemData.suborderId}
+      key={itemData.id}
       secondaryAction={
         <Stack direction="row" spacing={1}>
           <IconButton
@@ -80,11 +78,14 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
       }
       disablePadding
     >
-      <ListItemButton onClick={handleToggle(itemData.suborderId)}>
+      <ListItemButton onClick={handleToggle(itemData)}>
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={checked.indexOf(itemData.suborderId) !== -1}
+            checked={
+              checked.findIndex((suborder) => suborder.id === itemData.id) !==
+              -1
+            }
             tabIndex={-1}
             disableRipple
             inputProps={{ "aria-labelledby": labelId }}

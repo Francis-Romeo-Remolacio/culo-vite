@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, FormEventHandler, useState } from "react";
 import {
   Button,
   TextField,
@@ -19,13 +19,13 @@ import {
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
-import api from "../api/axiosConfig";
 import { useFormik } from "formik";
 import { orderSchema } from "../utils/Validation.js";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { Suborder } from "../utils/Schemas.js";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import api from "../api/axiosConfig.js";
 
 type ButtonCheckoutProps = {
   suborders: Suborder[];
@@ -35,6 +35,7 @@ type ButtonCheckoutProps = {
 const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
   const [open, setOpen] = useState(false);
   const minDate = dayjs().add(7, "day");
+  const suborderIds: string[] = suborders.map((suborder) => suborder.id);
 
   const handleClickOpen = () => {
     if (suborders.length > 0) {
@@ -48,7 +49,7 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
   };
 
   const onSubmit = async () => {
-    console.log(values);
+    console.log(suborderIds);
 
     const formattedDate = dayjs(values.pickupDateTime).format("YYYY-MM-DD");
     const formattedTime = dayjs(values.pickupDateTime).format("hh:mm A");
@@ -59,9 +60,8 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
         pickupDate: formattedDate,
         pickupTime: formattedTime,
         payment: values.payment,
-        suborderIds: values.suborderIds,
+        suborderIds: suborderIds as string[],
       });
-
       handleClose();
       fetchCart();
     } catch (error) {
@@ -69,12 +69,11 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
     }
   };
 
-  const { values, isSubmitting, handleChange, handleSubmit } = useFormik({
+  const { values, errors, isSubmitting, handleChange } = useFormik({
     initialValues: {
       type: "normal",
       pickupDateTime: minDate,
       payment: "full",
-      suborderIds: suborders,
     },
     validationSchema: orderSchema,
     onSubmit,
@@ -91,79 +90,71 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Order</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ minWidth: 512 }}>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                DesignName
-              </AccordionSummary>
-              <AccordionDetails>
-                <Typography>Size: </Typography>
-                <Typography>Color: </Typography>
-                <Typography>Flavor: </Typography>
-                <Typography>Description: </Typography>
-              </AccordionDetails>
-            </Accordion>
-            <FormControl fullWidth variant="filled">
-              <InputLabel id="select-type-label">Type</InputLabel>
-              <Select
-                labelId="select-type-label"
-                id="select-type"
-                name="type"
-                value={values.type}
-                label="Type"
+        <form
+          onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+        >
+          <DialogContent>
+            <Stack spacing={2} sx={{ minWidth: 512 }}>
+              <FormControl fullWidth variant="filled">
+                <InputLabel id="select-type-label">Type</InputLabel>
+                <Select
+                  labelId="select-type-label"
+                  id="select-type"
+                  name="type"
+                  value={values.type}
+                  label="Type"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="normal">Normal</MenuItem>
+                  <MenuItem value="rush">Rush</MenuItem>
+                </Select>
+              </FormControl>
+              <DateTimePicker
+                label="Pickup Date & Time"
+                name="pickupDateTime"
+                value={values.pickupDateTime}
+                minDate={minDate}
+                minTime={dayjs("2018-01-01T09:00")}
+                maxTime={dayjs("2018-01-01T16:00")}
                 onChange={handleChange}
-              >
-                <MenuItem value="normal">Normal</MenuItem>
-                <MenuItem value="rush">Rush</MenuItem>
-              </Select>
-            </FormControl>
-            <DateTimePicker
-              label="Pickup Date & Time"
-              name="pickupDateTime"
-              value={values.pickupDateTime}
-              minDate={minDate}
-              minTime={dayjs("2018-01-01T09:00")}
-              maxTime={dayjs("2018-01-01T16:00")}
-              onChange={handleChange}
-              viewRenderers={{
-                hours: renderTimeViewClock,
-                minutes: renderTimeViewClock,
-                seconds: renderTimeViewClock,
-              }}
-            />
-            <FormControl fullWidth variant="filled">
-              <InputLabel id="select-payment-label">Payment</InputLabel>
-              <Select
-                labelId="select-payment-label"
-                id="select-payment"
-                name="payment"
-                value={values.payment}
-                label="Payment"
-                onChange={handleChange}
-              >
-                <MenuItem value="full">Full</MenuItem>
-                <MenuItem value="half">Half</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button
-            type="submit"
-            variant="contained"
-            onClick={() => handleSubmit}
-            endIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
-            disabled={isSubmitting}
-          >
-            {!isSubmitting ? "Checkout" : <CircularProgress size={21} />}
-          </Button>
-        </DialogActions>
+                viewRenderers={{
+                  hours: renderTimeViewClock,
+                  minutes: renderTimeViewClock,
+                  seconds: renderTimeViewClock,
+                }}
+              />
+              <FormControl fullWidth variant="filled">
+                <InputLabel id="select-payment-label">Payment</InputLabel>
+                <Select
+                  labelId="select-payment-label"
+                  id="select-payment"
+                  name="payment"
+                  value={values.payment}
+                  label="Payment"
+                  onChange={handleChange}
+                >
+                  <MenuItem value="full">Full</MenuItem>
+                  <MenuItem value="half">Half</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              onClick={() => console.log(errors)}
+              endIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
+              disabled={isSubmitting}
+            >
+              {!isSubmitting ? "Checkout" : <CircularProgress size={21} />}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </>
   );
