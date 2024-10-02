@@ -7,7 +7,7 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
