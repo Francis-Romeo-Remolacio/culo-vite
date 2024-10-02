@@ -56,16 +56,6 @@ const PastryMaterial = () => {
       flex: 0.2,
     },
     {
-      field: "dateAdded",
-      headerName: "Date Added",
-      type: "dateTime",
-    },
-    {
-      field: "lastModifiedDate",
-      headerName: "Last Modified Date",
-      type: "dateTime",
-    },
-    {
       field: "costEstimate",
       headerName: "Cost Estimate",
     },
