@@ -21,6 +21,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CakeIcon from "@mui/icons-material/Cake";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import Cookies from "js-cookie";
 import api from "./../../api/axiosConfig.js";
@@ -88,6 +89,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const [cartData, setCartData] = useState([]);
+  const [orderData, setOrderData] = useState(0);
   const [loggedIn, setLoggedIn] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -120,6 +122,15 @@ export default function MainAppBar({ children }: MainAppBarProps) {
       setCartData(response.data);
     } catch (error) {
       console.error("Error fetching cart data:", error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await api.get(`current-user/orders-count`);
+      setOrderData(0);
+    } catch (error) {
+      console.error("Error fetching order data:", error);
     }
   };
 
@@ -196,9 +207,14 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     navigate("/cart");
   };
 
+  const handleOrders = () => {
+    navigate("/my-orders");
+  };
+
   const handleLogout = () => {
     Cookies.remove("token");
     localStorage.removeItem("currentUser");
+    window.location.href = "/";
   };
 
   const menuId = "primary-search-account-menu";
@@ -280,7 +296,27 @@ export default function MainAppBar({ children }: MainAppBarProps) {
             <ShoppingCartIcon />
           </Badge>
         </IconButton>
+        <IconButton size="large" color="inherit">
+          <Badge badgeContent={0}>
+            {" "}
+            <CakeIcon />
+          </Badge>
+        </IconButton>
         <p>Cart</p>
+      </MenuItem>
+      <MenuItem onClick={handleOrders}>
+        <IconButton size="large" color="inherit">
+          <Badge badgeContent={cartData.length}>
+            <CakeIcon />
+          </Badge>
+        </IconButton>
+        <IconButton size="large" color="inherit">
+          <Badge badgeContent={0}>
+            {" "}
+            <CakeIcon />
+          </Badge>
+        </IconButton>
+        <p>My Orders</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -357,14 +393,18 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                       <NotificationsIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
-                  <IconButton
-                    href="/cart"
-                    size="large"
-                    aria-label="show ${cartData.length} pending cart items"
-                    color="inherit"
-                  >
+                  <IconButton onClick={handleCart} size="large" color="inherit">
                     <Badge badgeContent={cartData.length} color="secondary">
                       <ShoppingCartIcon sx={{ color: colors.background }} />
+                    </Badge>
+                  </IconButton>
+                  <IconButton
+                    onClick={handleOrders}
+                    size="large"
+                    color="inherit"
+                  >
+                    <Badge badgeContent={orderData} color="secondary">
+                      <CakeIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
                 </>
