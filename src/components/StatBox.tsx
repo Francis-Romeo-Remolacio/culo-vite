@@ -1,5 +1,5 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import { Tokens } from "../theme";
+import { Tokens } from "../Theme";
 import ProgressCircle from "./ProgressCircle";
 
 type StatboxProps = {
