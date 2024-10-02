@@ -18,7 +18,7 @@ import UpdatePastryMaterialModal from "./updateModal";
 import AddPastryMaterialModal from "./addModal";
 import ManualSubtractionModal from "./manualSubtractionModal";
 import DeleteConfirmationModal from "./deleteConfirmationModal";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 
 const PastryMaterial = () => {
   const theme = useTheme();
