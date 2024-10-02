@@ -69,7 +69,7 @@ function App() {
       <AuthGuard role={"Customer"}>
         {/* Customer */}
         <MainAppBar>
-          {/* <FabChat /> */}
+          <FabChat />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
