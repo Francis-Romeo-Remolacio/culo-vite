@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme, Button, Grid } from "@mui/material";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
-import DesignCard from "./../../../components/DesignCard.jsx";
+import DesignCard from "./../../../components/DesignCard.tsx";
 import api from "../../../api/axiosConfig";
 import AddDesignModal from "./addModal";
 import UpdateDesignModal from "./updateModal";

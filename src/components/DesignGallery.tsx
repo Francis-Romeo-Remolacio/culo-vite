@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import api from "./../api/axiosConfig.js";
-import DesignCard from "./DesignCard.jsx";
+import DesignCard from "./DesignCard.tsx";
 import { Design } from "../utils/Schemas.js";
 import { RefreshContext } from "../scenes/shop/index.js";
 
