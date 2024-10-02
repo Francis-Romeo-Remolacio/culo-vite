@@ -13,11 +13,22 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
 import ButtonEdit from "./ButtonEdit.jsx";
+import { Design, Suborder } from "../../utils/Schemas.js";
 
-const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
-  const [designData, setDesignData] = useState([]);
-  const [designInfo, setDesignInfo] = useState(null);
-  const labelId = `checkbox-list-label-${itemData.orderName}`;
+type CartItemProps = {
+  itemData: Suborder;
+  checked: Suborder[];
+  handleToggle: (suborder: Suborder) => () => void;
+  fetchCart: () => Promise<void>;
+};
+const CartItem = ({
+  itemData,
+  checked,
+  handleToggle,
+  fetchCart,
+}: CartItemProps) => {
+  const [design, setDesign] = useState<Design>();
+  const labelId = `checkbox-list-label-${itemData.id}`;
 
   const handleClickRemove = () => {
     deleteItem();
@@ -25,19 +36,65 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
 
   useEffect(() => {
     const fetchDesignData = async () => {
-      try {
-        var response = await api.get(
-          `designs/${encodeURIComponent(itemData.designId)}`
-        );
-        setDesignData(response.data);
-        response = await api.get(
-          `ui-helpers/get-design-info/${encodeURIComponent(itemData.designId)}`
-        );
-        setDesignInfo(response.data);
-      } catch (error) {
-        console.error("Error fetching design data:", error);
+      {
+        try {
+          // Fetch both the design data and design info simultaneously
+          const [designDataResponse, designInfoResponse] = await Promise.all([
+            api.get(`designs/${encodeURIComponent(itemData.designId)}`),
+            api.get(
+              `ui-helpers/get-design-info/${encodeURIComponent(
+                itemData.designId
+              )}`
+            ),
+          ]);
+
+          // Parse the design data
+          const parsedDesignData = {
+            id: designDataResponse.data.designId,
+            name: designDataResponse.data.displayName,
+            description: designDataResponse.data.cakeDescription,
+            pictureUrl: designDataResponse.data.designPictureUrl,
+            pictureData: designDataResponse.data.displayPictureData,
+            tags: designDataResponse.data.designTags.map((tag: any) => ({
+              id: tag.designTagId,
+              name: tag.designTagName,
+            })),
+            shapes: designDataResponse.data.designShapes.map((shape: any) => ({
+              id: shape.designShapeId,
+              name: shape.shapeName,
+            })),
+          };
+
+          // Parse the design info
+          const parsedDesignInfo = {
+            pastryMaterialId: designInfoResponse.data.pastryMaterialId,
+            variants: designInfoResponse.data.variants.map((variant: any) => ({
+              id: variant.variantId,
+              name: variant.variantName,
+              cost: variant.costEstimate,
+              inStock: variant.inStock,
+              addOns: variant.addOns.map((addOn: any) => ({
+                id: addOn.addOnId,
+                name: addOn.addOnName,
+                price: addOn.price,
+                amount: addOn.amount,
+                stock: addOn.stock,
+              })),
+            })),
+          };
+
+          // Merge the design data and design info into a single object
+          const combinedDesignData = {
+            ...parsedDesignData,
+            ...parsedDesignInfo,
+          };
+          setDesign(combinedDesignData as Design);
+        } catch (error) {
+          console.error("Error fetching design data or design info: ", error);
+        }
       }
     };
+
     fetchDesignData();
   }, []);
 
@@ -69,8 +126,8 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
           >
             <DeleteIcon />
           </IconButton>
-          {designInfo ? (
-            <ButtonEdit orderData={itemData} designInfo={designInfo} />
+          {design ? (
+            <ButtonEdit orderData={itemData} designInfo={design} />
           ) : (
             <Skeleton variant="circular" width={36} height={36} />
           )}
@@ -92,10 +149,10 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
           />
         </ListItemIcon>
         <ListItemAvatar sx={{ height: "160px" }}>
-          {designData.displayPictureData ? (
+          {design?.pictureData ? (
             <img
-              src={`data:image/png;base64,${designData.displayPictureData}`}
-              alt={designData.displayName}
+              src={`data:image/png;base64,${design.pictureData}`}
+              alt={design.name}
               style={{
                 height: "100%",
                 borderRadius: "4px",
@@ -110,7 +167,7 @@ const CartItem = ({ itemData, checked, handleToggle, fetchCart }) => {
         </ListItemAvatar>
         <ListItemText
           id={labelId}
-          primary={`Name: ${designData.displayName}`}
+          primary={design ? `Name: ${design.name}` : `Name: Loading...`}
           secondary={`Price: ${formatToCurrency(itemData.price)}`}
           sx={{ pl: 2 }}
         />
