@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import DataGridStyler from "./../../../components/DataGridStyler.jsx";
@@ -19,8 +19,6 @@ const Sales = () => {
   const [salesList, setSalesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     const fetchSalesData = async () => {

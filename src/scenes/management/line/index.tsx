@@ -1,5 +1,5 @@
 import { Box, useTheme } from "@mui/material";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import LineChart from "../../../components/LineChart";
 

@@ -13,7 +13,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { UpdateModeEnum } from "chart.js";
 
 const style = {

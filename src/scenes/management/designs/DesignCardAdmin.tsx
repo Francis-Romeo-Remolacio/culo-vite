@@ -13,7 +13,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useTheme } from "@mui/material";
 
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import TagChipName from "../../../components/TagChipName";
 
 const DesignCardAdmin = ({

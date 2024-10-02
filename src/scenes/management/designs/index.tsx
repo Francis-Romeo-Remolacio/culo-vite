@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme, Button, Grid } from "@mui/material";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import DesignCard from "./../../../components/DesignCard.jsx";
 import api from "../../../api/axiosConfig";

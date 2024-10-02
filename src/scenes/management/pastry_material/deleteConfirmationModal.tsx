@@ -18,7 +18,7 @@ import {
   FormControl,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { useEffect, useState } from "react";
 
 const style = {

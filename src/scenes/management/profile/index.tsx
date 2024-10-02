@@ -6,7 +6,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { Tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import api from "../../../api/axiosConfig";
 import Cookies from "js-cookie";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
