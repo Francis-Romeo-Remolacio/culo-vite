@@ -398,7 +398,7 @@ const ViewDesign = () => {
     return (
       <Container sx={{ maxWidth: "600px" }}>
         <Helmet>
-          <title>{design?.name} - The Pink Butter Cake Studio</title>
+          <title>{`₱{design?.name} - The Pink Butter Cake Studio`}</title>
         </Helmet>
         {loading ? (
           <CircularProgress />
