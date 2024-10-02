@@ -43,6 +43,7 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
         }));
         setFetchedDesigns(parsedDesigns);
         setOutputDesigns(parsedDesigns); // Set outputDesigns to all designs initially
+        setIsRefreshing(false);
       } catch (error) {
         console.error("Error fetching designs:", error);
       } finally {
