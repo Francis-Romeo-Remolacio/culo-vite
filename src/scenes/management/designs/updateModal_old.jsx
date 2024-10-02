@@ -13,7 +13,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { UpdateModeEnum } from "chart.js";
 
 const style = {
@@ -43,7 +43,7 @@ const UpdateDesignModal = ({
   };
 
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState(null);

@@ -19,7 +19,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 
 const style = {
   top: "100%",
@@ -56,7 +56,7 @@ const AddPastryMaterialModal = ({
   const [validAddOns, setValidAddOns] = useState([]);
 
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     fetchValidMeasurements();

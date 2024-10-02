@@ -13,12 +13,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useTheme } from "@mui/material";
 
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import TagChipName from "../../../components/TagChipName";
 
 const DesignCardAdmin = ({key, id, name, picture, pictureUrl, tags, description, editAction, deleteAction}) => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
   const [open, setOpen] = useState(false);
   const [imageType, setImageType] = useState(null);
   const data = {

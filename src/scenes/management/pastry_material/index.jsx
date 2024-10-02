@@ -7,7 +7,7 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
@@ -22,7 +22,7 @@ import DataGridStyler from "./../../../components/DataGridStyler.jsx";
 
 const PastryMaterial = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

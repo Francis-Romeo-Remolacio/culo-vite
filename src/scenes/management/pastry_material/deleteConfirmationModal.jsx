@@ -18,7 +18,7 @@ import {
   FormControl,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import { useEffect, useState } from "react";
 
 const style = {
@@ -40,7 +40,7 @@ const DeleteConfirmationModal = ({
     designName: "",
   });
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     if (material !== undefined && material !== null) {

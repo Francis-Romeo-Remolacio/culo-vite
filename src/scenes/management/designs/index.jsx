@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme, Button, Grid } from "@mui/material";
-import { tokens } from "../../../theme";
+import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import DesignCard from "./../../../components/DesignCard.jsx";
 import api from "../../../api/axiosConfig";
@@ -12,7 +12,7 @@ import UpdatePastryMaterialModal from "./updateModalPastryMaterial.jsx";
 
 const Designs = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   const [designs, setDesigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
