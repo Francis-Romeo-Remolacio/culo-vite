@@ -118,7 +118,7 @@ const toKebabCase = (str: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-const iconMapping = {
+const iconMapping: any = {
   dashboard: HomeIcon,
   register: PersonIcon,
   calendar: CalendarTodayIcon,
