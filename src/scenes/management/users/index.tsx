@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRowsProp,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import DataGridStyler from "./../../../components/DataGridStyler.jsx";
@@ -51,7 +56,6 @@ const Users = () => {
     {
       field: "roles",
       headerName: "Role",
-      valueGetter: (params: any) => params.row.roles.join(", "),
     },
     {
       field: "phoneNumber",
@@ -112,7 +116,14 @@ const Users = () => {
           checkboxSelection
           rows={users}
           columns={columns}
-          getRowId={(row) => row.user_id}
+          slots={{ toolbar: GridToolbar }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+              },
+            },
+          }}
         />
       </DataGridStyler>
     </Box>
