@@ -26,6 +26,7 @@ const Landing = () => {
           top: 0,
           zIndex: -1,
           opacity: 0.3,
+          margin: -2,
           background: `url(/src/assets/banner.png) center/cover no-repeat`,
         }}
       />
