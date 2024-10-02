@@ -26,10 +26,7 @@ const Landing = () => {
           top: 0,
           zIndex: -1,
           opacity: 0.3,
-          backgroundImage:
-            "url(https://i.scdn.co/image/ab67616d0000b2736fbf4bb780a9cbc34b3f35da)",
-          filter:
-            "invert(39%) sepia(57%) saturate(2606%) hue-rotate(321deg) brightness(85%) contrast(95%) blur(8px)",
+          background: `url(/src/assets/banner.png) center/cover no-repeat`,
         }}
       />
       <Stack justifyContent="center" spacing={4} mt="0">
