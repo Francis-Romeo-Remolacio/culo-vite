@@ -33,11 +33,10 @@ const style = {
 const UpdatePastryMaterialModal = ({
   open,
   handleClose,
-  selectedDesign,
+  material,
   handleUpdate,
-  updateDesignModalOpen,
 }) => {
-  const defaultData = {
+  const [formData, setFormData] = useState({
     designId: "",
     otherCost: {
       additionalCost : 0.0
@@ -46,21 +45,18 @@ const UpdatePastryMaterialModal = ({
     addOns: [],
     subVariants: [],
     forDeletion: "",
-    noPastryMaterial: true,
-  };
-
-  const [formData, setFormData] = useState(defaultData);
-  const [material, setMaterial] = useState(defaultData);
+  });
   const [error, setError] = useState(null);
 
   const [validItemTypes, setValidItemTypes] = useState([]);
   const [validMeasurements, setValidMeasurements] = useState({});
+  const [validDesignIds, setValidDesignIds] = useState([]);
 
   const [validInventoryItems, setValidInventoryItems] = useState([]);
   const [validAddOns, setValidAddOns] = useState([]);
 
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     fetchValidMeasurements();
@@ -70,11 +66,11 @@ const UpdatePastryMaterialModal = ({
   }, []);
 
   useEffect(() => {
-    if (
-      material &&
-      material.pastryMaterialId != undefined &&
-      material.pastryMaterialId != null
-    ) {
+    fetchDesignsWithoutPastryMaterials();
+  }, [open]);
+
+  useEffect(() => {
+    if (material) {
       var newIngredientsForForm = [];
       material.ingredients.forEach((element) => {
         var currentIngredient = element;
@@ -114,7 +110,6 @@ const UpdatePastryMaterialModal = ({
       setFormData({
         designId: material.designId,
         mainVariantName: material.mainVariantName,
-        pastryMaterialId: material.pastryMaterialId,
         dateAdded: material.dateAdded,
         lastModifiedDate: material.lastModifiedDate,
         costEstimate: material.costEstimate,
@@ -125,12 +120,8 @@ const UpdatePastryMaterialModal = ({
       });
     }
   }, [material]);
-
-  useEffect(() => {
-    fetchDesignPastryMaterials();
-  }, [updateDesignModalOpen]);
-
-  useEffect(() => {}, [selectedDesign]);
+  //useEffect(() => {console.log(formData)}, [formData])
+  
 
   const fetchValidItemTypes = async () => {
     try {
@@ -141,9 +132,32 @@ const UpdatePastryMaterialModal = ({
       console.error("Failed to fetch valid item types:", error);
     }
   };
+  const fetchDesignsWithoutPastryMaterials = async () => {
+    setValidDesignIds([]);
+    try {
+      const response = await api.get("/designs/without-pastry-material");
+      setValidDesignIds(response.data);
+      // Append the current material if it exists
+      if (
+        material !== null &&
+        material.designId !== undefined &&
+        material.designId !== null
+      ) {
+        setValidDesignIds((prevValidDesignIds) => [
+          ...prevValidDesignIds,
+          { designId: material.designId, displayName: material.designName },
+        ]);
+      }
+    } catch (error) {
+      setError("Failed to fetch valid design ids");
+      console.error("Failed to fetch valid item types:", error);
+    }
+  };
   const fetchValidMeasurements = async () => {
     try {
-      const response = await api.get("/ui-helpers/valid-measurement-values");
+      const response = await api.get(
+        "/ui-helpers/valid-measurement-values"
+      );
       setValidMeasurements(response.data);
     } catch (error) {
       setError("Failed to fetch valid measurement units");
@@ -168,42 +182,29 @@ const UpdatePastryMaterialModal = ({
       console.error("Failed to fetch valid add on items:", error);
     }
   };
-  const fetchDesignPastryMaterials = async () => {
-    if (updateDesignModalOpen === false) {
-      setFormData(defaultData);
-    } else if (
-      updateDesignModalOpen === true &&
-      selectedDesign != undefined &&
-      selectedDesign != null &&
-      selectedDesign.designId != undefined &&
-      selectedDesign.designId != null
-    ) {
-      try {
-        const response = await api.get(
-          `/designs/${encodeURIComponent(
-            selectedDesign.designId
-          )}/pastry-material`
-        );
-        if (
-          response.data.pastryMaterialId != undefined &&
-          response.data.pastryMaterialId != null
-        ) {
-          setMaterial(response.data);
-        } else {
-          setMaterial(defaultData);
-        }
-      } catch {
-        console.error(
-          "Failed to fetch pastry material info for design " +
-            selectedDesign.designId
-        );
-      }
-    }
-  };
+
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    handleClose();
-    await handleUpdate(formData);
+    //First Step : Check if Design Exists in db
+    var designExists = false;
+    try {
+      const response = await api.get(
+        "/designs/" + encodeURIComponent(formData.designId)
+      );
+
+      if (response.data.designId != null) {
+        designExists = true;
+        e.preventDefault();
+        handleClose();
+        await handleUpdate(material.pastryMaterialId, formData);
+      } else {
+        console.log("INVALID DESIGN ID");
+        return;
+      }
+    } catch (error) {
+      setError("Failed to fetch validity of design id");
+      console.error("Failed to fetch validity of design id:", error);
+    }
   };
   const handleChange = async (e, index = null) => {
     const { name, value } = e.target;
@@ -235,7 +236,7 @@ const UpdatePastryMaterialModal = ({
             (item) => item.id == encodedId
           );
           if (selectedInventoryItem !== undefined) {
-            newIngredients[index].name = selectedInventoryItem.name;
+            newIngredients[index].itemName = selectedInventoryItem.itemName;
             newIngredients[index].amountMeasurement =
               selectedInventoryItem.measurements;
           }
@@ -279,14 +280,16 @@ const UpdatePastryMaterialModal = ({
       var newSubIng = [];
       setFormData((prevData) => {
         newSubIng = prevData.subVariants;
-        newSubIng[index].subVariantIngredients[ingredientIndex][name] = value;
+        newSubIng[index].subVariantIngredients[ingredientIndex][name] =
+          value;
         if (
           newSubIng[index].subVariantIngredients[ingredientIndex][
             "forInsertion"
           ] === "off"
         ) {
-          newSubIng[index].subVariantIngredients[ingredientIndex]["changed"] =
-            "on";
+          newSubIng[index].subVariantIngredients[ingredientIndex][
+            "changed"
+          ] = "on";
         }
         return { ...prevData, subVariants: newSubIng };
       });
@@ -301,8 +304,9 @@ const UpdatePastryMaterialModal = ({
             (item) => item.id == encodedId
           );
           if (selectedInventoryItem !== undefined) {
-            newSubIng[index].subVariantIngredients[ingredientIndex].name =
-              selectedInventoryItem.name;
+            newSubIng[index].subVariantIngredients[
+              ingredientIndex
+            ].itemName = selectedInventoryItem.itemName;
             newSubIng[index].subVariantIngredients[
               ingredientIndex
             ].amountMeasurement = selectedInventoryItem.measurements;
@@ -373,8 +377,7 @@ const UpdatePastryMaterialModal = ({
         );
 
         if (selectedAddOn !== undefined) {
-          newSubVariants[index].subVariantAddOns[subvarAddOnIndex].addOnsName =
-            selectedAddOn.addOnName;
+          newSubVariants[index].subVariantAddOns[subvarAddOnIndex].addOnsName = selectedAddOn.addOnName;
         }
       }
       return { ...prevData, subVariants: newSubVariants };
@@ -394,7 +397,7 @@ const UpdatePastryMaterialModal = ({
     const newIngredient = {
       ingredientType: "INV",
       itemId: String(validInventoryItems[0].id),
-      name: validInventoryItems[0].name,
+      itemName: validInventoryItems[0].itemName,
       amountMeasurement: validInventoryItems[0].measurements,
       amount: "0",
       forInsertion: "on",
@@ -478,7 +481,7 @@ const UpdatePastryMaterialModal = ({
     const newIngredient = {
       ingredientType: "INV",
       itemId: String(validInventoryItems[0].id),
-      name: validInventoryItems[0].name,
+      itemName: validInventoryItems[0].itemName,
       amountMeasurement: validInventoryItems[0].measurements,
       amount: "0",
       forInsertion: "on",
@@ -513,24 +516,28 @@ const UpdatePastryMaterialModal = ({
         <DialogContent>
           <Box component="form" id="form_box_container">
             <Typography variant="h2" p={2}>
-              Smallest Size
+              Design ID
               <Typography variant="caption" display={"block"}>
-                Contains the base ingredients and add-ons, when any other size's
-                ingredient is subtracted to the inventory, the base ingredients
-                also gets subtracted. <br />
-                It is recommended to put the smallest size of the design in
-                this.
+                To what cake is this recipe linked to
               </Typography>
             </Typography>
-            <TextField
+            <Select
               error={false}
               fullWidth
               margin="dense"
-              label="Smallest Size Name"
-              name="mainVariantName"
-              value={formData.mainVariantName}
+              label="Design ID"
+              name="designId"
+              value={formData.designId}
               onChange={(e) => handleChange(e)}
-            />
+            >
+              {validDesignIds !== undefined &&
+                validDesignIds !== null &&
+                validDesignIds.map((designInfo, index) => (
+                  <MenuItem key={index} value={designInfo.designId}>
+                    {designInfo.displayName}
+                  </MenuItem>
+                ))}
+            </Select>
             
             <Typography variant="h4" p={2}>
             Other Costs
@@ -550,6 +557,27 @@ const UpdatePastryMaterialModal = ({
               onChange={(e) => handleAdditionalCostChange(e)}
             />
 
+            <Typography variant="h2" p={2}>
+            Smallest Size
+              <Typography variant="caption" display={"block"}>
+              Contains the base ingredients and add-ons, when any other size's
+                ingredient is subtracted to the inventory, the base ingredients
+                also gets subtracted. <br />
+                It is recommended to put the smallest size of the design in
+                this.
+              </Typography>
+            </Typography>
+            <TextField
+              error={false}
+              fullWidth
+              margin="dense"
+              label="Smallest Size Name"
+              name="mainVariantName"
+              value={formData.mainVariantName}
+              onChange={(e) => handleChange(e)}
+            />
+
+
             <Stack spacing={1}>
               <Typography variant="h4" p={2}>
                 Main Ingredients
@@ -560,7 +588,6 @@ const UpdatePastryMaterialModal = ({
               {formData.ingredients.map((ingredient, index) => (
                 <Box key={"mainvar_ingredient" + index}>
                   <Stack spacing={0.1} direction="row" mt={1}>
-                    {/*
                     <Select
                       sx={{ width: "10%" }}
                       autoWidth
@@ -576,6 +603,7 @@ const UpdatePastryMaterialModal = ({
                         </MenuItem>
                       ))}
                     </Select>
+                    {/*
                     <TextField
                       sx={{ width: "20%" }}
                       error={false}
@@ -587,7 +615,7 @@ const UpdatePastryMaterialModal = ({
                     />
                     */}
                     <Select
-                      sx={{ width: "30%", flexGrow: 1 }}
+                      sx={{ width: "20%" }}
                       error={false}
                       margin="dense"
                       label="Item Id"
@@ -598,10 +626,19 @@ const UpdatePastryMaterialModal = ({
                       {ingredient.ingredientType == "INV" &&
                         validInventoryItems.map((inventoryItem, idx) => (
                           <MenuItem key={idx} value={String(inventoryItem.id)}>
-                            ID:{String(inventoryItem.id)} / {inventoryItem.name}
+                            ID:{String(inventoryItem.id)} /{" "}
+                            {inventoryItem.name}
                           </MenuItem>
                         ))}
                     </Select>
+                    <TextField
+                      sx={{ width: "20%" }}
+                      margin="dense"
+                      label="Item Name"
+                      name="itemName"
+                      disabled
+                      value={ingredient.name}
+                    />
                     <Select
                       sx={{ width: "30%" }}
                       autoWidth
@@ -743,7 +780,7 @@ const UpdatePastryMaterialModal = ({
               <Box key={"subvar" + index} mb={2}>
                 <Stack spacing={0.1} direction="row" mt={1}>
                   <Typography variant="h4" p={2}>
-                    Other Size #{index + 1} <br /> Name:{" "}
+                  Other Size #{index + 1} <br /> Name:{" "}
                     {subVariant.subVariantName}
                   </Typography>
                   {subVariant.forInsertion === "off" && (
@@ -775,7 +812,7 @@ const UpdatePastryMaterialModal = ({
                 />
                 <Stack>
                   <Typography variant="h5" p={2}>
-                    Other Size #{index + 1} Ingredients
+                  Other Size #{index + 1} Ingredients
                   </Typography>
                   <Button
                     variant="contained"
@@ -838,7 +875,7 @@ const UpdatePastryMaterialModal = ({
                           label="Item Name"
                           name="itemName"
                           disabled
-                          value={subVariantIngredient.name}
+                          value={subVariantIngredient.itemName}
                         />
                         <Select
                           sx={{ width: "30%" }}
@@ -926,7 +963,9 @@ const UpdatePastryMaterialModal = ({
                 </Stack>
                 {subVariant.subVariantAddOns.map(
                   (subvarAddOn, subvarAddOnIndex) => (
-                    <Box key={"subvarAddOn" + index + "_" + subvarAddOnIndex}>
+                    <Box
+                      key={"subvarAddOn" + index + "_" + subvarAddOnIndex}
+                    >
                       <Stack spacing={0.1} direction="row" mt={1}>
                         <Select
                           sx={{ width: "30%" }}

@@ -7,20 +7,19 @@ import {
   Modal,
   Typography,
   Select,
-  Stack,
   MenuItem,
   FormControlLabel,
   Checkbox,
+  OutlinedInput,
+  Stack,
+  FormControl,
   Dialog,
-  DialogActions,
   DialogTitle,
   DialogContent,
-  OutlinedInput,
-  FormControl,
+  DialogActions,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
 import { Tokens } from "../../../Theme";
-import { CookieSharp } from "@mui/icons-material";
 
 const style = {
   top: "100%",
@@ -30,22 +29,23 @@ const style = {
   p: 1,
 };
 
-const UpdatePastryMaterialModal = ({
+const AddPastryMaterialModal = ({
   open,
+  addDesignModalOpen,
   handleClose,
-  material,
-  handleUpdate,
+  handleAdd,
 }) => {
-  const [formData, setFormData] = useState({
+  const defaultFormData = {
     designId: "",
     otherCost: {
-      additionalCost: 0.0,
+      additionalCost : 0.0
     },
     ingredients: [],
     addOns: [],
     subVariants: [],
-    forDeletion: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState(null);
 
   const [validItemTypes, setValidItemTypes] = useState([]);
@@ -56,7 +56,7 @@ const UpdatePastryMaterialModal = ({
   const [validAddOns, setValidAddOns] = useState([]);
 
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     fetchValidMeasurements();
@@ -64,63 +64,11 @@ const UpdatePastryMaterialModal = ({
     fetchValidInventoryItems();
     fetchValidAddOns();
   }, []);
-
   useEffect(() => {
-    fetchDesignsWithoutPastryMaterials();
-  }, [open]);
-
-  useEffect(() => {
-    if (material) {
-      var newIngredientsForForm = [];
-      material.ingredients.forEach((element) => {
-        var currentIngredient = element;
-        currentIngredient["forDeletion"] = "off";
-        currentIngredient["forInsertion"] = "off";
-        currentIngredient["changed"] = "off";
-        newIngredientsForForm.push(currentIngredient);
-      });
-      var newAddOnsForForm = [];
-      material.addOns.forEach((element) => {
-        var currentAddOn = element;
-        currentAddOn["forDeletion"] = "off";
-        currentAddOn["forInsertion"] = "off";
-        currentAddOn["changed"] = "off";
-        newAddOnsForForm.push(currentAddOn);
-      });
-      var newSubVariantsForForm = [];
-      material.subVariants.forEach((element) => {
-        var currentVariant = element;
-        currentVariant["forDeletion"] = "off";
-        currentVariant["forInsertion"] = "off";
-        currentVariant["changed"] = "off";
-        currentVariant.subVariantIngredients.map(
-          (subVariantIngredient, index) => {
-            subVariantIngredient["forDeletion"] = "off";
-            subVariantIngredient["forInsertion"] = "off";
-            subVariantIngredient["changed"] = "off";
-          }
-        );
-        currentVariant.subVariantAddOns.map((subVariantAddOn, index) => {
-          subVariantAddOn["forDeletion"] = "off";
-          subVariantAddOn["forInsertion"] = "off";
-          subVariantAddOn["changed"] = "off";
-        });
-        newSubVariantsForForm.push(currentVariant);
-      });
-      setFormData({
-        designId: material.designId,
-        mainVariantName: material.mainVariantName,
-        dateAdded: material.dateAdded,
-        lastModifiedDate: material.lastModifiedDate,
-        costEstimate: material.costEstimate,
-        otherCost: material.otherCost,
-        addOns: newAddOnsForForm,
-        ingredients: newIngredientsForForm,
-        subVariants: newSubVariantsForForm,
-      });
+    if (addDesignModalOpen === false) {
+      setFormData(defaultFormData);
     }
-  }, [material]);
-  //useEffect(() => {console.log(formData)}, [formData])
+  }, [addDesignModalOpen]);
 
   const fetchValidItemTypes = async () => {
     try {
@@ -128,27 +76,6 @@ const UpdatePastryMaterialModal = ({
       setValidItemTypes(response.data);
     } catch (error) {
       setError("Failed to fetch valid item types");
-      console.error("Failed to fetch valid item types:", error);
-    }
-  };
-  const fetchDesignsWithoutPastryMaterials = async () => {
-    setValidDesignIds([]);
-    try {
-      const response = await api.get("/designs/without-pastry-material");
-      setValidDesignIds(response.data);
-      // Append the current material if it exists
-      if (
-        material !== null &&
-        material.designId !== undefined &&
-        material.designId !== null
-      ) {
-        setValidDesignIds((prevValidDesignIds) => [
-          ...prevValidDesignIds,
-          { designId: material.designId, displayName: material.designName },
-        ]);
-      }
-    } catch (error) {
-      setError("Failed to fetch valid design ids");
       console.error("Failed to fetch valid item types:", error);
     }
   };
@@ -179,28 +106,16 @@ const UpdatePastryMaterialModal = ({
       console.error("Failed to fetch valid add on items:", error);
     }
   };
+  const handleAddModalClose = () => {
+    setFormData(defaultFormData);
+    handleClose();
+  };
 
   const handleSubmit = async (e) => {
-    //First Step : Check if Design Exists in db
-    var designExists = false;
-    try {
-      const response = await api.get(
-        "/designs/" + encodeURIComponent(formData.designId)
-      );
+    e.preventDefault();
+    handleClose();
 
-      if (response.data.designId != null) {
-        designExists = true;
-        e.preventDefault();
-        handleClose();
-        await handleUpdate(material.pastryMaterialId, formData);
-      } else {
-        console.log("INVALID DESIGN ID");
-        return;
-      }
-    } catch (error) {
-      setError("Failed to fetch validity of design id");
-      console.error("Failed to fetch validity of design id:", error);
-    }
+    await handleAdd(formData);
   };
   const handleChange = async (e, index = null) => {
     const { name, value } = e.target;
@@ -232,7 +147,7 @@ const UpdatePastryMaterialModal = ({
             (item) => item.id == encodedId
           );
           if (selectedInventoryItem !== undefined) {
-            newIngredients[index].itemName = selectedInventoryItem.itemName;
+            newIngredients[index].itemName = selectedInventoryItem.name;
             newIngredients[index].amountMeasurement =
               selectedInventoryItem.measurements;
           }
@@ -291,36 +206,35 @@ const UpdatePastryMaterialModal = ({
       if (name == "itemId") {
         const encodedId = encodeURIComponent(value);
         if (
-          formData.subVariants[index].subVariantIngredients[ingredientIndex]
+          newSubIng[index].subVariantIngredients[ingredientIndex]
             .ingredientType == "INV"
         ) {
-          const selectedInventoryItem = validInventoryItems.find(
-            (item) => item.id == encodedId
-          );
-          if (selectedInventoryItem !== undefined) {
-            newSubIng[index].subVariantIngredients[ingredientIndex].itemName =
-              selectedInventoryItem.itemName;
-            newSubIng[index].subVariantIngredients[
-              ingredientIndex
-            ].amountMeasurement = selectedInventoryItem.measurements;
+          try {
+            const response = await api.get(`/Ingredients/${encodedId}`);
+            if (response && response.data.name && response.data.measurements) {
+              newSubIng[index].subVariantIngredients[ingredientIndex].itemName =
+                response.data.name;
+              newSubIng[index].subVariantIngredients[
+                ingredientIndex
+              ].amountMeasurement = response.data.measurements;
+            }
+          } catch (error) {
+            console.error("Failed to get item in inventory:", error);
           }
         }
-        {
-          /*
-          if (
+        if (
           newSubIng[index].subVariantIngredients[ingredientIndex]
             .ingredientType == "MAT"
         ) {
           try {
-            const response = await api.get("/BOM/materials/" + encodedId);
+            const response = await api.get(`/pastry-materials/${encodedId}`);
             if (
               response &&
               response.data.material.materialName &&
               response.data.material.amountMeasurement
             ) {
-              newSubIng[index].subVariantIngredients[
-                ingredientIndex
-              ].itemName = response.data.material.materialName;
+              newSubIng[index].subVariantIngredients[ingredientIndex].itemName =
+                response.data.material.materialName;
               newSubIng[index].subVariantIngredients[
                 ingredientIndex
               ].amountMeasurement = response.data.material.amountMeasurement;
@@ -328,8 +242,6 @@ const UpdatePastryMaterialModal = ({
           } catch (error) {
             console.error("Failed to get material:", error);
           }
-        }  
-          */
         }
       }
       setFormData((prevData) => {
@@ -377,21 +289,22 @@ const UpdatePastryMaterialModal = ({
       return { ...prevData, subVariants: newSubVariants };
     });
   };
+  
   const handleAdditionalCostChange = async (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => {
       var newOtherCost = prevData.otherCost;
-      newOtherCost[name] = value;
+      newOtherCost[name] = value
 
-      return { ...prevData, otherCost: newOtherCost };
-    });
-  };
+      return {...prevData, otherCost: newOtherCost}
+    })
+  }
 
   const handleAddIngredientFormRow = () => {
     const newIngredient = {
       ingredientType: "INV",
       itemId: String(validInventoryItems[0].id),
-      itemName: validInventoryItems[0].itemName,
+      itemName: validInventoryItems[0].name,
       amountMeasurement: validInventoryItems[0].measurements,
       amount: "0",
       forInsertion: "on",
@@ -475,7 +388,7 @@ const UpdatePastryMaterialModal = ({
     const newIngredient = {
       ingredientType: "INV",
       itemId: String(validInventoryItems[0].id),
-      itemName: validInventoryItems[0].itemName,
+      itemName: validInventoryItems[0].name,
       amountMeasurement: validInventoryItems[0].measurements,
       amount: "0",
       forInsertion: "on",
@@ -505,55 +418,10 @@ const UpdatePastryMaterialModal = ({
       maxWidth={true}
       fullWidth={true}
     >
-      <DialogTitle id="dialog-title">Update Pastry Material</DialogTitle>
+      <DialogTitle id="dialog-title">Add new Pastry Material</DialogTitle>
       <Box sx={style} color={colors.text}>
         <DialogContent>
           <Box component="form" id="form_box_container">
-            <Typography variant="h2" p={2}>
-              Design ID
-              <Typography variant="caption" display={"block"}>
-                To what cake is this recipe linked to
-              </Typography>
-            </Typography>
-            <Select
-              error={false}
-              fullWidth
-              margin="dense"
-              label="Design ID"
-              name="designId"
-              value={formData.designId}
-              onChange={(e) => handleChange(e)}
-            >
-              {validDesignIds !== undefined &&
-                validDesignIds !== null &&
-                validDesignIds.map((designInfo, index) => (
-                  <MenuItem key={index} value={designInfo.designId}>
-                    {designInfo.displayName}
-                  </MenuItem>
-                ))}
-            </Select>
-
-            <Typography variant="h4" p={2}>
-              Other Costs
-              <Typography variant="caption" display={"block"}>
-                Contains other costs that will be included in the final
-                calculation of the price for all of the sizes.
-                <br />
-                This could include fees such as labor, utilities, and other
-                miscellaneous fees. <br />
-              </Typography>
-            </Typography>
-            <TextField
-              error={false}
-              fullWidth
-              margin="dense"
-              label="Additional Cost"
-              name="additionalCost"
-              type="number"
-              value={formData.otherCost.additionalCost}
-              onChange={(e) => handleAdditionalCostChange(e)}
-            />
-
             <Typography variant="h2" p={2}>
               Smallest Size
               <Typography variant="caption" display={"block"}>
@@ -572,6 +440,24 @@ const UpdatePastryMaterialModal = ({
               name="mainVariantName"
               value={formData.mainVariantName}
               onChange={(e) => handleChange(e)}
+            />
+            
+            <Typography variant="h4" p={2}>
+            Other Costs
+              <Typography variant="caption" display={"block"}>
+              Contains other costs that will be included in the final calculation of the price for all of the sizes.<br />
+              This could include fees such as labor, utilities, and other miscellaneous fees. <br />
+              </Typography>
+            </Typography>
+            <TextField
+              error={false}
+              fullWidth
+              margin="dense"
+              label="Additional Cost"
+              name="additionalCost"
+              type="number"
+              value={formData.otherCost.additionalCost}
+              onChange={(e) => handleAdditionalCostChange(e)}
             />
 
             <Stack spacing={1}>
@@ -632,7 +518,7 @@ const UpdatePastryMaterialModal = ({
                       label="Item Name"
                       name="itemName"
                       disabled
-                      value={ingredient.name}
+                      value={ingredient.itemName}
                     />
                     <Select
                       sx={{ width: "30%" }}
@@ -767,7 +653,7 @@ const UpdatePastryMaterialModal = ({
                 </Typography>
               </Typography>
               <Button variant="contained" onClick={handleAddVariantRow}>
-                Add new Variant
+                Add new size
               </Button>
             </Stack>
 
@@ -807,7 +693,7 @@ const UpdatePastryMaterialModal = ({
                 />
                 <Stack>
                   <Typography variant="h5" p={2}>
-                    Other Size #{index + 1} Ingredients
+                  Other Size #{index + 1} Ingredients
                   </Typography>
                   <Button
                     variant="contained"
@@ -1053,15 +939,15 @@ const UpdatePastryMaterialModal = ({
         </DialogContent>
       </Box>
       <DialogActions>
-        <Button onClick={handleClose} color="secondary">
+        <Button onClick={handleAddModalClose} color="secondary" sx={{ mr: 2 }}>
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained" color="primary">
-          Update
+          Save
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default UpdatePastryMaterialModal;
+export default AddPastryMaterialModal;

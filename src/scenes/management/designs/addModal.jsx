@@ -5,8 +5,6 @@ import {
   Typography,
   Select,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
   Dialog,
   DialogTitle,
   Stack,
@@ -17,31 +15,33 @@ import {
   FormControl,
   DialogActions,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import api from "../../../api/axiosConfig";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const UpdateDesignModal = ({
+const AddDesignModal = ({
   open,
   handleClose,
-  handleUpdateSubmit,
-  updatePastryMaterialOpen,
-  designData,
+  handleAddSubmit,
+  addPastryMaterialOpen,
 }) => {
   const defaultFormData = {
     displayName: "",
-    designPictureUrl: "N/A",
+    displayPictureUrl: "",
     cakeDescription: "",
-    designTags: [],
+    designTagIds: [],
     displayPictureData: "",
     designShapes: [],
+    displayPictureDataEncoded: "",
   };
-
-  const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState(null);
+
   const [validTags, setValidTags] = useState([]);
+  const [formData, setFormData] = useState(defaultFormData);
   const [fileType, setFileType] = useState("");
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const fetchValidTags = async () => {
     try {
@@ -53,45 +53,10 @@ const UpdateDesignModal = ({
     }
   };
 
-  const fetchDesignData = async () => {
-    if (designData && designData.designId) {
-      try {
-        const encodedId = encodeURIComponent(designData.designId);
-        const response = await api.get(`/designs/${encodedId}`);
-        if (response.data.designId !== null) {
-          const parsedResponse = response.data;
-          if (
-            response.data.designTags !== undefined &&
-            response.data.designTags !== null
-          ) {
-            parsedResponse.designTags.forEach((element) => {
-              element["initialData"] = "on";
-              element["forDeletion"] = "off";
-            });
-          }
-          if (
-            response.data.designShapes !== undefined &&
-            response.data.designShapes !== null
-          ) {
-            parsedResponse.designShapes.forEach((element) => {
-              element["initialData"] = "on";
-              element["forDeletion"] = "off";
-            });
-          }
-          setFormData(parsedResponse);
-        }
-      } catch (error) {
-        setError("Failed to fetch design data");
-        console.error("Failed to fetch design data:", error);
-      }
-    }
-  };
   useEffect(() => {
-    if (open) {
-      fetchValidTags();
-      fetchDesignData();
-    }
-  }, [open]);
+    fetchValidTags();
+    setFormData(defaultFormData);
+  }, []);
 
   const handleChange = (e, index = null, index2 = null) => {
     const { name, value } = e.target;
@@ -104,17 +69,17 @@ const UpdateDesignModal = ({
       if (index2 !== null) {
         if (index2 === 1) {
           setFormData((prevData) => {
-            const newTagList = [...prevData.designTags];
-            newTagList[index][name] = value;
+            const newTagList = [...prevData.designTagIds];
+            newTagList[index] = value;
             return {
               ...prevData,
-              designTags: newTagList,
+              designTagIds: newTagList,
             };
           });
         } else if (index2 === 2) {
           setFormData((prevData) => {
             const newShapeList = [...prevData.designShapes];
-            newShapeList[index][name] = value;
+            newShapeList[index] = value;
             return {
               ...prevData,
               designShapes: newShapeList,
@@ -131,7 +96,6 @@ const UpdateDesignModal = ({
       setError("File size exceeds the limit of 1MB.");
       return;
     }
-
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
@@ -140,41 +104,31 @@ const UpdateDesignModal = ({
 
       setFormData((prevData) => ({
         ...prevData,
-        displayPictureData: base64String,
+        displayPictureDataEncoded: base64String,
       }));
       setFileType(file.type);
     };
   };
 
   const handleAddTagRow = () => {
-    const newTagValue = {
-      designTagId: validTags.length > 0 ? validTags[0].designTagId : "",
-      designTagName: validTags.length > 0 ? validTags[0].designTagName : "",
-      initialData: "off",
-      forDeletion: "off",
-    };
+    const newTagValue = validTags.length > 0 ? validTags[0].designTagId : "";
     setFormData((prevData) => ({
       ...prevData,
-      designTags: [...prevData.designTags, newTagValue],
+      designTagIds: [...prevData.designTagIds, newTagValue],
     }));
   };
 
   const handleAddShapeRow = () => {
-    const newShapeValue = {
-      shapeName: "",
-      initialData: "off",
-      forDeletion: "off",
-    };
     setFormData((prevData) => ({
       ...prevData,
-      designShapes: [...prevData.designShapes, newShapeValue],
+      designShapes: [...prevData.designShapes, ""],
     }));
   };
 
   const handleRemoveTagRow = (index) => {
     setFormData((prevData) => ({
       ...prevData,
-      designTags: prevData.designTags.filter((_, i) => i !== index),
+      designTagIds: prevData.designTagIds.filter((_, i) => i !== index),
     }));
   };
 
@@ -192,9 +146,12 @@ const UpdateDesignModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleUpdateSubmit(formData);
+    setSubmitting(true);
+    // Implement form submission logic here
+    await handleAddSubmit(formData);
     setFormData(defaultFormData);
     handleClose();
+    setSubmitting(false);
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -208,19 +165,16 @@ const UpdateDesignModal = ({
     whiteSpace: "nowrap",
     width: 1,
   });
-
-  if (Object.keys(formData).length === 0) {
-    return <p>Loading</p>;
-  } else {
-    return (
-      <Dialog open={open} onClose={handleAddModalClose}>
-        <DialogTitle>Editing Design "{designData.displayName}"</DialogTitle>
+  return (
+    <Dialog open={open} onClose={handleAddModalClose}>
+      <DialogTitle>Adding a new Design</DialogTitle>
+      <form onSubmit={handleSubmit}>
         <DialogContent sx={{ minWidth: "600px" }}>
           <Stack spacing={2}>
             <Box display="flex" justifyContent="center">
               {formData.displayPictureDataEncoded && (
                 <img
-                  src={`data:${fileType};base64,${designData.displayPictureData}`}
+                  src={`data:${fileType};base64,${formData.displayPictureDataEncoded}`}
                   alt="Uploaded Preview"
                   style={{
                     width: "300px",
@@ -234,7 +188,7 @@ const UpdateDesignModal = ({
               component="label"
               role={undefined}
               variant={
-                designData.displayPictureData ? "contained" : "outlined"
+                formData.displayPictureDataEncoded ? "contained" : "outlined"
               }
               tabIndex={-1}
               startIcon={<CloudUploadIcon />}
@@ -271,51 +225,37 @@ const UpdateDesignModal = ({
             />
             <Divider />
             <Typography variant="h6">Tags</Typography>
-            {formData.designTags !== undefined &&
-              formData.designTags !== null &&
-              formData.designTags.map((item, index) => (
-                <Stack key={index} direction="row" spacing={2}>
-                  <FormControl fullWidth>
-                    <InputLabel
-                      variant="filled"
-                      id={`tag-${index}-label`}
-                    >{`Tag #${index + 1}`}</InputLabel>
-                    <Select
-                      labelId={`tag-${index}-label`}
-                      disabled={item.initialData === "on"}
-                      name="designTagId"
-                      variant="filled"
-                      value={item.designTagId}
-                      onChange={(e) => handleChange(e, index, 1)}
-                    >
-                      {validTags.map((validTagRow, idx) => (
-                        <MenuItem key={idx} value={validTagRow.designTagId}>
-                          {validTagRow.designTagName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {item.initialData === "on" && (
-                    <FormControlLabel
-                      name="forDeletion"
-                      control={<Checkbox />}
-                      onChange={(e) => handleChange(e, index, 1)}
-                      label="Delete"
-                      sx={{ minWidth: "80px" }}
-                    />
-                  )}
-                  {item.initialData === "off" && (
-                    <Button
-                      onClick={() => handleRemoveTagRow(index)}
-                      startIcon={<DeleteIcon />}
-                      color="secondary"
-                      sx={{ minWidth: "80px" }}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </Stack>
-              ))}
+            {formData.designTagIds.map((tagId, index) => (
+              <Stack key={index} direction="row" spacing={2}>
+                <FormControl fullWidth>
+                  <InputLabel
+                    variant="filled"
+                    id={`tag-${index}-label`}
+                  >{`Tag #${index + 1}`}</InputLabel>
+                  <Select
+                    labelId={`tag-${index}-label`}
+                    label={`Tag #${index + 1}`}
+                    name="designTagIds"
+                    value={tagId}
+                    onChange={(e) => handleChange(e, index, 1)}
+                  >
+                    {validTags.map((validTagRow, idx) => (
+                      <MenuItem key={idx} value={validTagRow.designTagId}>
+                        {validTagRow.designTagName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button
+                  onClick={() => handleRemoveTagRow(index)}
+                  startIcon={<DeleteIcon />}
+                  color="secondary"
+                  sx={{ minWidth: "80px" }}
+                >
+                  Remove
+                </Button>
+              </Stack>
+            ))}
             <Button variant="outlined" onClick={handleAddTagRow}>
               Add new tag
             </Button>
@@ -333,28 +273,17 @@ const UpdateDesignModal = ({
                     label={`Shape #${index + 1}`}
                     name="shapeName"
                     variant="filled"
-                    value={shape.shapeName}
+                    value={shape}
                   />
                 </FormControl>
-                {shape.initialData === "on" && (
-                  <FormControlLabel
-                    name="forDeletion"
-                    control={<Checkbox />}
-                    onChange={(e) => handleChange(e, index, 2)}
-                    label="Delete"
-                    sx={{ minWidth: "80px" }}
-                  />
-                )}
-                {shape.initialData === "off" && (
-                  <Button
-                    onClick={() => handleRemoveShapeRow(index)}
-                    startIcon={<DeleteIcon />}
-                    color="secondary"
-                    sx={{ minWidth: "80px" }}
-                  >
-                    Remove
-                  </Button>
-                )}
+                <Button
+                  onClick={() => handleRemoveShapeRow(index)}
+                  startIcon={<DeleteIcon />}
+                  color="secondary"
+                  sx={{ minWidth: "80px" }}
+                >
+                  Remove
+                </Button>
               </Stack>
             ))}
             <Button variant="outlined" onClick={handleAddShapeRow}>
@@ -363,26 +292,26 @@ const UpdateDesignModal = ({
             <Divider />
 
             <Typography variant="h6">Pastry Material</Typography>
-            <Button variant="outlined" onClick={updatePastryMaterialOpen}>
+            <Button variant="outlined" onClick={addPastryMaterialOpen}>
               Edit pastry material
             </Button>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddModalClose} color="secondary">
+          <Button
+            onClick={handleAddModalClose}
+            color="secondary"
+            sx={{ mr: 2 }}
+          >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            color="primary"
-            onClick={(e) => handleSubmit(e)}
-          >
-            Update Design
+          <Button type="submit" variant="contained" disabled={isSubmitting}>
+            {!isSubmitting ? "Add" : <CircularProgress size={21} />}
           </Button>
         </DialogActions>
-      </Dialog>
-    );
-  }
+      </form>
+    </Dialog>
+  );
 };
 
-export default UpdateDesignModal;
+export default AddDesignModal;

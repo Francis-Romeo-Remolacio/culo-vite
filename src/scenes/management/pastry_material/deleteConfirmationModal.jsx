@@ -71,10 +71,9 @@ const DeleteConfirmationModal = ({
         <DialogContent>
           <Box component="form" id="form_box_container">
             <Typography variant="h4" p={2}>
-              Do you want to delete the pastry material for{" "}
-              {formData.designName}?
+              Do you want to delete the pastry material for {formData.designName}?
               <Typography variant="caption" display={"block"}>
-                Pastry Material ID: {formData.pastryMaterialId} <br />
+                Pastry Material ID: {formData.pastryMaterialId} <br/>
                 Design ID: {formData.designId}
               </Typography>
             </Typography>

@@ -1,5 +1,5 @@
 {
-  "compilerOptions": { "strict": false },
+  "compilerOptions": { "strict": false, "allowJs": true },
   "files": [],
   "references": [
     {

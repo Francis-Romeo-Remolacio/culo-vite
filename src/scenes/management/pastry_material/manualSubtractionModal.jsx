@@ -62,9 +62,7 @@ const ManualSubtractionModal = ({
 
     setFormData(parsedData);
   }, [open]);
-  useEffect(() => {
-    updateIngredientInStockState();
-  }, [material]);
+  useEffect(() => {updateIngredientInStockState()}, [material])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,28 +70,21 @@ const ManualSubtractionModal = ({
       ...prevData,
       [name]: value,
     }));
-    if (name == "variant_id") {
+    if (name == "variant_id"){
       updateIngredientInStockState();
     }
   };
   const updateIngredientInStockState = () => {
-    if (
-      material !== undefined &&
-      material !== null &&
-      material.subVariants !== undefined &&
-      material.subVariants !== null
-    ) {
-      if (formData.pastryMaterialId == formData.variant_id) {
-        setIngredientsInStock(material.ingredients_in_stock);
-      } else {
-        setIngredientsInStock(
-          material.subVariants.find(
-            (x) => x.pastryMaterialSubVariantId == formData.variant_id
-          ).ingredients_in_stock
-        );
+    if (material !== undefined && material !== null &&
+      material.subVariants !== undefined && material.subVariants !== null){
+        if (formData.pastryMaterialId == formData.variant_id){
+         setIngredientsInStock(material.ingredients_in_stock); 
+        }
+        else {
+          setIngredientsInStock(material.subVariants.find(x => x.pastryMaterialSubVariantId == formData.variant_id).ingredients_in_stock)
+        }
       }
-    }
-  };
+  }
 
   return (
     <Dialog
@@ -110,33 +101,27 @@ const ManualSubtractionModal = ({
       <Box sx={style} color={colors.text}>
         <DialogContent>
           <Box component="form" id="form_box_container">
-            <Typography variant="caption">
-              Subtracts only the ingredients of a variant (not including add
-              ons), Use only if absolutely necessary
+            <Typography variant="caption" >
+              Subtracts only the ingredients of a specific design's size (not including add ons), 
+              Use only if absolutely necessary
             </Typography>
             <Stack direction={"row"} spacing={1}>
               <Select
                 sx={{ width: "100%" }}
                 margin="dense"
-                label="Variant Name"
+                label="Size"
                 name="variant_id"
                 value={formData.variant_id}
                 onChange={(e) => handleChange(e)}
               >
-                {material !== undefined && material !== null && (
-                  <MenuItem value={formData.pastryMaterialId}>
-                    {material.mainVariantName}
-                  </MenuItem>
-                )}
-                {material !== undefined &&
-                  material !== null &&
-                  material.subVariants !== undefined &&
-                  material.subVariants !== null &&
+                {material !== undefined && material !== null && 
+                <MenuItem value={formData.pastryMaterialId}>{material.mainVariantName}</MenuItem>}
+                {
+                  material !== undefined && material !== null && 
+                  material.subVariants !== undefined && material.subVariants !== null && 
                   material.subVariants.map((subVariant, index) => (
-                    <MenuItem value={subVariant.pastryMaterialSubVariantId}>
-                      {subVariant.subVariantName}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value={subVariant.pastryMaterialSubVariantId}>{subVariant.subVariantName}</MenuItem>
+                ))}
               </Select>
             </Stack>
           </Box>
@@ -147,12 +132,7 @@ const ManualSubtractionModal = ({
         <Button onClick={handleClose} color="secondary" sx={{ mr: 2 }}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          color="primary"
-          disabled={!ingredientsInStock}
-        >
+        <Button onClick={handleSubmit} variant="contained" color="primary" disabled={!ingredientsInStock}>
           Subtract from Inventory
         </Button>
       </DialogActions>

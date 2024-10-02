@@ -12,7 +12,7 @@ import UpdatePastryMaterialModal from "./updateModalPastryMaterial.jsx";
 
 const Designs = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   const [designs, setDesigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

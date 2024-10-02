@@ -22,7 +22,7 @@ import DataGridStyler from "./../../../components/DataGridStyler.jsx";
 
 const PastryMaterial = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,16 +54,6 @@ const PastryMaterial = () => {
       field: "designName",
       headerName: "Name of Design",
       flex: 0.2,
-    },
-    {
-      field: "dateAdded",
-      headerName: "Date Added",
-      type: "dateTime",
-    },
-    {
-      field: "lastModifiedDate",
-      headerName: "Last Modified Date",
-      type: "dateTime",
     },
     {
       field: "costEstimate",

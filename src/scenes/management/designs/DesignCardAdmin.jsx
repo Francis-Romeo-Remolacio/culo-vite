@@ -16,29 +16,19 @@ import { useTheme } from "@mui/material";
 import { Tokens } from "../../../Theme";
 import TagChipName from "../../../components/TagChipName";
 
-const DesignCardAdmin = ({
-  key,
-  id,
-  name,
-  picture,
-  pictureUrl,
-  tags,
-  description,
-  editAction,
-  deleteAction,
-}) => {
+const DesignCardAdmin = ({key, id, name, picture, pictureUrl, tags, description, editAction, deleteAction}) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
   const [open, setOpen] = useState(false);
   const [imageType, setImageType] = useState(null);
   const data = {
-    designId: id,
-    displayName: name,
-    displayPictureUrl: pictureUrl,
-    cakeDescription: description,
-    designTags: tags,
-    displayPictureData: picture,
-  };
+    "designId": id,
+    "displayName": name,
+    "displayPictureUrl": pictureUrl,
+    "cakeDescription": description,
+    "designTags": tags,
+    "displayPictureData": picture,
+}
 
   useEffect(() => {
     if (picture) {
@@ -64,7 +54,7 @@ const DesignCardAdmin = ({
   const editButtonClick = () => {
     editAction(data);
     setOpen(false);
-  };
+  }
 
   // Function to get the image type by reading the base64 header
   const getImageType = (data) => {
@@ -94,7 +84,7 @@ const DesignCardAdmin = ({
           e.target.src = "/assets/design.png"; // Set the fallback image source
         }}
       />
-
+      
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {name}
@@ -110,34 +100,26 @@ const DesignCardAdmin = ({
       </CardContent>
 
       <CardActions>
-        <Button variant="contained" size="small" onClick={handleClickOpen}>
-          View Details
-        </Button>
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{name}</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{description}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} sx={{ color: colors.text }}>
-              Close
-            </Button>
-            <Button
-              type="button"
-              sx={{ color: colors.text }}
-              onClick={(e) => editButtonClick()}
-            >
-              Edit
-            </Button>
-            <Button
-              type="button"
-              sx={{ color: colors.text }}
-              onClick={(e) => deleteAction(id)}
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <Button variant="contained" size="small" onClick={handleClickOpen}>
+            View Details
+          </Button>
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>{name}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{description}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} sx={{ color: colors.text }}>
+                Close 
+              </Button>
+              <Button type="button" sx={{ color: colors.text }} onClick={(e) => editButtonClick()}>
+                Edit
+              </Button>
+              <Button type="button" sx={{ color: colors.text }} onClick={(e) => deleteAction(id)}>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
       </CardActions>
     </Card>
   );

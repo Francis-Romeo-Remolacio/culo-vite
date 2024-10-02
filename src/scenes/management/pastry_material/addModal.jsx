@@ -51,7 +51,7 @@ const AddPastryMaterialModal = ({ open, handleClose, handleAdd }) => {
   const [validAddOns, setValidAddOns] = useState([]);
 
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = Tokens(theme.palette.mode);
 
   useEffect(() => {
     fetchValidMeasurements();
