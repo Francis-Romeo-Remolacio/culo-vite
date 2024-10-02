@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, useTheme, Button, Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Button,
+  Grid2 as Grid,
+} from "@mui/material";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import DesignCard from "./../../../components/DesignCard.jsx";
@@ -125,7 +131,8 @@ const Designs = () => {
           designId: responseId,
           mainVariantName: currentDesignPastryMaterialData.mainVariantName,
           otherCost: {
-            additionalCost: currentDesignPastryMaterialData.otherCost.additionalCost
+            additionalCost:
+              currentDesignPastryMaterialData.otherCost.additionalCost,
           },
           ingredients: [],
           addOns: [],
@@ -260,30 +267,41 @@ const Designs = () => {
           currentDesignPastryMaterialData.pastryMaterialId
         );
 
-        if (currentDesignPastryMaterialData.otherCost !== undefined && currentDesignPastryMaterialData.otherCost !== null) {
+        if (
+          currentDesignPastryMaterialData.otherCost !== undefined &&
+          currentDesignPastryMaterialData.otherCost !== null
+        ) {
           //Check if no record of other cost exist
           if (
-            currentDesignPastryMaterialData.otherCost.pastryMaterialAdditionalCostId !== undefined &&
-            currentDesignPastryMaterialData.otherCost.pastryMaterialAdditionalCostId !== null &&
-            currentDesignPastryMaterialData.otherCost.pastryMaterialAdditionalCostId ===
+            currentDesignPastryMaterialData.otherCost
+              .pastryMaterialAdditionalCostId !== undefined &&
+            currentDesignPastryMaterialData.otherCost
+              .pastryMaterialAdditionalCostId !== null &&
+            currentDesignPastryMaterialData.otherCost
+              .pastryMaterialAdditionalCostId ===
               "00000000-0000-0000-0000-000000000000"
           ) {
             try {
-              const response = await api.post(`/pastry-materials/${encodedId}/other-costs/`, 
-                {"additionalCost" : currentDesignPastryMaterialData.otherCost.additionalCost}
+              const response = await api.post(
+                `/pastry-materials/${encodedId}/other-costs/`,
+                {
+                  additionalCost:
+                    currentDesignPastryMaterialData.otherCost.additionalCost,
+                }
               );
-            }
-            catch (error) {
+            } catch (error) {
               console.error("Failed to add pastry material other cost:", error);
             }
-          }
-          else {
+          } else {
             try {
-              const response = await api.patch(`/pastry-materials/${encodedId}/other-costs/`, 
-                {"additionalCost" : currentDesignPastryMaterialData.otherCost.additionalCost}
+              const response = await api.patch(
+                `/pastry-materials/${encodedId}/other-costs/`,
+                {
+                  additionalCost:
+                    currentDesignPastryMaterialData.otherCost.additionalCost,
+                }
               );
-            }
-            catch (error) {
+            } catch (error) {
               console.error("Failed to add pastry material other cost:", error);
             }
           }

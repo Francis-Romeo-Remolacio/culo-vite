@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Paper,
-  Typography,
-  //Grid,
-} from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Paper, Typography, Grid2 as Grid } from "@mui/material";
 import api from "../../api/axiosConfig";
 import { Helmet } from "react-helmet-async";
 import Header from "./../../components/Header.jsx";

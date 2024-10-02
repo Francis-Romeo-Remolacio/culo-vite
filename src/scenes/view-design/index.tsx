@@ -8,7 +8,7 @@ import {
   Container,
   Stack,
   Button,
-  Grid,
+  Grid2 as Grid,
   FormControl,
   TextField,
   Skeleton,

@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Stack, Typography, useTheme, Grid } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Stack,
+  Typography,
+  useTheme,
+  Grid2 as Grid,
+} from "@mui/material";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import { BarDatum, ResponsiveBar } from "@nivo/bar";

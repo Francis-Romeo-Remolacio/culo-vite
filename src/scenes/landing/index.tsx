@@ -9,9 +9,8 @@ import {
   Paper,
   ListItemText,
   Box,
-  //Grid,
+  Grid2 as Grid,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2/Grid2.js";
 import { Helmet } from "react-helmet-async";
 import DesignGallery from "./../../components/DesignGallery.jsx";
 

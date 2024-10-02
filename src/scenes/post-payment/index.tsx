@@ -1,8 +1,13 @@
 import { Tokens } from "../../Theme";
-import { Button, Grid, Stack, Typography, useTheme } from "@mui/material";
+import {
+  Button,
+  Grid2 as Grid,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import api from "../../api/axiosConfig";
 
 const PostPayment = () => {
   const location = useLocation();
