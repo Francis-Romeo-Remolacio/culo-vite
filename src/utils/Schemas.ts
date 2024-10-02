@@ -93,10 +93,15 @@ export interface PastryMaterial {
   designName: string;
   dateAdded: string;
   lastModifiedDate: string;
+  otherCost: OtherCost;
   costEstimate: number;
   ingredients: Array<{ itemName: string }>;
   subVariants: Array<{ subVariantName: string }>;
   mainVariantName: string;
+}
+export interface OtherCost {
+  pastryMaterialAdditionalCostId: string,
+  additionalCost: number
 }
 
 export interface Order {
@@ -225,4 +230,36 @@ export interface SalesOnMonth extends Sales {
 export interface ChartData {
   id: string | number;
   value: number;
+}
+
+//Pastry Material Input schemas
+export interface PastryMaterialAddForm {
+  designId: string;
+  otherCost: PastryMaterialAddFormOtherCost;
+  ingredients: PastryMaterialAddFormIngredients[];
+  addOns: PastryMaterialAddFormAddOns[];
+  subVariants: PastryMaterialAddFormSubVariants[];
+}
+export interface PastryMaterialAddFormOtherCost {
+  additionalCost : number
+}
+export interface PastryMaterialAddFormIngredients {
+  ingredientType: string;
+  itemId: string;
+  itemName: string;
+  amountMeasurement : string;
+  amount: number;
+  forInsertion: string;
+}
+export interface PastryMaterialAddFormAddOns {
+  addOnsId: number;
+  addOnsName: string;
+  amount: number;
+  forInsertion: string;
+}
+export interface PastryMaterialAddFormSubVariants {
+  subVariantName? : string;
+  forInsertion?: string;
+  subVariantIngredients?: PastryMaterialAddFormIngredients[];
+  subVariantAddOns? : PastryMaterialAddFormAddOns[]
 }
