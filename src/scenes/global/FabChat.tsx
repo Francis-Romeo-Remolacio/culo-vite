@@ -29,11 +29,11 @@ import {
   HubConnectionBuilder,
   ILogger,
   LogLevel,
-  NullLogger,
 } from "@microsoft/signalr";
 import Cookies from "js-cookie";
 import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
-import { DirectMessage, User } from "../../utils/Schemas";
+import { DirectMessage } from "../../utils/Schemas";
+import api from "../../api/axiosConfig";
 
 class CustomHttpClient extends DefaultHttpClient {
   private token: string;
@@ -60,6 +60,13 @@ class CustomHttpClient extends DefaultHttpClient {
 
     return super.send(request);
   }
+}
+
+interface OnlineUser {
+  connection_id: string;
+  account_id: string;
+  name: string;
+  role: string;
 }
 
 type MessageProps = {
@@ -130,7 +137,7 @@ const FabChat = () => {
   );
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<DirectMessage[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [bearerToken, setBearerToken] = useState<string>("");
 
@@ -153,13 +160,16 @@ const FabChat = () => {
         }
 
         const newConnection = new HubConnectionBuilder()
-          .withUrl("http://localhost:5155/live-chat/", {
-            httpClient: new CustomHttpClient(
-              new ConsoleLogger(LogLevel.Information),
-              "MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs",
-              cookieToken
-            ),
-          })
+          .withUrl(
+            "http://resentekaizen280-001-site1.etempurl.com/live-chat/",
+            {
+              httpClient: new CustomHttpClient(
+                new ConsoleLogger(LogLevel.Information),
+                "MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs",
+                cookieToken
+              ),
+            }
+          )
           .withAutomaticReconnect()
           .build();
 
@@ -212,19 +222,13 @@ const FabChat = () => {
   }, [connection]);
 
   // Fetch online users
-  useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      fetch(
-        "http://localhost:5155/culo-api/v1/ui-helpers/live-chat/online-users"
-      )
-        .then((response) => response.json())
-        .then((jsonArray) => {
-          setOnlineUsers(jsonArray);
-        });
-    }, 10000); // Refresh every 10 seconds
-
-    return () => clearInterval(refreshInterval);
-  }, []);
+  const refreshConnections = () => {
+    fetch("http://localhost:5155/culo-api/v1/ui-helpers/live-chat/online-users")
+      .then((response) => response.json())
+      .then((jsonArray) => {
+        setOnlineUsers(jsonArray);
+      });
+  };
 
   // Send message as a customer or admin
   const sendMessage = (role: string) => {
@@ -295,12 +299,13 @@ const FabChat = () => {
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
                   {onlineUsers.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
-                      {`${user.username} (${user.roles[0]})`}
+                    <MenuItem key={user.account_id} value={user.account_id}>
+                      {`${user.name} (${user.role})`}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+              <Button onClick={refreshConnections}>Refresh Connections</Button>
               {chatMessages.map((msg, index) =>
                 msg.sender === "Admin" ? (
                   <MessageRight key={index} directMessage={msg} />
