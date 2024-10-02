@@ -51,7 +51,7 @@ const Shop = () => {
       </Helmet>
 
       <RefreshContext.Provider value={{ isRefreshing, setIsRefreshing }}>
-        <Grid xs={2} sx={{ display: { xs: "none", lg: "block" } }}>
+        <Grid size={{ xs: 2 }} sx={{ display: { xs: "none", lg: "block" } }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h3">Popular Categories</Typography>
             <TagsCheckboxList
@@ -61,7 +61,7 @@ const Shop = () => {
             />
           </Paper>
         </Grid>
-        <Grid xs={12} lg={10}>
+        <Grid size={{ xs: 2, lg: 10 }}>
           <Paper sx={{ p: 2 }}>
             <Header
               title="The Pink Butter Cake Studio"

@@ -679,7 +679,7 @@ const Designs = () => {
     <Box p={2}>
       <Header title="Designs" subtitle="Gallery of all designs" />
       <Grid container spacing={2}>
-        <Grid item xs={6} sm={4} md={2} lg={1.5}>
+        <Grid size={{ xs: 6, sm: 4, md: 2, lg: 1.5 }}>
           <Button
             onClick={handleAddDesignButtonClick}
             variant="contained"
@@ -693,7 +693,7 @@ const Designs = () => {
           </Button>
         </Grid>
         {designs.map((design) => (
-          <Grid item xs={6} sm={4} md={2} lg={1.5}>
+          <Grid size={{ xs: 6, sm: 4, md: 2, lg: 1.5 }}>
             <DesignCard
               manager
               id={design.designId}

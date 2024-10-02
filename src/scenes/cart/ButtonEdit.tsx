@@ -225,7 +225,7 @@ const ButtonEdit = ({ orderData, designInfo }) => {
           </Box>
           <CustomTabPanel tab={tab} index={0}>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Stack spacing={2}>
                   <Typography variant="h5">Size</Typography>
                   <Box display="flex" flexWrap="wrap" gap="2px">
@@ -287,7 +287,7 @@ const ButtonEdit = ({ orderData, designInfo }) => {
                   </FormControl>
                 </Stack>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <FormControl sx={{ width: "100%" }}>
                   <TextField
                     id="descriptionText"
@@ -316,7 +316,7 @@ const ButtonEdit = ({ orderData, designInfo }) => {
             <Stack spacing={2}>
               {orderAddOns.map((addOn, idx) => (
                 <Grid container key={idx} sx={{ width: "100%" }}>
-                  <Grid item xs={9}>
+                  <Grid size={{ xs: 9 }}>
                     {/* OrderAddOns Name */}
                     <Autocomplete
                       disablePortal
@@ -336,7 +336,7 @@ const ButtonEdit = ({ orderData, designInfo }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={2}>
+                  <Grid size={{ xs: 2 }}>
                     {/* OrderAddOns Quantity */}
                     <TextField
                       type="number"
@@ -348,7 +348,7 @@ const ButtonEdit = ({ orderData, designInfo }) => {
                       }
                     />
                   </Grid>
-                  <Grid item xs={1}>
+                  <Grid size={{ xs: 1 }}>
                     {/* OrderAddOns Remove Button */}
                     <Box
                       display="flex"

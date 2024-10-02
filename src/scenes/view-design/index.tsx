@@ -389,7 +389,7 @@ const ViewDesign = () => {
         width="100%"
         minHeight="90vh"
       >
-        <Grid item>
+        <Grid>
           <CircularProgress />
         </Grid>
       </Grid>
@@ -404,7 +404,7 @@ const ViewDesign = () => {
           <CircularProgress />
         ) : (
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               {picture ? (
                 <img
                   src={`data:image/${imageType};base64,${picture}`}
@@ -419,7 +419,7 @@ const ViewDesign = () => {
                 <Skeleton variant="rounded" />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Stack spacing={2} width="100%" height="100%">
                 <Typography variant="subtitle1">
                   Pink Butter Cake Studio Original Design
@@ -568,7 +568,6 @@ const ViewDesign = () => {
                           {selectedVariant.addOns.map((addOn) => (
                             <ListItem
                               key={addOn.id}
-                              button
                               onClick={() =>
                                 handleToggleAddOn(addOn.id, "variant")
                               }
@@ -624,7 +623,6 @@ const ViewDesign = () => {
                           {userAddOns.map((userAddOn) => (
                             <ListItem
                               key={userAddOn.id}
-                              button
                               onClick={() =>
                                 handleToggleAddOn(userAddOn.id, "custom")
                               }
@@ -679,7 +677,6 @@ const ViewDesign = () => {
                           ))}
                           <ListItem
                             key="insert_add_on"
-                            button
                             onClick={() => handleOpenAddOn()}
                           >
                             <IconButton>

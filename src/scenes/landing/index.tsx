@@ -55,7 +55,7 @@ const Landing = () => {
         </Stack>
 
         <Grid container spacing={2}>
-          <Grid xs={12} md={6} lg={4}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             {/* Section 2: About */}
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
@@ -71,7 +71,7 @@ const Landing = () => {
               </Typography>
             </Paper>
           </Grid>
-          <Grid xs={12} md={6} lg={4}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             {/* Section 3: Premade Designs */}
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
@@ -85,7 +85,8 @@ const Landing = () => {
             </Paper>
           </Grid>
           {/* Section 4: Custom Order */}
-          {/*<Grid xs={12} md={6} lg={4}>
+          {/*
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Panel>
             <Typography variant="h4" gutterBottom>
               Request a Custom Cake
@@ -95,7 +96,7 @@ const Landing = () => {
         </Grid>*/}
 
           {/* Section 5: Testimonials */}
-          <Grid xs={12} md={6} lg={4}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 What Our Customers Say
@@ -134,7 +135,7 @@ const Landing = () => {
               </List>
             </Paper>
           </Grid>
-          <Grid xs={12} md={6} lg={4}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             {/* Section 6: Contact  */}
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>

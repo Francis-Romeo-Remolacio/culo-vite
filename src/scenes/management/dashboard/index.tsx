@@ -661,7 +661,7 @@ const Dashboard = () => {
               <Header title={"Total Orders: " + totalOrders?.total} />
             </Paper>
 
-            <Grid xs={6} style={gridItemStyle}>
+            <Grid size={{ xs: 6 }} style={gridItemStyle}>
               <Header title="Orders this month" />
               <ResponsiveLine
                 colors={lineGraphLineColor}
@@ -714,7 +714,7 @@ const Dashboard = () => {
               />
             </Grid>
 
-            <Grid xs={6} style={gridItemStyle}>
+            <Grid size={{ xs: 6 }} style={gridItemStyle}>
               <Header title="Orders this year" />
               <ResponsiveLine
                 colors={lineGraphLineColor}
@@ -780,7 +780,7 @@ const Dashboard = () => {
           }}
         >
           <Grid container marginBottom={10} style={gridStyle}>
-            <Grid xs={6} style={gridItemStyle}>
+            <Grid size={{ xs: 6 }} style={gridItemStyle}>
               <Header title="Design tags use occurrence" />
               <ResponsiveBar
                 data={tagsUsedOccurenceBarChartData}
@@ -811,7 +811,7 @@ const Dashboard = () => {
                 }}
               />
             </Grid>
-            <Grid xs={6} style={gridItemStyle}>
+            <Grid size={{ xs: 6 }} style={gridItemStyle}>
               <Header title="Ingredient use in design ingredients" />
               <ResponsiveBar
                 data={itemUsedOccurenceCakeIngredientBarChartData}
