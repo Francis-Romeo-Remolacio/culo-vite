@@ -98,6 +98,24 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
         >
           <DialogContent>
             <Stack spacing={2} sx={{ minWidth: 512 }}>
+              {suborders.map((suborder) => (
+                <Accordion>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2-content"
+                    id="panel2-header"
+                  >
+                    {suborder.id}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography>{`Size: ${suborder.size}`}</Typography>
+                    <Typography>{`Color: ${suborder.color}`}</Typography>
+                    <Typography>{`Flavor: ${suborder.flavor}`}</Typography>
+                    <Typography>{`Description: ${suborder.description}`}</Typography>
+                    <Typography>{`Quantity: ${suborder.quantity}x`}</Typography>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
               <FormControl fullWidth variant="filled">
                 <InputLabel id="select-type-label">Type</InputLabel>
                 <Select
