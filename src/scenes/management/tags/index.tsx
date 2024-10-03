@@ -18,9 +18,9 @@ import { Tag } from "../../../utils/Schemas.js";
 
 const Tags = () => {
   const [rows, setRows] = useState([]);
-  const [openAddModal, setOpenAddModal] = useState(false);
-  const [openBulkAddModal, setOpenBulkAddModal] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openAddModal, setOpenAddModal] = useState<boolean>(false);
+  const [openBulkAddModal, setOpenBulkAddModal] = useState<boolean>(false);
+  const [openEditModal, setOpenEditModal] = useState<boolean>(false);
   const [currentTagSelected, setCurrentTagSelected] = useState("");
 
   const fetchData = async () => {
