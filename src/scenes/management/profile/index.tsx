@@ -44,6 +44,7 @@ const Profile = () => {
               isEmailConfirmed: response.data.email,
               joinDate: response.data.joinDate,
             };
+            setUserData(parsedUser);
           });
       } catch (err) {
         setError("Failed to fetch user data. Please try again.");
