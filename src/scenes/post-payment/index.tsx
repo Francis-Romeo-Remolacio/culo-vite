@@ -14,7 +14,7 @@ const PostPayment = () => {
   const query = new URLSearchParams(location.search);
   const transactionId = query.get("transaction") || undefined;
 
-  const [transaction, setTransaction] = useState<any>({ result: "failed" });
+  const [transaction, setTransaction] = useState<any>({ result: "success" });
   const [message1, setMessage1] = useState("");
   const [message2, setMessage2] = useState("");
 

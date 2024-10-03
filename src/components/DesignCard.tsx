@@ -70,7 +70,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
               ? `data:image/${imageType};base64,${design.pictureData}`
               : design.pictureUrl
               ? design.pictureUrl.toString()
-              : "/assets/design.png"
+              : "design.png"
           }
         />
         <CardContent>

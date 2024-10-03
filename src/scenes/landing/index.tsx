@@ -26,7 +26,7 @@ const Landing = () => {
           zIndex: -1,
           opacity: 0.5,
           margin: -2,
-          background: `url(/src/assets/banner.png) center/cover no-repeat`,
+          background: `url(banner.png) center/cover no-repeat`,
         }}
       />
       <Stack justifyContent="center" spacing={4} mt="0">
