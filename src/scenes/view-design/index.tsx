@@ -340,8 +340,10 @@ const ViewDesign = () => {
     if (picture) {
       const determineImageType = async () => {
         try {
-          const type = getImageType(picture);
-          setImageType(type);
+          if (picture) {
+            const type = getImageType(picture);
+            setImageType(type);
+          }
         } catch (err) {
           console.error("Error determining image type:", err);
         }
@@ -398,7 +400,7 @@ const ViewDesign = () => {
     return (
       <Container sx={{ maxWidth: "600px" }}>
         <Helmet>
-          <title>{`₱{design?.name} - The Pink Butter Cake Studio`}</title>
+          <title>{`${design?.name} - The Pink Butter Cake Studio`}</title>
         </Helmet>
         {loading ? (
           <CircularProgress />
