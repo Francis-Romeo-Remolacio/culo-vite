@@ -45,7 +45,7 @@ class CustomHttpClient extends DefaultHttpClient {
     this.bearer = bearer;
   }
 
-  public send(request: HttpRequest): Promise<HttpResponse> {
+  public async send(request: HttpRequest): Promise<HttpResponse> {
     const baseAuth = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
     let authHeader = baseAuth;
 
@@ -58,7 +58,7 @@ class CustomHttpClient extends DefaultHttpClient {
       Authorization: authHeader,
     };
 
-    return super.send(request);
+    return await super.send(request);
   }
 }
 
