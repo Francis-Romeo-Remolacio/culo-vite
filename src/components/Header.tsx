@@ -7,13 +7,17 @@ type HeaderProps = {
 
 const Header = ({ title, subtitle }: HeaderProps) => {
   return (
-    <Box mb="30px">
-      <Typography variant="h2" fontWeight="bold" sx={{ m: "0 0 5px 0" }}>
+    <Box mb={subtitle ? "30px" : ""}>
+      <Typography variant="h2" fontWeight="bold">
         {title}
       </Typography>
-      <Typography variant="h5" color="secondary">
-        {subtitle}
-      </Typography>
+      {subtitle ? (
+        <Typography variant="h5" color="secondary">
+          {subtitle}
+        </Typography>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

@@ -453,10 +453,6 @@ const Dashboard = () => {
     return <Typography>Loading...</Typography>;
   }
 
-  if (error) {
-    return <Typography>Error: {error}</Typography>;
-  }
-
   return (
     <Box>
       {/* HEADER */}
@@ -572,13 +568,6 @@ const Dashboard = () => {
                   curve={lineGraphLineCurve}
                   lineWidth={4}
                   data={totalSalesInMonth}
-                  theme={{
-                    axis: {
-                      ticks: { text: { fill: gridColor } },
-                      legend: { text: { fill: gridColor } },
-                    },
-                    grid: { line: { stroke: gridColor } },
-                  }}
                 />
               </Paper>
 
@@ -632,13 +621,6 @@ const Dashboard = () => {
                   curve={lineGraphLineCurve}
                   lineWidth={4}
                   data={totalSalesInYear}
-                  theme={{
-                    axis: {
-                      ticks: { text: { fill: gridColor } },
-                      legend: { text: { fill: gridColor } },
-                    },
-                    grid: { line: { stroke: gridColor } },
-                  }}
                 />
               </Paper>
             </Stack>
@@ -656,115 +638,102 @@ const Dashboard = () => {
             backgroundColor: colors.primary[100],
           }}
         >
-          <Stack>
+          <Stack spacing={2}>
             <Paper sx={paperStyle}>
               <Header title={"Total Orders: " + totalOrders?.total} />
             </Paper>
+            <Stack direction="row" spacing={2}>
+              <Paper sx={paperStyle}>
+                <Header title="Orders this month" />
+                <ResponsiveLine
+                  colors={lineGraphLineColor}
+                  margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
+                  xScale={{ type: "point" }}
+                  yScale={{
+                    type: "linear",
+                    min: "auto",
+                    max: "auto",
+                    stacked: true,
+                    reverse: false,
+                  }}
+                  yFormat=" >-.2f"
+                  pointSize={10}
+                  pointColor={{ theme: "background" }}
+                  pointBorderWidth={2}
+                  pointBorderColor={{ from: "serieColor" }}
+                  pointLabel="data.yFormatted"
+                  pointLabelYOffset={-12}
+                  enableTouchCrosshair={true}
+                  useMesh={true}
+                  axisLeft={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 0,
+                    legend: "Number of Orders",
+                    legendOffset: -40,
+                    legendPosition: "middle",
+                    truncateTickAt: 0,
+                  }}
+                  axisBottom={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 0,
+                    legend: "Day",
+                    legendOffset: 36,
+                    legendPosition: "middle",
+                    truncateTickAt: 0,
+                  }}
+                  curve={lineGraphLineCurve}
+                  lineWidth={4}
+                  data={totalOrdersInMonth}
+                />
+              </Paper>
 
-            <Grid size={{ xs: 6 }} style={gridItemStyle}>
-              <Header title="Orders this month" />
-              <ResponsiveLine
-                colors={lineGraphLineColor}
-                margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
-                xScale={{ type: "point" }}
-                yScale={{
-                  type: "linear",
-                  min: "auto",
-                  max: "auto",
-                  stacked: true,
-                  reverse: false,
-                }}
-                yFormat=" >-.2f"
-                pointSize={10}
-                pointColor={{ theme: "background" }}
-                pointBorderWidth={2}
-                pointBorderColor={{ from: "serieColor" }}
-                pointLabel="data.yFormatted"
-                pointLabelYOffset={-12}
-                enableTouchCrosshair={true}
-                useMesh={true}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legend: "Number of Orders",
-                  legendOffset: -40,
-                  legendPosition: "middle",
-                  truncateTickAt: 0,
-                }}
-                axisBottom={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legend: "Day",
-                  legendOffset: 36,
-                  legendPosition: "middle",
-                  truncateTickAt: 0,
-                }}
-                curve={lineGraphLineCurve}
-                lineWidth={4}
-                data={totalOrdersInMonth}
-                theme={{
-                  axis: {
-                    ticks: { text: { fill: gridColor } },
-                    legend: { text: { fill: gridColor } },
-                  },
-                  grid: { line: { stroke: gridColor } },
-                }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 6 }} style={gridItemStyle}>
-              <Header title="Orders this year" />
-              <ResponsiveLine
-                colors={lineGraphLineColor}
-                margin={{ top: 25, right: 110, bottom: 60, left: 60 }}
-                xScale={{ type: "point" }}
-                yScale={{
-                  type: "linear",
-                  min: "auto",
-                  max: "auto",
-                  stacked: true,
-                  reverse: false,
-                }}
-                yFormat=" >-.2f"
-                pointSize={10}
-                pointColor={{ theme: "background" }}
-                pointBorderWidth={2}
-                pointBorderColor={{ from: "serieColor" }}
-                pointLabel="data.yFormatted"
-                pointLabelYOffset={-12}
-                enableTouchCrosshair={true}
-                useMesh={true}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legend: "Number of Orders",
-                  legendOffset: -40,
-                  legendPosition: "middle",
-                  truncateTickAt: 0,
-                }}
-                axisBottom={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 90,
-                  legendOffset: 36,
-                  legendPosition: "middle",
-                  truncateTickAt: 0,
-                }}
-                curve={lineGraphLineCurve}
-                lineWidth={4}
-                data={totalOrdersInYear}
-                theme={{
-                  axis: {
-                    ticks: { text: { fill: gridColor } },
-                    legend: { text: { fill: gridColor } },
-                  },
-                  grid: { line: { stroke: gridColor } },
-                }}
-              />
-            </Grid>
+              <Paper sx={paperStyle}>
+                <Header title="Orders this year" />
+                <ResponsiveLine
+                  colors={lineGraphLineColor}
+                  margin={{ top: 25, right: 110, bottom: 60, left: 60 }}
+                  xScale={{ type: "point" }}
+                  yScale={{
+                    type: "linear",
+                    min: "auto",
+                    max: "auto",
+                    stacked: true,
+                    reverse: false,
+                  }}
+                  yFormat=" >-.2f"
+                  pointSize={10}
+                  pointColor={{ theme: "background" }}
+                  pointBorderWidth={2}
+                  pointBorderColor={{ from: "serieColor" }}
+                  pointLabel="data.yFormatted"
+                  pointLabelYOffset={-12}
+                  enableTouchCrosshair={true}
+                  useMesh={true}
+                  axisLeft={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 0,
+                    legend: "Number of Orders",
+                    legendOffset: -40,
+                    legendPosition: "middle",
+                    truncateTickAt: 0,
+                  }}
+                  axisBottom={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 90,
+                    legendOffset: 36,
+                    legendPosition: "middle",
+                    truncateTickAt: 0,
+                  }}
+                  curve={lineGraphLineCurve}
+                  lineWidth={4}
+                  data={totalOrdersInYear}
+                />
+              </Paper>
+            </Stack>
           </Stack>
         </Paper>
 
@@ -779,8 +748,8 @@ const Dashboard = () => {
             backgroundColor: colors.primary[100],
           }}
         >
-          <Grid container marginBottom={10} style={gridStyle}>
-            <Grid size={{ xs: 6 }} style={gridItemStyle}>
+          <Stack direction="row" spacing={2}>
+            <Paper sx={paperStyle}>
               <Header title="Design tags use occurrence" />
               <ResponsiveBar
                 data={tagsUsedOccurenceBarChartData}
@@ -802,16 +771,9 @@ const Dashboard = () => {
                   legendPosition: "middle",
                   legendOffset: -40,
                 }}
-                theme={{
-                  axis: {
-                    ticks: { text: { fill: gridColor } },
-                    legend: { text: { fill: gridColor } },
-                  },
-                  grid: { line: { stroke: gridColor } },
-                }}
               />
-            </Grid>
-            <Grid size={{ xs: 6 }} style={gridItemStyle}>
+            </Paper>
+            <Paper sx={paperStyle}>
               <Header title="Ingredient use in design ingredients" />
               <ResponsiveBar
                 data={itemUsedOccurenceCakeIngredientBarChartData}
@@ -834,18 +796,11 @@ const Dashboard = () => {
                   legendOffset: -40,
                 }}
                 axisBottom={{
-                  tickRotation: 90
-                }}
-                theme={{
-                  axis: {
-                    ticks: { text: { fill: gridColor } },
-                    legend: { text: { fill: gridColor } },
-                  },
-                  grid: { line: { stroke: gridColor } },
+                  tickRotation: 90,
                 }}
               />
-            </Grid>
-          </Grid>
+            </Paper>
+          </Stack>
         </Paper>
       </Stack>
     </Box>
