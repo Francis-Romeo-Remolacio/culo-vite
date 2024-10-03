@@ -151,11 +151,13 @@ const ToPay = () => {
   };
 
   const handlePay = async (orders: PreviewOrder[]) => {
+    setisSubmitting(true);
     const response: any = await api.post(`${orders[0].id}/payment`, {
       option: orders[0].payment,
     });
 
     window.open(response.data.attributes.checkout_url);
+    setisSubmitting(false);
   };
   return (
     <Stack spacing={2}>
