@@ -61,7 +61,7 @@ const Shop = () => {
             />
           </Paper>
         </Grid>
-        <Grid size={{ xs: 2, lg: 10 }}>
+        <Grid size={{ xs: 12, lg: 10 }}>
           <Paper sx={{ p: 2 }}>
             <Header
               title="The Pink Butter Cake Studio"
