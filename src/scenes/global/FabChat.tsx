@@ -223,11 +223,9 @@ const FabChat = () => {
 
   // Fetch online users
   const refreshConnections = () => {
-    fetch("http://localhost:5155/culo-api/v1/ui-helpers/live-chat/online-users")
-      .then((response) => response.json())
-      .then((jsonArray) => {
-        setOnlineUsers(jsonArray);
-      });
+    api.get("ui-helpers/live-chat/online-users").then((response) => {
+      setOnlineUsers(response.data);
+    });
   };
 
   // Send message as a customer or admin
