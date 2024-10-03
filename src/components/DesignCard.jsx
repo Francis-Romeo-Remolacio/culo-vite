@@ -5,6 +5,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
+import { useNavigate } from "react-router-dom";
 
 const DesignCard = ({
   id,
@@ -24,6 +25,8 @@ const DesignCard = ({
     designTags: tags,
     displayPictureData: picture,
   };
+
+  navigate = useNavigate();
 
   useEffect(() => {
     if (picture) {
@@ -54,8 +57,12 @@ const DesignCard = ({
   };
 
   const handleClick = () => {
-    editAction(data);
-    setOpen(false);
+    if (manager) {
+      editAction(data);
+      setOpen(false);
+    } else {
+      navigate(`/view-design?q=${encodeURIComponent(id)}`);
+    }
   };
 
   return (
@@ -68,8 +75,7 @@ const DesignCard = ({
       }
     >
       <CardActionArea
-        href={manager ? "" : `/view-design?q=${encodeURIComponent(id)}`}
-        onClick={manager ? handleClick : ""}
+        onClick={handleClick}
         sx={{
           height: "inherit",
           display: "flex",
@@ -84,14 +90,12 @@ const DesignCard = ({
               : { height: 200, width: "100%" }
           }
           image={
-            picture
-              ? `data:image/${imageType};base64,${picture}`
-              : "/assets/design.png"
+            picture ? `data:image/${imageType};base64,${picture}` : "design.png"
           }
           title={name}
           onError={(e) => {
             e.target.onerror = null; // Remove the event listener to prevent infinite loop
-            e.target.src = "/assets/design.png"; // Set the fallback image source
+            e.target.src = "design.png"; // Set the fallback image source
           }}
         />
         <CardContent>
