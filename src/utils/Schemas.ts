@@ -82,7 +82,7 @@ export interface Design {
 export interface DesignVariant {
   id: string;
   name: string;
-  costEstimate: number;
+  cost: number;
   inStock: boolean;
   addOns: VariantAddOn[];
 }

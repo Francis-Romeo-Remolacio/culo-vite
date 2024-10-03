@@ -432,8 +432,8 @@ const ViewDesign = () => {
                     values.size
                       ? design?.variants.find(
                           (variant) => variant.name === values.size
-                        )?.costEstimate ?? 0
-                      : design?.variants[0]?.costEstimate ?? 0
+                        )?.cost ?? 0
+                      : design?.variants[0]?.cost ?? 0
                   )}
                 </Typography>
                 {/*
