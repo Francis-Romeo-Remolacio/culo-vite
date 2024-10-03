@@ -32,15 +32,17 @@ import {
   LightModeOutlined as LightModeOutlinedIcon,
   DarkModeOutlined as DarkModeOutlinedIcon,
   NotificationsOutlined as NotificationsOutlinedIcon,
-  SettingsOutlined as SettingsOutlinedIcon,
   PersonOutlined as PersonOutlinedIcon,
+  Extension as ExtensionIcon,
+  LocalPizza as LocalPizzaIcon,
+  Check as CheckIcon,
+  Redeem as RedeemIcon,
 } from "@mui/icons-material";
 import { Badge, Paper, Popper } from "@mui/material";
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import api from "../../../api/axiosConfig";
 import { Notification } from "../../../utils/Schemas";
-import CheckIcon from "@mui/icons-material/Check";
 
 const drawerWidth = 240;
 
@@ -123,9 +125,9 @@ const iconMapping: any = {
   register: PersonIcon,
   calendar: CalendarTodayIcon,
   inventory: Inventory2Icon,
-  "add-ons": LabelIcon,
-  orders: ShoppingCartCheckoutIcon,
-  suborders: ShoppingCartCheckoutIcon,
+  "add-ons": ExtensionIcon,
+  orders: RedeemIcon,
+  suborders: LocalPizzaIcon,
   designs: CakeIcon,
   "pastry-material": ShapeLineIcon,
   tags: LabelIcon,
