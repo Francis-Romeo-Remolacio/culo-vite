@@ -58,8 +58,6 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
   if (currentRole === role) {
     return children;
   }
-
-  return null;
 };
 
 export default AuthGuard;
