@@ -26,6 +26,7 @@ import { Suborder } from "../utils/Schemas.js";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import api from "../api/axiosConfig.js";
+import { Send as SendIcon } from "@mui/icons-material";
 
 type ButtonCheckoutProps = {
   suborders: Suborder[];
@@ -166,10 +167,10 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
               type="submit"
               variant="contained"
               onClick={() => console.log(errors)}
-              endIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
+              endIcon={!isSubmitting ? <SendIcon /> : ""}
               disabled={isSubmitting}
             >
-              {!isSubmitting ? "Checkout" : <CircularProgress size={21} />}
+              {!isSubmitting ? "Send Order" : <CircularProgress size={21} />}
             </Button>
           </DialogActions>
         </form>

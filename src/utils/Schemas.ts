@@ -112,6 +112,10 @@ export interface Order {
   suborders: Suborder[];
 }
 
+export interface PreviewOrder extends Order {
+  designId: string;
+}
+
 export interface ManagementOrder extends Order {
   customerId: string;
   customerName: string;

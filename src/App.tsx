@@ -34,6 +34,7 @@ import AuthGuard from "./components/AuthGuard";
 import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
+import MyOrders from "./scenes/my-orders/index.js";
 
 function App() {
   return (
@@ -76,6 +77,7 @@ function App() {
             <Route path="/view-design" element={<Design />} />
             <Route path="/custom" element={<Custom />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/post-payment" element={<PostPayment />} />
             {/* <Route path="/post-payment" element={<MyOrders />} /> */}
             <Route path="/results" element={<Results />} />
