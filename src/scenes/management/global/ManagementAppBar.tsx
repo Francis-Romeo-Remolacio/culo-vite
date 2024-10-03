@@ -363,7 +363,7 @@ export default function ManagementAppBar({
         </Box>
       </Box>
       <Popper
-        open={notifOpen}
+        open={open}
         anchorEl={notifAnchorEl}
         placement="bottom"
         sx={{ padding: 2 }}
@@ -372,6 +372,7 @@ export default function ManagementAppBar({
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
+            <Typography>Notifications</Typography>
             {notifications.length > 0
               ? notifications.map((notif: Notification) => {
                   const labelId = `checkbox-list-label-${notif.id}`;
@@ -394,7 +395,11 @@ export default function ManagementAppBar({
                       disablePadding
                     >
                       <ListItemButton role={undefined}>
-                        <ListItemText id={labelId} primary={notif.message} />
+                        <ListItemText
+                          id={labelId}
+                          primary={notif.message}
+                          secondary={String(notif.created)}
+                        />
                       </ListItemButton>
                     </ListItem>
                   );

@@ -20,8 +20,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import CakeIcon from "@mui/icons-material/Cake";
+import CartIcon from "@mui/icons-material/ShoppingCart";
+import OrderIcon from "@mui/icons-material/Redeem";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import Cookies from "js-cookie";
 import api from "./../../api/axiosConfig.js";
@@ -204,6 +204,10 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     navigate("/register");
   };
 
+  const handleProfile = () => {
+    navigate("/profile");
+  };
+
   const handleCart = () => {
     navigate("/cart");
   };
@@ -235,8 +239,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleProfile}>Profile</MenuItem>
       <MenuItem onClick={handleLogout} href="/">
         Logout
       </MenuItem>
@@ -294,27 +297,16 @@ export default function MainAppBar({ children }: MainAppBarProps) {
           color="inherit"
         >
           <Badge badgeContent={cartData.length}>
-            <ShoppingCartIcon />
-          </Badge>
-        </IconButton>
-        <IconButton size="large" color="inherit">
-          <Badge badgeContent={0}>
-            {" "}
-            <CakeIcon />
+            <CartIcon />
           </Badge>
         </IconButton>
         <p>Cart</p>
       </MenuItem>
       <MenuItem onClick={handleOrders}>
         <IconButton size="large" color="inherit">
-          <Badge badgeContent={cartData.length}>
-            <CakeIcon />
-          </Badge>
-        </IconButton>
-        <IconButton size="large" color="inherit">
           <Badge badgeContent={0}>
             {" "}
-            <CakeIcon />
+            <OrderIcon />
           </Badge>
         </IconButton>
         <p>My Orders</p>
@@ -396,7 +388,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   </IconButton>
                   <IconButton onClick={handleCart} size="large" color="inherit">
                     <Badge badgeContent={cartData.length} color="secondary">
-                      <ShoppingCartIcon sx={{ color: colors.background }} />
+                      <CartIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
                   <IconButton
@@ -405,7 +397,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     color="inherit"
                   >
                     <Badge badgeContent={orderData} color="secondary">
-                      <CakeIcon sx={{ color: colors.background }} />
+                      <OrderIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
                 </>
@@ -443,7 +435,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         <Toolbar />
         <Box sx={{ flexGrow: 1, p: 2 }}>{children}</Box>
       </Box>
-
       <Popper
         open={open}
         anchorEl={notifAnchorEl}
