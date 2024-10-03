@@ -16,6 +16,8 @@ import {
   ListItemButton,
   ListItemText,
   Paper,
+  Skeleton,
+  Stack,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -96,6 +98,8 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const token = Cookies.get("token");
+
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   const fetchNotifs = async () => {
     try {
@@ -351,14 +355,34 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         <AppBar position="fixed" enableColorOnDark>
           <Toolbar>
             <Link to="/" style={{ textDecoration: "none" }}>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ display: "block", color: colors.background }}
-              >
-                The Pink Butter Cake Studio
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {!logoLoaded && (
+                  <Skeleton
+                    variant="circular"
+                    width={32}
+                    height={32}
+                    animation="wave"
+                  />
+                )}
+                <img
+                  src="logo192.png"
+                  alt="Logo"
+                  style={{
+                    width: 32,
+                    borderRadius: "100%",
+                    display: logoLoaded ? "block" : "none",
+                  }}
+                  onLoad={() => setLogoLoaded(true)}
+                />
+                <Typography
+                  variant="h4"
+                  noWrap
+                  component="div"
+                  sx={{ display: "block", color: colors.background }}
+                >
+                  The Pink Butter Cake Studio
+                </Typography>
+              </Stack>
             </Link>
             <>
               <Search>
