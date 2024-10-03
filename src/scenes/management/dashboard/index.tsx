@@ -833,6 +833,9 @@ const Dashboard = () => {
                   legendPosition: "middle",
                   legendOffset: -40,
                 }}
+                axisBottom={{
+                  tickRotation: 90
+                }}
                 theme={{
                   axis: {
                     ticks: { text: { fill: gridColor } },
