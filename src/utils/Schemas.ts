@@ -10,7 +10,7 @@ export interface User {
   roles: string[];
   phoneNumber?: number;
   isEmailConfirmed: boolean;
-  joinDate: Dayjs;
+  joinDate: Date;
 }
 
 export interface Employee {
