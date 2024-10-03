@@ -151,13 +151,20 @@ const ToPay = () => {
   };
 
   const handlePay = async (orders: PreviewOrder[]) => {
-    setisSubmitting(true);
-    const response: any = await api.post(`${orders[0].id}/payment`, {
-      option: orders[0].payment,
-    });
+    console.log(orderData);
 
-    window.open(response.data.attributes.checkout_url);
-    setisSubmitting(false);
+    setisSubmitting(true);
+    try {
+      const response: any = await api.post(`${orders[0].id}/payment`, {
+        option: orders[0].payment,
+      });
+
+      window.open(response.data.data.attributes.checkout_url);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setisSubmitting(false);
+    }
   };
   return (
     <Stack spacing={2}>
@@ -190,7 +197,7 @@ const ToPay = () => {
       <Button
         type="submit"
         variant="contained"
-        onClick={handlePay(checked)}
+        onClick={() => handlePay(checked)}
         endIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
         disabled={isSubmitting}
       >

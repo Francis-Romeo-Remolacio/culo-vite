@@ -94,7 +94,7 @@ const ToPayItem = ({
 
   const deleteItem = async () => {
     try {
-      await api.delete(`current-user/orders-to-pay/${itemData.id}`);
+      await api.delete(`current-user/to-pay/${itemData.id}`);
       fetchOrders();
     } catch (error) {
       console.error("Error deleting order item:", error);
