@@ -10,7 +10,7 @@ import { createContext } from "react";
 
 export const RefreshContext = createContext({
   isRefreshing: true,
-  setIsRefreshing: (refreshing: boolean) => {},
+  setIsRefreshing: (value: boolean) => {},
 });
 
 const Shop = () => {
@@ -18,6 +18,7 @@ const Shop = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(true);
+  const refreshContextValue = { isRefreshing, setIsRefreshing };
 
   useEffect(() => {
     const fetchDesignTags = async () => {
@@ -50,7 +51,7 @@ const Shop = () => {
         <title>Shop - The Pink Butter Cake Studio</title>
       </Helmet>
 
-      <RefreshContext.Provider value={{ isRefreshing, setIsRefreshing }}>
+      <RefreshContext.Provider value={refreshContextValue}>
         <Grid size={{ xs: 2 }} sx={{ display: { xs: "none", lg: "block" } }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h3">Popular Categories</Typography>

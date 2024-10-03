@@ -20,6 +20,7 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
   useEffect(() => {
     const fetchDesigns = async () => {
       setIsLoading(true);
+      setIsRefreshing(true);
       try {
         const tagsQuery = tagFilter?.length
           ? `/designs/with-tags/${tagFilter.join(",")}`
@@ -47,6 +48,7 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
         console.error("Error fetching designs:", error);
       } finally {
         setIsLoading(false);
+        setIsRefreshing(false);
       }
     };
 
@@ -83,8 +85,7 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
 
   return (
     <Container>
-      <Grid container spacing={1} sx={{ p: 2 }}>
-        <Typography>{selectedTags}</Typography>
+      <Grid container spacing={1} justifyContent="center" sx={{ p: 2 }}>
         {outputDesigns.map((design) => (
           <Grid key={design.id}>
             <DesignCard design={design} />
