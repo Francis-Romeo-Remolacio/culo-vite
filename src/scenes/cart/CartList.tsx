@@ -81,7 +81,7 @@ const CartList = () => {
 
   return (
     <Stack spacing={2}>
-      <Button onClick={handleClickClear} endIcon={<DeleteIcon />}>
+      <Button color="error" onClick={handleClickClear} endIcon={<DeleteIcon />}>
         Clear
       </Button>
       <Dialog open={open} onClose={handleClose}>
