@@ -1,5 +1,5 @@
 import { MouseEvent, ReactNode, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { styled, alpha, useTheme } from "@mui/material/styles";
 import {
   AppBar,
@@ -350,14 +350,16 @@ export default function MainAppBar({ children }: MainAppBarProps) {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed" enableColorOnDark>
           <Toolbar>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{ display: "block", color: colors.background }}
-            >
-              The Pink Butter Cake Studio
-            </Typography>
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ display: "block", color: colors.background }}
+              >
+                The Pink Butter Cake Studio
+              </Typography>
+            </Link>
             <>
               <Search>
                 <SearchIconWrapper>
