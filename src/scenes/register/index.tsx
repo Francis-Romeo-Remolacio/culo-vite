@@ -49,17 +49,29 @@ const Register = () => {
       });
 
       if (response.status === 200) {
-        // Registration successful, now login
-        const loginResponse = await api.post("users/login", {
-          email: values.email,
-          password: values.password,
-        });
+        try {
+          const response = await api.post("users/login", values);
 
-        if (loginResponse.status === 200) {
-          // Login successful, save token and redirect
-          const { token, expiration } = loginResponse.data;
-          Cookies.set("token", token, { expires: new Date(expiration) });
-          navigate("/");
+          if (response.status === 200) {
+            const { token, expiration } = response.data;
+
+            // Save token as a cookie
+            Cookies.set("token", token, { expires: new Date(expiration) });
+
+            // Fetch user data
+            const userResponse = await api.get("current-user");
+
+            if (userResponse.status === 200) {
+              const userData = userResponse.data;
+
+              // Save user data in local storage
+              localStorage.setItem("currentUser", JSON.stringify(userData));
+
+              navigate("/");
+            }
+          }
+        } catch (error) {
+          console.error("Login error: ", error);
         }
       }
     } catch (error) {

@@ -27,7 +27,7 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
               decodeURIComponent(currentUserStored)
             );
 
-            if (currentUser.roles && currentUser.roles.length > 0) {
+            if (currentUser.roles) {
               setCurrentRole(currentUser.roles[0]);
             } else {
               setCurrentRole("Guest");
