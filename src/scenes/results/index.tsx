@@ -2,29 +2,30 @@ import { useEffect, useState } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { Tokens } from "../../Theme";
 import api from "../../api/axiosConfig.js";
-import DesignCard from "../../components/DesignCard";
+import DesignCard from "../../components/DesignCard.tsx";
 import { useLocation } from "react-router-dom";
 import { Design } from "../../utils/Schemas.js";
 
 const Results = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const searchQuery = queryParams.get("q");
+  const tagId = queryParams.get("tag-id");
+
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
+
   const [designs, setDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const location = useLocation();
 
   useEffect(() => {
     const fetchDesigns = async () => {
-      const queryParams = new URLSearchParams(location.search);
-      const searchQuery = queryParams.get("search-query");
-      const tagId = queryParams.get("tag-id");
-
       if (searchQuery) {
         try {
           await api
             .get(
-              `designs/search/by-name/name=${encodeURIComponent(searchQuery)}`
+              `designs/search/by-name?name=${encodeURIComponent(searchQuery)}`
             )
             .then((response) => {
               const parsedDesigns: Design[] = response.data.map(
@@ -45,6 +46,7 @@ const Results = () => {
                 })
               );
               setDesigns(parsedDesigns);
+              setIsLoading(false);
             });
         } catch (error) {
           console.error(error);
@@ -100,7 +102,11 @@ const Results = () => {
       }}
     >
       <Typography variant="h4" gutterBottom>
-        Cake Gallery
+        {searchQuery
+          ? `Search results for: "${searchQuery}"`
+          : tagId
+          ? `Search results for: "${tagId}"`
+          : "Cake Gallery"}
       </Typography>
       {error ? (
         <Typography variant="body2" color="error">

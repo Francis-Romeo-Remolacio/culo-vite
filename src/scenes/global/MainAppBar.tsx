@@ -1,5 +1,13 @@
-import { MouseEvent, ReactNode, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  ChangeEvent,
+  ChangeEventHandler,
+  FormEvent,
+  MouseEvent,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
+import { createSearchParams, Link, useNavigate } from "react-router-dom";
 import { styled, alpha, useTheme } from "@mui/material/styles";
 import {
   AppBar,
@@ -18,6 +26,7 @@ import {
   Paper,
   Skeleton,
   Stack,
+  TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -31,7 +40,7 @@ import { Popper } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
-import { Login } from "@mui/icons-material";
+import { Login, Style } from "@mui/icons-material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -64,7 +73,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
     [theme.breakpoints.up("md")]: {
@@ -102,6 +110,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const navigate = useNavigate();
 
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [search, setSearch] = useState("");
 
   const fetchNotifs = async () => {
     try {
@@ -134,10 +143,21 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const fetchOrders = async () => {
     try {
       const response = await api.get(`current-user/orders-count`);
-      setOrderData(0);
+      setOrderData(response.data);
     } catch (error) {
       console.error("Error fetching order data:", error);
     }
+  };
+
+  const handleTypeSearch: ChangeEventHandler = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    setSearch(event.target.value);
+    console.log(search);
+  };
+
+  const handleSearch = () => {
+    navigate(`results?q=${search}`);
   };
 
   useEffect(() => {
@@ -384,14 +404,19 @@ export default function MainAppBar({ children }: MainAppBarProps) {
             </Link>
             <>
               <Search>
-                <SearchIconWrapper>
-                  <SearchIcon sx={{ color: colors.background }} />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  placeholder="Search…"
-                  inputProps={{ "aria-label": "search" }}
-                  sx={{ color: colors.subtle }}
-                />
+                <form onSubmit={handleSearch}>
+                  <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
+                    <IconButton type="submit">
+                      <SearchIcon sx={{ color: colors.background }} />
+                    </IconButton>
+                    <StyledInputBase
+                      placeholder="Search…"
+                      onChange={handleTypeSearch}
+                      inputProps={{ "aria-label": "search" }}
+                      sx={{ color: colors.subtle }}
+                    />
+                  </Stack>
+                </form>
               </Search>
             </>
             <Box sx={{ flexGrow: 1 }} />

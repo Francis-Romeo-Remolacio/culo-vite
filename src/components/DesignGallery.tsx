@@ -3,6 +3,7 @@ import { Container, Typography, Grid2 as Grid } from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.tsx";
 import { Design } from "../utils/Schemas.js";
+import { AxiosResponse } from "axios";
 
 type DesignGalleryProps = {
   tagFilter?: string[];
@@ -14,11 +15,30 @@ type DesignGalleryProps = {
 const DesignGallery = ({
   tagFilter,
   selectedTags,
+  searchQuery,
   setIsRefreshing,
 }: DesignGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  function parseDesigns(response: AxiosResponse): Design[] {
+    return response.data.map((design: any) => ({
+      id: design.designId,
+      name: design.displayName,
+      description: design.cakeDescription,
+      pictureUrl: design.designPictureUrl,
+      pictureData: design.displayPictureData,
+      tags: design.designTags.map((tag: any) => ({
+        id: tag.designTagId,
+        name: tag.designTagName,
+      })),
+      shapes: design.designShapes.map((shape: any) => ({
+        id: shape.designShapeId,
+        name: shape.shapeName,
+      })),
+    }));
+  }
 
   useEffect(() => {
     const fetchDesigns = async () => {
@@ -26,36 +46,43 @@ const DesignGallery = ({
       if (setIsRefreshing) {
         setIsRefreshing(true);
       }
-      try {
-        const tagsQuery = tagFilter?.length
-          ? `/designs/with-tags/${tagFilter.join(",")}`
-          : "/designs?page=1&record_per_page=30";
-        const response = await api.get(tagsQuery);
-        const parsedDesigns: Design[] = response.data.map((design: any) => ({
-          id: design.designId,
-          name: design.displayName,
-          description: design.cakeDescription,
-          pictureUrl: design.designPictureUrl,
-          pictureData: design.displayPictureData,
-          tags: design.designTags.map((tag: any) => ({
-            id: tag.designTagId,
-            name: tag.designTagName,
-          })),
-          shapes: design.designShapes.map((shape: any) => ({
-            id: shape.designShapeId,
-            name: shape.shapeName,
-          })),
-        }));
-        setFetchedDesigns(parsedDesigns);
-        setOutputDesigns(parsedDesigns);
-        if (setIsRefreshing) {
-          setIsRefreshing(false);
+      if (searchQuery) {
+        try {
+          api
+            .get("designs/search/by-name", {
+              params: {
+                name: searchQuery,
+              },
+            })
+            .then((response) => {
+              const parsedDesigns: Design[] = parseDesigns(response);
+              setFetchedDesigns(parsedDesigns);
+              setOutputDesigns(parsedDesigns);
+            });
+          if (setIsRefreshing) {
+            setIsRefreshing(false);
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error("Error fetching designs:", error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        try {
+          const tagsQuery = tagFilter?.length
+            ? `/designs/with-tags/${tagFilter.join(",")}`
+            : "/designs?page=1&record_per_page=30";
+          await api.get(tagsQuery).then((response) => {
+            const parsedDesigns: Design[] = parseDesigns(response);
+            setFetchedDesigns(parsedDesigns);
+            setOutputDesigns(parsedDesigns);
+          });
+          if (setIsRefreshing) {
+            setIsRefreshing(false);
+          }
+        } catch (error) {
+          console.error("Error fetching designs:", error);
+        }
       }
+      setIsLoading(false);
     };
 
     fetchDesigns();

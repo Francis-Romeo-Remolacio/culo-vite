@@ -6,11 +6,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
-import {
-  Link as RouterLink,
-  LinkProps as RouterLinkProps,
-  MemoryRouter,
-} from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { Link } from "@mui/material";
 
 type DesignCardProps = {
