@@ -1,7 +1,6 @@
-import { FormEvent, FormEventHandler, useState } from "react";
+import { useState } from "react";
 import {
   Button,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,21 +20,45 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import { orderSchema } from "../utils/Validation.js";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import { Suborder } from "../utils/Schemas.js";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import api from "../api/axiosConfig.js";
-import { Send as SendIcon } from "@mui/icons-material";
+import { ContentPasteGo as CheckoutIcon } from "@mui/icons-material";
+
+type SuborderAccordionProps = {
+  suborder: Suborder;
+};
 
 type ButtonCheckoutProps = {
   suborders: Suborder[];
   fetchCart: Function;
 };
 
+const SuborderAccordion = ({ suborder }: SuborderAccordionProps) => {
+  return (
+    <Accordion>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel2-content"
+        id="panel2-header"
+      >
+        {suborder.id}
+      </AccordionSummary>
+      <AccordionDetails>
+        <Typography>{`Size: ${suborder.size}`}</Typography>
+        <Typography>{`Color: ${suborder.color}`}</Typography>
+        <Typography>{`Flavor: ${suborder.flavor}`}</Typography>
+        <Typography>{`Description: ${suborder.description}`}</Typography>
+        <Typography>{`Quantity: ${suborder.quantity}x`}</Typography>
+      </AccordionDetails>
+    </Accordion>
+  );
+};
+
 const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
   const [open, setOpen] = useState(false);
-  const minDate = dayjs().add(7, "day");
+  const minDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
   const suborderIds: string[] = suborders.map((suborder) => suborder.id);
 
   const handleClickOpen = () => {
@@ -100,22 +123,7 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
           <DialogContent>
             <Stack spacing={2} sx={{ minWidth: 512 }}>
               {suborders.map((suborder) => (
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2-content"
-                    id="panel2-header"
-                  >
-                    {suborder.id}
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>{`Size: ${suborder.size}`}</Typography>
-                    <Typography>{`Color: ${suborder.color}`}</Typography>
-                    <Typography>{`Flavor: ${suborder.flavor}`}</Typography>
-                    <Typography>{`Description: ${suborder.description}`}</Typography>
-                    <Typography>{`Quantity: ${suborder.quantity}x`}</Typography>
-                  </AccordionDetails>
-                </Accordion>
+                <SuborderAccordion suborder={suborder}></SuborderAccordion>
               ))}
               <FormControl fullWidth variant="filled">
                 <InputLabel id="select-type-label">Type</InputLabel>
@@ -167,7 +175,7 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
               type="submit"
               variant="contained"
               onClick={() => console.log(errors)}
-              endIcon={!isSubmitting ? <SendIcon /> : ""}
+              endIcon={!isSubmitting ? <CheckoutIcon /> : ""}
               disabled={isSubmitting}
             >
               {!isSubmitting ? "Send Order" : <CircularProgress size={21} />}
