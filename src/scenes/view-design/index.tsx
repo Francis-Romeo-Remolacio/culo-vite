@@ -30,6 +30,7 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
+
 import api from "../../api/axiosConfig.js";
 import { Helmet } from "react-helmet-async";
 import TagChip from "../../components/TagChip.js";
@@ -38,7 +39,10 @@ import { useFormik } from "formik";
 import { cartSchema } from "../../utils/Validation.ts";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import { Add } from "@mui/icons-material";
+import {
+  Add as IncreaseIcon,
+  Remove as DecreaseIcon,
+} from "@mui/icons-material";
 import {
   AddOn,
   Design,
@@ -128,6 +132,7 @@ const ViewDesign = () => {
     handleBlur,
     handleChange,
     handleSubmit,
+    setFieldValue,
   } = useFormik({
     initialValues: {
       quantity: 1,
@@ -141,6 +146,23 @@ const ViewDesign = () => {
     validationSchema: cartSchema,
     onSubmit,
   });
+
+  const handleChangeQuantity = (method: string) => {
+    switch (method) {
+      case "decrement":
+        if (values.quantity > 1) {
+          const newValue = values.quantity - 1;
+          setFieldValue("quantity", newValue);
+        }
+        break;
+      case "increment":
+        if (values.quantity < 10) {
+          const newValue = values.quantity + 1;
+          setFieldValue("quantity", newValue);
+        }
+        break;
+    }
+  };
 
   const handleOpenAddOn = () => {
     setOpenAddOn(true);
@@ -517,14 +539,23 @@ const ViewDesign = () => {
                     <></>
                   )}
                 </Stack>
-                <TextField
-                  inputProps={{ type: "number", min: 1, max: 10 }}
-                  label="Quantity"
-                  id="quantity"
-                  name="quantity"
-                  value={values.quantity}
-                  onChange={handleChange}
-                />
+                <Stack direction="row">
+                  <IconButton onClick={() => handleChangeQuantity("decrement")}>
+                    <DecreaseIcon />
+                  </IconButton>
+                  <TextField
+                    label="Quantity"
+                    id="quantity"
+                    name="quantity"
+                    value={values.quantity}
+                    slotProps={{
+                      htmlInput: { type: "number", min: 1, max: 10 },
+                    }}
+                  />
+                  <IconButton onClick={() => handleChangeQuantity("increment")}>
+                    <IncreaseIcon />
+                  </IconButton>
+                </Stack>
                 <TextField
                   label="Dedication / Message"
                   id="field-dedication"
@@ -662,7 +693,7 @@ const ViewDesign = () => {
                         onClick={() => handleOpenAddOn()}
                       >
                         <IconButton>
-                          <Add />
+                          <IncreaseIcon />
                         </IconButton>
                         <ListItemText primary="Insert Add-On" />
                       </ListItem>
