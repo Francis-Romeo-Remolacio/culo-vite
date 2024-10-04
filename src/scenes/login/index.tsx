@@ -120,16 +120,16 @@ const Login = () => {
     <Container
       maxWidth="sm"
       sx={{
-        pt: { xs: "16px", sm: "24px" },
+        pt: 3,
       }}
     >
       <Helmet>
         <title>Login - The Pink Butter Cake Studio</title>
       </Helmet>
-      <Box position="absolute" left={0}>
-        <ButtonBack />
-      </Box>
       <Paper sx={{ p: 2 }}>
+        <Box position="absolute">
+          <ButtonBack />
+        </Box>
         <Stack>
           <Header
             title="Login"

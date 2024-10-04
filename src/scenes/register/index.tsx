@@ -14,6 +14,7 @@ import {
   InputLabel,
   IconButton,
   FilledInput,
+  Tooltip,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
@@ -49,7 +50,7 @@ const Register = () => {
 
       if (response.status === 200) {
         // Registration successful, now login
-        const loginResponse = await api.post("login", {
+        const loginResponse = await api.post("users/login", {
           email: values.email,
           password: values.password,
         });
@@ -97,7 +98,12 @@ const Register = () => {
     });
 
   return (
-    <Container>
+    <Container
+      maxWidth="sm"
+      sx={{
+        pt: 3,
+      }}
+    >
       <Helmet>
         <title>Register - The Pink Butter Cake Studio</title>
       </Helmet>
@@ -105,7 +111,10 @@ const Register = () => {
         <ButtonBack />
       </Box>
       <Paper sx={{ p: 2 }}>
-        <Box>
+        <Box position="absolute">
+          <ButtonBack />
+        </Box>
+        <Stack spacing={2}>
           <Header
             title="Register"
             subtitle="Create an account at The Pink Butter Cake Studio"
@@ -179,55 +188,43 @@ const Register = () => {
                 error={touched.contactNumber && Boolean(errors.contactNumber)}
                 helperText={touched.contactNumber && errors.contactNumber}
               />
-              <FormControl variant="filled">
-                <InputLabel htmlFor="password">Password</InputLabel>
-                <FilledInput
-                  id="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                  error={touched.password && Boolean(errors.password)}
-                  type={showPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
-              <TextField
-                label="Confirm Password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={values.confirmPassword}
-                onChange={handleChange}
-                type="password"
-                variant="filled"
-                fullWidth
-                required
-                error={
-                  touched.confirmPassword && Boolean(errors.confirmPassword)
-                }
-                helperText={touched.confirmPassword && errors.confirmPassword}
-              />
-              <FormControl variant="filled">
-                <InputLabel htmlFor="password">Password</InputLabel>
+              <Tooltip
+                title="Must contain at least 8 characters, including a lowercase and uppercase letter, a number, and a symbol"
+                followCursor
+              >
+                <FormControl variant="filled" required>
+                  <InputLabel htmlFor="password">Password</InputLabel>
+                  <FilledInput
+                    id="password"
+                    name="password"
+                    value={values.password}
+                    onChange={handleChange}
+                    fullWidth
+                    error={touched.password && Boolean(errors.password)}
+                    type={showPassword ? "text" : "password"}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                </FormControl>
+              </Tooltip>
+              <FormControl variant="filled" required>
+                <InputLabel htmlFor="password">Confirm Password</InputLabel>
                 <FilledInput
                   id="confirmPassword"
                   name="confirmPassword"
                   value={values.confirmPassword}
                   onChange={handleChange}
                   fullWidth
-                  required
                   error={
                     touched.confirmPassword && Boolean(errors.confirmPassword)
                   }
@@ -261,7 +258,7 @@ const Register = () => {
               to login.
             </Typography>
           </Box>
-        </Box>
+        </Stack>
       </Paper>
     </Container>
   );
