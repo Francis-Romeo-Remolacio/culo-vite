@@ -8,7 +8,7 @@ type DesignGalleryProps = {
   tagFilter?: string[];
   selectedTags?: string[];
   searchQuery?: string;
-  setIsRefreshing: React.Dispatch<SetStateAction<boolean>>;
+  setIsRefreshing?: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const DesignGallery = ({
@@ -23,7 +23,9 @@ const DesignGallery = ({
   useEffect(() => {
     const fetchDesigns = async () => {
       setIsLoading(true);
-      setIsRefreshing(true);
+      if (setIsRefreshing) {
+        setIsRefreshing(true);
+      }
       try {
         const tagsQuery = tagFilter?.length
           ? `/designs/with-tags/${tagFilter.join(",")}`
@@ -46,7 +48,9 @@ const DesignGallery = ({
         }));
         setFetchedDesigns(parsedDesigns);
         setOutputDesigns(parsedDesigns);
-        setIsRefreshing(false);
+        if (setIsRefreshing) {
+          setIsRefreshing(false);
+        }
       } catch (error) {
         console.error("Error fetching designs:", error);
       } finally {
@@ -58,17 +62,23 @@ const DesignGallery = ({
   }, [tagFilter]); // Re-fetch when tagFilter changes
 
   const checkFilter = () => {
-    setIsRefreshing(true);
+    if (setIsRefreshing) {
+      setIsRefreshing(true);
+    }
     if (selectedTags && selectedTags.length > 0) {
       setOutputDesigns(
         fetchedDesigns.filter((design) =>
           design.tags.some((tag) => selectedTags.includes(tag.id))
         )
       );
-      setIsRefreshing(false);
+      if (setIsRefreshing) {
+        setIsRefreshing(false);
+      }
     } else {
       setOutputDesigns(fetchedDesigns); // Reset to all designs if no filter
-      setIsRefreshing(false);
+      if (setIsRefreshing) {
+        setIsRefreshing(false);
+      }
     }
   };
 
