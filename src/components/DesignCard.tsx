@@ -6,6 +6,12 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
+import {
+  Link as RouterLink,
+  LinkProps as RouterLinkProps,
+  MemoryRouter,
+} from "react-router-dom";
+import { Link } from "@mui/material";
 
 type DesignCardProps = {
   design: Design;
@@ -50,52 +56,50 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
           : { width: 200, height: 300, display: "inline-block" }
       }
     >
-      <CardActionArea
-        href={manager ? "" : `/view-design?q=${encodeURIComponent(design.id)}`}
-        sx={{
-          height: "inherit",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "start",
-        }}
+      <Link
+        component={RouterLink}
+        to={`/view-design?q=${encodeURIComponent(design.id)}`}
+        sx={{ textDecoration: "none", color: "inherit" }}
       >
-        <CardMedia
-          sx={
-            manager
-              ? { height: 140, width: "100%" }
-              : { height: 200, width: "100%" }
-          }
-          image={
-            design.pictureData
-              ? `data:image/${imageType};base64,${design.pictureData}`
-              : design.pictureUrl
-              ? design.pictureUrl.toString()
-              : "design.png"
-          }
-        />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            {design.name}
-          </Typography>
-          <Typography
-            variant="body2"
-            align="left"
-            sx={{
-              display: "-webkit-box",
-              overflow: "hidden",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 3,
-            }}
-          >
-            {manager ? design.description : ""}
-          </Typography>
-          <div style={{ marginTop: "8px" }}>
-            {design.tags.map((tag: Tag) => (
-              <TagChip id={tag.id} name={tag.name} />
-            ))}
-          </div>
-        </CardContent>
-      </CardActionArea>
+        <CardActionArea>
+          <CardMedia
+            sx={
+              manager
+                ? { height: 140, width: "100%" }
+                : { height: 200, width: "100%" }
+            }
+            image={
+              design.pictureData
+                ? `data:image/${imageType};base64,${design.pictureData}`
+                : design.pictureUrl
+                ? design.pictureUrl.toString()
+                : "design.png"
+            }
+          />
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              {design.name}
+            </Typography>
+            <Typography
+              variant="body2"
+              align="left"
+              sx={{
+                display: "-webkit-box",
+                overflow: "hidden",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 3,
+              }}
+            >
+              {manager ? design.description : ""}
+            </Typography>
+            <div style={{ marginTop: "8px" }}>
+              {design.tags.map((tag: Tag) => (
+                <TagChip id={tag.id} name={tag.name} />
+              ))}
+            </div>
+          </CardContent>
+        </CardActionArea>
+      </Link>
     </Card>
   );
 };
