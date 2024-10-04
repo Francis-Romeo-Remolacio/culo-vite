@@ -211,6 +211,14 @@ const FabChat = () => {
     };
   }, []);
 
+  // Autoscroll
+  useEffect(() => {
+    const chatContainer = document.getElementById("chat-container");
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [chatMessages]);
+
   // Error Handling and Connection Management
   useEffect(() => {
     if (connection) {
@@ -304,13 +312,15 @@ const FabChat = () => {
                 </Select>
               </FormControl>
               <Button onClick={refreshConnections}>Refresh Connections</Button>
-              {chatMessages.map((msg, index) =>
-                msg.sender === "Admin" ? (
-                  <MessageRight key={index} directMessage={msg} />
-                ) : (
-                  <MessageLeft key={index} directMessage={msg} />
-                )
-              )}
+              <Box id="chat-container" sx={{ height: 400 }}>
+                {chatMessages.map((msg, index) =>
+                  msg.sender === "Admin" ? (
+                    <MessageRight key={index} directMessage={msg} />
+                  ) : (
+                    <MessageLeft key={index} directMessage={msg} />
+                  )
+                )}
+              </Box>
             </Box>
 
             <Box>
