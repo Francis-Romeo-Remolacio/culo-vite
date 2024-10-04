@@ -1,21 +1,24 @@
-import { useContext, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Container, Typography, Grid2 as Grid } from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.tsx";
 import { Design } from "../utils/Schemas.js";
-import { RefreshContext } from "../scenes/shop/index.js";
 
 type DesignGalleryProps = {
   tagFilter?: string[];
   selectedTags?: string[];
+  searchQuery?: string;
+  setIsRefreshing: React.Dispatch<SetStateAction<boolean>>;
 };
 
-const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
+const DesignGallery = ({
+  tagFilter,
+  selectedTags,
+  setIsRefreshing,
+}: DesignGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const { setIsRefreshing } = useContext(RefreshContext);
 
   useEffect(() => {
     const fetchDesigns = async () => {
@@ -42,13 +45,12 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
           })),
         }));
         setFetchedDesigns(parsedDesigns);
-        setOutputDesigns(parsedDesigns); // Set outputDesigns to all designs initially
+        setOutputDesigns(parsedDesigns);
         setIsRefreshing(false);
       } catch (error) {
         console.error("Error fetching designs:", error);
       } finally {
         setIsLoading(false);
-        setIsRefreshing(false);
       }
     };
 
@@ -63,10 +65,11 @@ const DesignGallery = ({ tagFilter, selectedTags }: DesignGalleryProps) => {
           design.tags.some((tag) => selectedTags.includes(tag.id))
         )
       );
+      setIsRefreshing(false);
     } else {
       setOutputDesigns(fetchedDesigns); // Reset to all designs if no filter
+      setIsRefreshing(false);
     }
-    setIsRefreshing(false);
   };
 
   useEffect(() => {
