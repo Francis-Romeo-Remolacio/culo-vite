@@ -31,6 +31,7 @@ import { Popper } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
+import { Login } from "@mui/icons-material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -98,6 +99,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const token = Cookies.get("token");
+  const navigate = useNavigate();
 
   const [logoLoaded, setLogoLoaded] = useState(false);
 
@@ -167,16 +169,12 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   const readNotif = async (id: string) => {
     try {
-      const response = await api.post(
-        `current-user/notifications/${id}/mark-as-read`
-      );
+      await api.post(`current-user/notifications/${id}/mark-as-read`);
       fetchNotifs();
     } catch (error) {
       console.error(error);
     }
   };
-
-  const navigate = useNavigate();
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setNotifAnchorEl(event.currentTarget);
@@ -426,21 +424,32 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                       <OrderIcon sx={{ color: colors.background }} />
                     </Badge>
                   </IconButton>
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    aria-label="account of current user"
+                    aria-controls={menuId}
+                    aria-haspopup="true"
+                    onClick={handleProfileMenuOpen}
+                    color="inherit"
+                  >
+                    <AccountCircle sx={{ color: colors.background }} />
+                  </IconButton>
                 </>
               ) : (
-                <></>
+                <>
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    onClick={() => {
+                      navigate("login");
+                    }}
+                    color="inherit"
+                  >
+                    <Login sx={{ color: colors.background }} />
+                  </IconButton>
+                </>
               )}
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle sx={{ color: colors.background }} />
-              </IconButton>
             </Box>
             <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
@@ -471,39 +480,47 @@ export default function MainAppBar({ children }: MainAppBarProps) {
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
-            <Typography>Notifications</Typography>
-            {notifications.length > 0
-              ? notifications.map((notif: Notification) => {
-                  const labelId = `checkbox-list-label-${notif.id}`;
-                  return (
-                    <ListItem
-                      key={notif.id}
-                      secondaryAction={
-                        notif.isRead === false ? (
-                          <IconButton
-                            edge="end"
-                            aria-label="mark-as-read"
-                            onClick={() => readNotif(notif.id)}
-                          >
-                            <CheckIcon />
-                          </IconButton>
-                        ) : (
-                          <></>
-                        )
-                      }
-                      disablePadding
-                    >
-                      <ListItemButton role={undefined}>
-                        <ListItemText
-                          id={labelId}
-                          primary={notif.message}
-                          secondary={String(notif.created)}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                })
-              : "No notifications"}
+            <Typography variant="h4">{"Notifications"}</Typography>
+            <Box
+              sx={{
+                maxHeight: "300px",
+                overflowY: "scroll",
+                scrollbarWidth: 0,
+              }}
+            >
+              {notifications.length > 0
+                ? notifications.map((notif: Notification) => {
+                    const labelId = `checkbox-list-label-${notif.id}`;
+                    return (
+                      <ListItem
+                        key={notif.id}
+                        secondaryAction={
+                          notif.isRead === false ? (
+                            <IconButton
+                              edge="end"
+                              aria-label="mark-as-read"
+                              onClick={() => readNotif(notif.id)}
+                            >
+                              <CheckIcon />
+                            </IconButton>
+                          ) : (
+                            <></>
+                          )
+                        }
+                        disablePadding
+                      >
+                        <ListItemButton role={undefined}>
+                          <ListItemText
+                            id={labelId}
+                            primary={notif.message}
+                            secondary={String(notif.created)}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })
+                : "No notifications"}
+            </Box>
           </List>
         </Paper>
       </Popper>
