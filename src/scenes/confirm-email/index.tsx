@@ -35,20 +35,20 @@ const ConfirmEmail = () => {
   }, [confirmationCode]);
 
   // Timer and redirection logic
-  //   useEffect(() => {
-  //     const interval = setInterval(() => {
-  //       setCountdown((prevCountdown) => prevCountdown - 1); // Update countdown
-  //     }, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((prevCountdown) => prevCountdown - 1); // Update countdown
+    }, 1000);
 
-  //     const timer = setTimeout(() => {
-  //       navigate("/");
-  //     }, 5000);
+    const timer = setTimeout(() => {
+      navigate("/");
+    }, 5000);
 
-  //     return () => {
-  //       clearInterval(interval); // Clear interval on unmount
-  //       clearTimeout(timer); // Clear timeout on unmount
-  //     };
-  //   }, [navigate]);
+    return () => {
+      clearInterval(interval); // Clear interval on unmount
+      clearTimeout(timer); // Clear timeout on unmount
+    };
+  }, [navigate]);
 
   return (
     <div
