@@ -189,7 +189,7 @@ const FabChat = () => {
 
         const newConnection = new HubConnectionBuilder()
           .withUrl(
-            "http://resentekaizen280-001-site1.etempurl.com/live-chat/",
+            "https://resentekaizen280-001-site1.etempurl.com/live-chat/",
             { accessTokenFactory: () => bearerToken }
           )
           .withAutomaticReconnect()
