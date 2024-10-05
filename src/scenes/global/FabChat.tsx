@@ -185,40 +185,38 @@ const FabChat = () => {
           setBearerToken(
             `${cookieToken}, Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`
           );
-        }
 
-        const newConnection = new HubConnectionBuilder()
-          .withUrl(
-            "https://resentekaizen280-001-site1.etempurl.com/live-chat/",
-            { accessTokenFactory: () => bearerToken }
-          )
-          .withAutomaticReconnect()
-          .build();
+          const fullUrl = `https://resentekaizen280-001-site1.etempurl.com/live-chat?access_token=${bearerToken}`;
+          const newConnection = new HubConnectionBuilder()
+            .withUrl(fullUrl, { accessTokenFactory: () => bearerToken })
+            .withAutomaticReconnect()
+            .build();
 
-        if (isMounted) {
-          setConnection(newConnection);
+          if (isMounted) {
+            setConnection(newConnection);
 
-          newConnection
-            .start()
-            .then(() => {
-              console.log("Connected to SignalR!");
+            newConnection
+              .start()
+              .then(() => {
+                console.log("Connected to SignalR!");
 
-              // Handle receiving messages
-              newConnection.on("RecieveMessage", (parsed_message) => {
-                const formattedMessage = {
-                  sender: parsed_message.senderName || "Unknown",
-                  message: `${parsed_message.senderMessage}\n${new Date(
-                    parsed_message.senderMessageTimeSent
-                  ).toLocaleString()}`,
-                  timestamp: new Date(parsed_message.senderMessageTimeSent),
-                };
-                setChatMessages((prevMessages) => [
-                  ...prevMessages,
-                  formattedMessage,
-                ]);
-              });
-            })
-            .catch((err) => console.error("SignalR Connection Error: ", err));
+                // Handle receiving messages
+                newConnection.on("RecieveMessage", (parsed_message) => {
+                  const formattedMessage = {
+                    sender: parsed_message.senderName || "Unknown",
+                    message: `${parsed_message.senderMessage}\n${new Date(
+                      parsed_message.senderMessageTimeSent
+                    ).toLocaleString()}`,
+                    timestamp: new Date(parsed_message.senderMessageTimeSent),
+                  };
+                  setChatMessages((prevMessages) => [
+                    ...prevMessages,
+                    formattedMessage,
+                  ]);
+                });
+              })
+              .catch((err) => console.error("SignalR Connection Error: ", err));
+          }
         }
       } catch (error) {
         console.error("Error initializing connection:", error);
