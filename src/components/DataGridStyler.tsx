@@ -13,10 +13,18 @@ const DataGridStyler = ({ children }: DataGridStylerProps) => {
   return (
     <Box
       sx={{
+        "& .css-6n75ee-MuiDataGrid-root": {
+          "--DataGrid-containerBackground": "rgba(0, 0, 0, 0)",
+        },
+        "& .css-1dezojn-MuiDataGrid-root": {
+          "--DataGrid-containerBackground": "rgba(0, 0, 0, 0)",
+        },
         "& .MuiDataGrid-root": { border: "none" },
         "& .MuiDataGrid-cell": { borderBottom: "none" },
         "& .name-column--cell": { color: colors.analogous1[500] },
+        "& .MuiDataGrid-columnSeparator": { color: colors.primary[900] },
         "& .MuiDataGrid-columnHeaders": {
+          color: colors.background,
           backgroundColor: colors.primary[500],
           borderBottom: "none",
           borderRadius: "8px 8px 0 0",
@@ -36,6 +44,7 @@ const DataGridStyler = ({ children }: DataGridStylerProps) => {
         mt: "40px",
         height: "70vh",
         width: "100%",
+        flexGrow: 1,
         borderRadius: 2,
         backgroundColor: colors.analogous1[100],
       }}
