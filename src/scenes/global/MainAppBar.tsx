@@ -319,7 +319,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
+      <Box>
         <AppBar position="fixed" enableColorOnDark>
           <Toolbar>
             <Link to="/" style={{ textDecoration: "none" }}>
@@ -346,29 +346,30 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   variant="h4"
                   noWrap
                   component="div"
-                  sx={{ display: "block", color: colors.background }}
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    color: colors.background,
+                  }}
                 >
                   The Pink Butter Cake Studio
                 </Typography>
+                <Search>
+                  <form onSubmit={handleSearch}>
+                    <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
+                      <IconButton type="submit">
+                        <SearchIcon sx={{ color: colors.background }} />
+                      </IconButton>
+                      <StyledInputBase
+                        placeholder="Search…"
+                        onChange={handleTypeSearch}
+                        inputProps={{ "aria-label": "search" }}
+                        sx={{ color: colors.subtle }}
+                      />
+                    </Stack>
+                  </form>
+                </Search>
               </Stack>
             </Link>
-            <>
-              <Search>
-                <form onSubmit={handleSearch}>
-                  <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
-                    <IconButton type="submit">
-                      <SearchIcon sx={{ color: colors.background }} />
-                    </IconButton>
-                    <StyledInputBase
-                      placeholder="Search…"
-                      onChange={handleTypeSearch}
-                      inputProps={{ "aria-label": "search" }}
-                      sx={{ color: colors.subtle }}
-                    />
-                  </Stack>
-                </form>
-              </Search>
-            </>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {loggedIn ? (
