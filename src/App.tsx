@@ -34,6 +34,7 @@ import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
 import ConfirmEmail from "./scenes/confirm-email/index.js";
+import Chat from "./scenes/chat/index.js";
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/confirm-email" element={<ConfirmEmail />} />
             <Route path="/not-found" element={<NotFound />} />
+            <Route path="/chat" element={<Chat />} />
           </Routes>
         </MainAppBar>
       </AuthGuard>
@@ -149,6 +151,7 @@ function App() {
             <Route path="/tags" element={<Tags />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/not-found" element={<NotFound />} />
+            <Route path="/chat" element={<Chat />} />
             {
               //<Route path="/logs" element={<Logs />} />
               //<Route path="/settings" element={<Settings />} />
