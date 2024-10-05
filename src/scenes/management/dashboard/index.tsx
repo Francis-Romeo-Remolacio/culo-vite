@@ -6,6 +6,9 @@ import {
   Typography,
   useTheme,
   Grid2 as Grid,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
 } from "@mui/material";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
@@ -16,29 +19,21 @@ import {
   ChartData,
   ItemOccurence,
   OrdersOnDay,
-  OrdersOnMonth,
   Sales,
   SalesOnDay,
-  SalesOnMonth,
   SeasonalOccurence,
   TagOccurence,
   Total,
 } from "../../../utils/Schemas";
 import * as TimePeriods from "./../../../utils/TimePeriods.ts";
+import { ExpandMore } from "@mui/icons-material";
 
 const Dashboard = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const [data, setData] = useState(null);
-
-  const gridStyle = {
-    backgroundColor: colors.primary[200],
-    padding: "10px",
-    border: "solid 1px black",
-    borderRadius: "10px",
-  };
 
   const paperStyle = {
     p: 2,
@@ -48,17 +43,8 @@ const Dashboard = () => {
     maxHeight: "400px",
   };
 
-  const gridItemStyle = {
-    xs: 6,
-    maxHeight: "400px",
-    paddingLeft: "3px",
-    paddingBottom: "50px",
-    marginBottom: "25px",
-  };
-
   const lineGraphLineColor = colors.analogous2[300];
   const lineGraphLineCurve = "linear";
-  const gridColor = colors.text;
 
   const [itemUsedOccurence, setItemUsedOccurence] = useState<ItemOccurence[]>(
     []
@@ -174,7 +160,7 @@ const Dashboard = () => {
         const response = await api.get(
           "/data-analysis/item-used/seasonal-occurrence"
         );
-        setItemUsedSeasonalOccurence([]);
+        setItemUsedSeasonalOccurence(response.data);
       } catch (error) {
         setError("Failed to fetch ingredients used by seasonal occurence");
         console.error(
@@ -386,7 +372,8 @@ const Dashboard = () => {
     getTotalOrdersThisMonth();
     getTotalOrdersThisYear();
 
-    /*fetchItemUseBySeasonalOccurence()*/ setLoading(false);
+    /*fetchItemUseBySeasonalOccurence()*/
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -454,7 +441,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Box>
+    <>
       {/* HEADER */}
       <Box
         sx={{
@@ -475,335 +462,419 @@ const Dashboard = () => {
       {/* //New */}
 
       <Stack spacing={2}>
-        {/* Total Sales */}
-        <Paper
-          sx={{
-            p: 2,
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: colors.primary[100],
-          }}
-        >
-          <Stack spacing={2}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12 }}>
+            <Accordion defaultExpanded sx={{ background: colors.primary[100] }}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Header title="Sales" />
+              </AccordionSummary>
+              <AccordionDetails>
+                <Paper
+                  sx={{
+                    p: 2,
+                    width: "100%",
+                    height: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: colors.primary[200],
+                  }}
+                >
+                  <Stack spacing={2}>
+                    <Paper
+                      sx={{
+                        p: 2,
+                      }}
+                    >
+                      <Header title="Total Sales" />
+                      <Stack spacing={2}>
+                        <Stack direction="row" spacing={2}>
+                          {/* All Time */}
+                          <Paper
+                            sx={{
+                              p: 2,
+                              width: "100%",
+                              height: "100%",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: colors.analogous1[100],
+                            }}
+                          >
+                            <Header
+                              title={
+                                "All Time: " +
+                                (totalSales ? totalSales?.total : "Loading...")
+                              }
+                            />
+                          </Paper>
+                          {/* Today */}
+                          <Paper
+                            sx={{
+                              p: 2,
+                              width: "100%",
+                              height: "100%",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: colors.analogous1[100],
+                            }}
+                          >
+                            <Header
+                              title={
+                                "Today: " +
+                                (totalSalesToday
+                                  ? totalSalesToday?.totalSales
+                                  : "Loading...")
+                              }
+                            />
+                          </Paper>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                    <Stack direction="row" spacing={2}>
+                      <Paper sx={paperStyle}>
+                        <Header title="Sales this month" />
+                        <ResponsiveLine
+                          colors={lineGraphLineColor}
+                          margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
+                          xScale={{ type: "point" }}
+                          yScale={{
+                            type: "linear",
+                            min: "auto",
+                            max: "auto",
+                            stacked: true,
+                            reverse: false,
+                          }}
+                          yFormat=" >-.2f"
+                          pointSize={10}
+                          pointColor={{ theme: "background" }}
+                          pointBorderWidth={2}
+                          pointBorderColor={{ from: "serieColor" }}
+                          pointLabel="data.yFormatted"
+                          pointLabelYOffset={-12}
+                          enableTouchCrosshair={true}
+                          useMesh={true}
+                          axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "Number of Sales",
+                            legendOffset: -40,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "Day",
+                            legendOffset: 36,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          curve={lineGraphLineCurve}
+                          lineWidth={4}
+                          data={totalSalesInMonth}
+                        />
+                      </Paper>
+
+                      <Paper
+                        sx={{
+                          p: 2,
+                          pb: "75px",
+                          xs: 6,
+                          width: "100%",
+                          maxHeight: "400px",
+                        }}
+                      >
+                        <Header title="Sales this year" />
+                        <ResponsiveLine
+                          colors={lineGraphLineColor}
+                          margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
+                          xScale={{ type: "point" }}
+                          yScale={{
+                            type: "linear",
+                            min: "auto",
+                            max: "auto",
+                            stacked: true,
+                            reverse: false,
+                          }}
+                          yFormat=" >-.2f"
+                          pointSize={10}
+                          pointColor={{ theme: "background" }}
+                          pointBorderWidth={2}
+                          pointBorderColor={{ from: "serieColor" }}
+                          pointLabel="data.yFormatted"
+                          pointLabelYOffset={-12}
+                          enableTouchCrosshair={true}
+                          useMesh={true}
+                          axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 90,
+                            legend: "Number of Sales",
+                            legendOffset: -40,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 90,
+                            legendOffset: 36,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          curve={lineGraphLineCurve}
+                          lineWidth={4}
+                          data={totalSalesInYear}
+                        />
+                      </Paper>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <Accordion defaultExpanded sx={{ background: colors.primary[100] }}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Header title="Orders" />
+              </AccordionSummary>
+              <AccordionDetails>
+                <Paper
+                  sx={{
+                    p: 2,
+                    width: "100%",
+                    height: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: colors.primary[200],
+                  }}
+                >
+                  <Stack spacing={2}>
+                    <Paper
+                      sx={{
+                        p: 2,
+                      }}
+                    >
+                      <Header title="Total Orders" />
+                      <Stack spacing={2}>
+                        <Stack direction="row" spacing={2}>
+                          {/* All Time */}
+                          <Paper
+                            sx={{
+                              p: 2,
+                              width: "100%",
+                              height: "100%",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: colors.analogous1[100],
+                            }}
+                          >
+                            <Header
+                              title={
+                                "All Time: " +
+                                (totalOrders
+                                  ? totalOrders?.total
+                                  : "Loading...")
+                              }
+                            />
+                          </Paper>
+                          {/* Today */}
+                          <Paper
+                            sx={{
+                              p: 2,
+                              width: "100%",
+                              height: "100%",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: colors.analogous1[100],
+                            }}
+                          >
+                            <Header
+                              title={
+                                "Today: " +
+                                (totalOrdersToday
+                                  ? totalOrdersToday?.totalOrders
+                                  : "Loading...")
+                              }
+                            />
+                          </Paper>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                    <Stack direction="row" spacing={2}>
+                      <Paper sx={paperStyle}>
+                        <Header title="Orders this month" />
+                        <ResponsiveLine
+                          colors={lineGraphLineColor}
+                          margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
+                          xScale={{ type: "point" }}
+                          yScale={{
+                            type: "linear",
+                            min: "auto",
+                            max: "auto",
+                            stacked: true,
+                            reverse: false,
+                          }}
+                          yFormat=" >-.2f"
+                          pointSize={10}
+                          pointColor={{ theme: "background" }}
+                          pointBorderWidth={2}
+                          pointBorderColor={{ from: "serieColor" }}
+                          pointLabel="data.yFormatted"
+                          pointLabelYOffset={-12}
+                          enableTouchCrosshair={true}
+                          useMesh={true}
+                          axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "Number of Orders",
+                            legendOffset: -40,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "Day",
+                            legendOffset: 36,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          curve={lineGraphLineCurve}
+                          lineWidth={4}
+                          data={totalOrdersInMonth}
+                        />
+                      </Paper>
+
+                      <Paper sx={paperStyle}>
+                        <Header title="Orders this year" />
+                        <ResponsiveLine
+                          colors={lineGraphLineColor}
+                          margin={{ top: 25, right: 110, bottom: 60, left: 60 }}
+                          xScale={{ type: "point" }}
+                          yScale={{
+                            type: "linear",
+                            min: "auto",
+                            max: "auto",
+                            stacked: true,
+                            reverse: false,
+                          }}
+                          yFormat=" >-.2f"
+                          pointSize={10}
+                          pointColor={{ theme: "background" }}
+                          pointBorderWidth={2}
+                          pointBorderColor={{ from: "serieColor" }}
+                          pointLabel="data.yFormatted"
+                          pointLabelYOffset={-12}
+                          enableTouchCrosshair={true}
+                          useMesh={true}
+                          axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: "Number of Orders",
+                            legendOffset: -40,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 90,
+                            legendOffset: 36,
+                            legendPosition: "middle",
+                            truncateTickAt: 0,
+                          }}
+                          curve={lineGraphLineCurve}
+                          lineWidth={4}
+                          data={totalOrdersInYear}
+                        />
+                      </Paper>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+        </Grid>
+
+        {/* Occurences */}
+        <Accordion defaultExpanded sx={{ background: colors.primary[100] }}>
+          <AccordionSummary expandIcon={<ExpandMore />}>
+            <Header title="Occurences" />
+          </AccordionSummary>
+          <AccordionDetails>
             <Paper
               sx={{
                 p: 2,
+                width: "100%",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colors.primary[200],
               }}
             >
-              <Header title="Total Sales" />
-              <Stack spacing={2}>
-                <Stack direction="row" spacing={2}>
-                  {/* All Time */}
-                  <Paper
-                    sx={{
-                      p: 2,
-                      width: "100%",
-                      height: "100%",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: colors.analogous1[100],
+              <Stack direction="row" spacing={2}>
+                <Paper sx={paperStyle}>
+                  <Header title="Design tags use occurrence" />
+                  <ResponsiveBar
+                    data={tagsUsedOccurenceBarChartData}
+                    keys={["value"]}
+                    indexBy="label"
+                    margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                    padding={0.4}
+                    valueScale={{ type: "linear" }}
+                    colors="#98F5F9"
+                    animate={true}
+                    enableLabel={false}
+                    axisTop={null}
+                    axisRight={null}
+                    axisLeft={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: 0,
+                      legend: "Number of Uses",
+                      legendPosition: "middle",
+                      legendOffset: -40,
                     }}
-                  >
-                    <Header title={"All Time: " + totalSales?.total} />
-                  </Paper>
-                  {/* Today */}
-                  <Paper
-                    sx={{
-                      p: 2,
-                      width: "100%",
-                      height: "100%",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: colors.analogous1[100],
+                  />
+                </Paper>
+                <Paper sx={paperStyle}>
+                  <Header title="Ingredient use in design ingredients" />
+                  <ResponsiveBar
+                    data={itemUsedOccurenceCakeIngredientBarChartData}
+                    keys={["value"]}
+                    indexBy="label"
+                    margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                    padding={0.4}
+                    valueScale={{ type: "linear" }}
+                    colors="#E5D900"
+                    animate={true}
+                    enableLabel={false}
+                    axisTop={null}
+                    axisRight={null}
+                    axisLeft={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: 0,
+                      legend: "Number of Uses",
+                      legendPosition: "middle",
+                      legendOffset: -40,
                     }}
-                  >
-                    <Header title={"Today: " + totalSalesToday?.totalSales} />
-                  </Paper>
-                </Stack>
+                    axisBottom={{
+                      tickRotation: 90,
+                    }}
+                  />
+                </Paper>
               </Stack>
             </Paper>
-            <Stack direction="row" spacing={2}>
-              <Paper sx={paperStyle}>
-                <Header title="Sales this month" />
-                <ResponsiveLine
-                  colors={lineGraphLineColor}
-                  margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
-                  xScale={{ type: "point" }}
-                  yScale={{
-                    type: "linear",
-                    min: "auto",
-                    max: "auto",
-                    stacked: true,
-                    reverse: false,
-                  }}
-                  yFormat=" >-.2f"
-                  pointSize={10}
-                  pointColor={{ theme: "background" }}
-                  pointBorderWidth={2}
-                  pointBorderColor={{ from: "serieColor" }}
-                  pointLabel="data.yFormatted"
-                  pointLabelYOffset={-12}
-                  enableTouchCrosshair={true}
-                  useMesh={true}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Number of Sales",
-                    legendOffset: -40,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Day",
-                    legendOffset: 36,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  curve={lineGraphLineCurve}
-                  lineWidth={4}
-                  data={totalSalesInMonth}
-                />
-              </Paper>
-
-              <Paper
-                sx={{
-                  p: 2,
-                  pb: "75px",
-                  xs: 6,
-                  width: "100%",
-                  maxHeight: "400px",
-                }}
-              >
-                <Header title="Sales this year" />
-                <ResponsiveLine
-                  colors={lineGraphLineColor}
-                  margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
-                  xScale={{ type: "point" }}
-                  yScale={{
-                    type: "linear",
-                    min: "auto",
-                    max: "auto",
-                    stacked: true,
-                    reverse: false,
-                  }}
-                  yFormat=" >-.2f"
-                  pointSize={10}
-                  pointColor={{ theme: "background" }}
-                  pointBorderWidth={2}
-                  pointBorderColor={{ from: "serieColor" }}
-                  pointLabel="data.yFormatted"
-                  pointLabelYOffset={-12}
-                  enableTouchCrosshair={true}
-                  useMesh={true}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 90,
-                    legend: "Number of Sales",
-                    legendOffset: -40,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 90,
-                    legendOffset: 36,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  curve={lineGraphLineCurve}
-                  lineWidth={4}
-                  data={totalSalesInYear}
-                />
-              </Paper>
-            </Stack>
-          </Stack>
-        </Paper>
-
-        {/* Total Orders */}
-        <Paper
-          sx={{
-            p: 2,
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: colors.primary[100],
-          }}
-        >
-          <Stack spacing={2}>
-            <Paper sx={paperStyle}>
-              <Header title={"Total Orders: " + totalOrders?.total} />
-            </Paper>
-            <Stack direction="row" spacing={2}>
-              <Paper sx={paperStyle}>
-                <Header title="Orders this month" />
-                <ResponsiveLine
-                  colors={lineGraphLineColor}
-                  margin={{ top: 25, right: 110, bottom: 50, left: 60 }}
-                  xScale={{ type: "point" }}
-                  yScale={{
-                    type: "linear",
-                    min: "auto",
-                    max: "auto",
-                    stacked: true,
-                    reverse: false,
-                  }}
-                  yFormat=" >-.2f"
-                  pointSize={10}
-                  pointColor={{ theme: "background" }}
-                  pointBorderWidth={2}
-                  pointBorderColor={{ from: "serieColor" }}
-                  pointLabel="data.yFormatted"
-                  pointLabelYOffset={-12}
-                  enableTouchCrosshair={true}
-                  useMesh={true}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Number of Orders",
-                    legendOffset: -40,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Day",
-                    legendOffset: 36,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  curve={lineGraphLineCurve}
-                  lineWidth={4}
-                  data={totalOrdersInMonth}
-                />
-              </Paper>
-
-              <Paper sx={paperStyle}>
-                <Header title="Orders this year" />
-                <ResponsiveLine
-                  colors={lineGraphLineColor}
-                  margin={{ top: 25, right: 110, bottom: 60, left: 60 }}
-                  xScale={{ type: "point" }}
-                  yScale={{
-                    type: "linear",
-                    min: "auto",
-                    max: "auto",
-                    stacked: true,
-                    reverse: false,
-                  }}
-                  yFormat=" >-.2f"
-                  pointSize={10}
-                  pointColor={{ theme: "background" }}
-                  pointBorderWidth={2}
-                  pointBorderColor={{ from: "serieColor" }}
-                  pointLabel="data.yFormatted"
-                  pointLabelYOffset={-12}
-                  enableTouchCrosshair={true}
-                  useMesh={true}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: "Number of Orders",
-                    legendOffset: -40,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 90,
-                    legendOffset: 36,
-                    legendPosition: "middle",
-                    truncateTickAt: 0,
-                  }}
-                  curve={lineGraphLineCurve}
-                  lineWidth={4}
-                  data={totalOrdersInYear}
-                />
-              </Paper>
-            </Stack>
-          </Stack>
-        </Paper>
-
-        {/* Occurences */}
-        <Paper
-          sx={{
-            p: 2,
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: colors.primary[100],
-          }}
-        >
-          <Stack direction="row" spacing={2}>
-            <Paper sx={paperStyle}>
-              <Header title="Design tags use occurrence" />
-              <ResponsiveBar
-                data={tagsUsedOccurenceBarChartData}
-                keys={["value"]}
-                indexBy="label"
-                margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                padding={0.4}
-                valueScale={{ type: "linear" }}
-                colors="#98F5F9"
-                animate={true}
-                enableLabel={false}
-                axisTop={null}
-                axisRight={null}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legend: "Number of Uses",
-                  legendPosition: "middle",
-                  legendOffset: -40,
-                }}
-              />
-            </Paper>
-            <Paper sx={paperStyle}>
-              <Header title="Ingredient use in design ingredients" />
-              <ResponsiveBar
-                data={itemUsedOccurenceCakeIngredientBarChartData}
-                keys={["value"]}
-                indexBy="label"
-                margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
-                padding={0.4}
-                valueScale={{ type: "linear" }}
-                colors="#E5D900"
-                animate={true}
-                enableLabel={false}
-                axisTop={null}
-                axisRight={null}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legend: "Number of Uses",
-                  legendPosition: "middle",
-                  legendOffset: -40,
-                }}
-                axisBottom={{
-                  tickRotation: 90,
-                }}
-              />
-            </Paper>
-          </Stack>
-        </Paper>
+          </AccordionDetails>
+        </Accordion>
       </Stack>
-    </Box>
+    </>
   );
 };
 
