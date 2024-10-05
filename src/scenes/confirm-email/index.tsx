@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import api from "../../api/axiosConfig";
 
 const ConfirmEmail = () => {
