@@ -197,9 +197,6 @@ const Suborders = () => {
   return (
     <>
       <Header title="SUBORDERS" subtitle="Employee updates" />
-      <Button variant="contained" onClick={handleAddNew}>
-        Add Suborder
-      </Button>
       <DataGridStyler>
         <DataGrid
           rows={rows as GridRowsProp}
@@ -219,50 +216,6 @@ const Suborders = () => {
           }}
         />
       </DataGridStyler>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {selectedRow.id ? "Edit Suborder" : "Add New Suborder"}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2}>
-            <TextField
-              id="description"
-              name="description"
-              label="Description"
-              fullWidth
-              variant="filled"
-              value={values.description}
-              onChange={handleChange}
-            />
-            <TextField
-              id="quantity"
-              name="quantity"
-              label="Quantity"
-              fullWidth
-              variant="filled"
-              type="number"
-              value={values.quantity}
-              onChange={handleChange}
-            />
-            {/* Additional Form Fields as needed */}
-          </Stack>
-          {error && <Typography color="error">{error}</Typography>}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {!isSubmitting ? (
-              selectedRow.id ? (
-                "Save"
-              ) : (
-                "Add"
-              )
-            ) : (
-              <CircularProgress size={21} />
-            )}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };
