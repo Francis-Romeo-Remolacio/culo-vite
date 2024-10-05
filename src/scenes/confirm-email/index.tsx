@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../../api/axiosConfig";
 
 const ConfirmEmail = () => {
   const [message, setMessage] = useState("");
@@ -16,9 +17,11 @@ const ConfirmEmail = () => {
   useEffect(() => {
     if (confirmationCode) {
       // Call the API to confirm the email
-      axios
+      api
         .post(
-          `/current-user/confirm-email?confirmationCode=${confirmationCode}`
+          `/current-user/confirm-email?confirmationCode=${encodeURIComponent(
+            confirmationCode
+          )}`
         )
         .then((response) => {
           setMessage(response.data.message || "Email confirmed successfully!");
@@ -32,20 +35,20 @@ const ConfirmEmail = () => {
   }, [confirmationCode]);
 
   // Timer and redirection logic
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown((prevCountdown) => prevCountdown - 1); // Update countdown
-    }, 1000);
+  //   useEffect(() => {
+  //     const interval = setInterval(() => {
+  //       setCountdown((prevCountdown) => prevCountdown - 1); // Update countdown
+  //     }, 1000);
 
-    const timer = setTimeout(() => {
-      navigate("/");
-    }, 5000);
+  //     const timer = setTimeout(() => {
+  //       navigate("/");
+  //     }, 5000);
 
-    return () => {
-      clearInterval(interval); // Clear interval on unmount
-      clearTimeout(timer); // Clear timeout on unmount
-    };
-  }, [navigate]);
+  //     return () => {
+  //       clearInterval(interval); // Clear interval on unmount
+  //       clearTimeout(timer); // Clear timeout on unmount
+  //     };
+  //   }, [navigate]);
 
   return (
     <div
