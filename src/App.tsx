@@ -12,8 +12,8 @@ import Custom from "./scenes/custom";
 // import About from "./scenes/about/index";
 import Results from "./scenes/results";
 import Cart from "./scenes/cart";
-//import MyOrders from "./scenes/my-orders";
-// import Purchases from "./scenes/purchases";
+import Profile from "./scenes/profile";
+import MyOrders from "./scenes/my-orders/index.js";
 // import Forbidden from "./scenes/forbidden";
 // import NotFound from "./scenes/not-found";
 import Dashboard from "./scenes/management/dashboard";
@@ -25,8 +25,7 @@ import Users from "./scenes/management/users";
 import Sales from "./scenes/management/sales";
 import ManualRegister from "./scenes/management/form";
 import Calendar from "./scenes/management/calendar";
-import Materials from "./scenes/management/pastry_material";
-import Profile from "./scenes/management/profile";
+import Materials from./scenes/profile/index.jsy_material";
 // import Logs from "./scenes/management/logs";
 // import Settings from "./scenes/management/settings";
 import AddOns from "./scenes/management/addons";
@@ -34,7 +33,6 @@ import AuthGuard from "./components/AuthGuard";
 import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
-import MyOrders from "./scenes/my-orders/index.js";
 import ConfirmEmail from "./scenes/confirm-email/index.js";
 
 function App() {

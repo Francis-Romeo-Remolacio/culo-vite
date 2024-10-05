@@ -12,15 +12,15 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { Tokens } from "../../../Theme";
-import api from "../../../api/axiosConfig";
+import { Tokens } from "../../Theme";
+import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router-dom";
-import { User } from "../../../utils/Schemas";
-import Header from "../../../components/Header";
+import { User } from "../../utils/Schemas";
+import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
-import { getImageType } from "../../../components/Base64Image";
+import { getImageType } from "../../components/Base64Image";
 
 const Profile = () => {
   const theme = useTheme();
