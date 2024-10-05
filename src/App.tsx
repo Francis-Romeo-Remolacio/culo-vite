@@ -35,6 +35,7 @@ import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
 import MyOrders from "./scenes/my-orders/index.js";
+import ConfirmEmail from "./scenes/confirm-email/index.js";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/confirm-email" element={<ConfirmEmail />} />
             <Route path="/not-found" element={<NotFound />} />
             {
               //<Route path="/about" element={<About />} />
@@ -85,6 +87,7 @@ function App() {
               //<Route path="/purchases" element={<Purchases />} />
             }
             <Route path="/profile" element={<Profile />} />
+            <Route path="/confirm-email" element={<ConfirmEmail />} />
             <Route path="/not-found" element={<NotFound />} />
           </Routes>
         </MainAppBar>
