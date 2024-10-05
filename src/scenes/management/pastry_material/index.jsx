@@ -18,7 +18,7 @@ import UpdatePastryMaterialModal from "./updateModal";
 import AddPastryMaterialModal from "./addModal";
 import ManualSubtractionModal from "./manualSubtractionModal";
 import DeleteConfirmationModal from "./deleteConfirmationModal";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 
 const PastryMaterial = () => {
   const theme = useTheme();
@@ -164,21 +164,20 @@ const PastryMaterial = () => {
           "00000000-0000-0000-0000-000000000000"
       ) {
         try {
-          const response = await api.post(`/pastry-materials/${encodedId}/other-costs/`, 
-            {"additionalCost" : updatedData.otherCost.additionalCost}
+          const response = await api.post(
+            `/pastry-materials/${encodedId}/other-costs/`,
+            { additionalCost: updatedData.otherCost.additionalCost }
           );
-        }
-        catch (error) {
+        } catch (error) {
           console.error("Failed to add pastry material other cost:", error);
         }
-      }
-      else {
+      } else {
         try {
-          const response = await api.patch(`/pastry-materials/${encodedId}/other-costs/`, 
-            {"additionalCost" : updatedData.otherCost.additionalCost}
+          const response = await api.patch(
+            `/pastry-materials/${encodedId}/other-costs/`,
+            { additionalCost: updatedData.otherCost.additionalCost }
           );
-        }
-        catch (error) {
+        } catch (error) {
           console.error("Failed to add pastry material other cost:", error);
         }
       }
@@ -487,7 +486,7 @@ const PastryMaterial = () => {
       designId: dataToBeAdded.designId,
       mainVariantName: dataToBeAdded.mainVariantName,
       otherCost: {
-        additionalCost: dataToBeAdded.otherCost.additionalCost
+        additionalCost: dataToBeAdded.otherCost.additionalCost,
       },
       ingredients: [],
       addOns: [],
@@ -566,35 +565,8 @@ const PastryMaterial = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-  if (error) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box p={2}>
+    <>
       <Header
         title="Pastry Materials"
         subtitle="The ingredients of something"
@@ -611,7 +583,7 @@ const PastryMaterial = () => {
           rows={pastryMaterialRows}
           columns={columns}
           getRowId={(row) => row.pastryMaterialId}
-          components={{ Toolbar: GridToolbar }}
+          slots={{ toolbar: GridToolbar }}
         />
       </DataGridStyler>
       <UpdatePastryMaterialModal
@@ -637,7 +609,7 @@ const PastryMaterial = () => {
         material={selectedMaterial}
         handleDelete={handleDeleteSubmit}
       />
-    </Box>
+    </>
   );
 };
 export default PastryMaterial;

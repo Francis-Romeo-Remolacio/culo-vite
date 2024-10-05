@@ -13,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutline";
 import ManualAddDialog from "./ManualAddDialog";
 import UpdateTagModal from "./updateModal";
 import BulkAddDialog from "./BulkAddDialog";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import { Tag } from "../../../utils/Schemas.js";
 
 const Tags = () => {
@@ -117,7 +117,7 @@ const Tags = () => {
   ];
 
   return (
-    <Box p={2}>
+    <>
       <Header title="Tags" subtitle="Tags for categorizing designs" />
       <Stack direction="row" spacing={2}>
         <Button
@@ -174,7 +174,7 @@ const Tags = () => {
         handleSubmit={handleUpdateTagSubmit}
         tagId={currentTagSelected}
       />
-    </Box>
+    </>
   );
 };
 

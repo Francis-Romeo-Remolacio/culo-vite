@@ -16,7 +16,7 @@ import {
 } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig"; // Assuming api encapsulates Axios methods
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import EditIcon from "@mui/icons-material/Edit";
 import { useFormik } from "formik";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
@@ -122,7 +122,7 @@ const AddOns = () => {
     onSubmit: handleSubmitAdd,
   });
 
-  const columns: GridColDef = [
+  const columns: readonly GridColDef[] = [
     {
       field: "action",
       headerName: "Actions",
@@ -132,7 +132,7 @@ const AddOns = () => {
         </IconButton>
       ),
     },
-    { field: "id", headerName: "ID", hide: true },
+    { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name" },
     { field: "measurement", headerName: "Measurement" },
     { field: "price", headerName: "Price" },
@@ -144,19 +144,26 @@ const AddOns = () => {
   return (
     <>
       <Header title="ADD-ONS" subtitle="Manage Add-Ons" />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddClick}
-        style={{ margin: "16px" }}
-      >
-        Add New Add-On
+      <Button variant="contained" color="primary" onClick={handleAddClick}>
+        {"Add New Add-On"}
       </Button>
       <DataGridStyler>
         <DataGrid
           rows={rows}
           columns={columns}
           slots={{ toolbar: GridToolbar }}
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [{ field: "isActive", operator: "is", value: true }],
+              },
+            },
+          }}
         />
       </DataGridStyler>
 

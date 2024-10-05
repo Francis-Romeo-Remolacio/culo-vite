@@ -4,7 +4,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Tokens } from "../../../Theme";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 const columns = [
   { field: "id", headerName: "ID", flex: 0.5, hide: true },
   { field: "name", headerName: "Product", flex: 1 },

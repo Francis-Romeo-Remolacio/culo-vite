@@ -20,7 +20,7 @@ import {
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import { Edit, Delete, Restore } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { ingredientSchema } from "../../../utils/Validation.js";

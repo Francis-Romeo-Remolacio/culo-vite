@@ -19,7 +19,7 @@ import {
 } from "@mui/x-data-grid";
 import Header from "../../../components/Header.js";
 import api from "../../../api/axiosConfig.js";
-import DataGridStyler from "../../../components/DataGridStyler.js";
+import DataGridStyler from "../../../components/DataGridStyler.tsx";
 import { Edit, Delete, Restore } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { suborderSchema } from "../../../utils/Validation.js";
