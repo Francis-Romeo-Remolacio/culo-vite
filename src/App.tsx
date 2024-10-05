@@ -25,7 +25,7 @@ import Users from "./scenes/management/users";
 import Sales from "./scenes/management/sales";
 import ManualRegister from "./scenes/management/form";
 import Calendar from "./scenes/management/calendar";
-import Materials from./scenes/profile/index.jsy_material";
+import Materials from "./scenes/management/pastry_material";
 // import Logs from "./scenes/management/logs";
 // import Settings from "./scenes/management/settings";
 import AddOns from "./scenes/management/addons";
