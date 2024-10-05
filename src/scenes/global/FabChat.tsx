@@ -150,7 +150,6 @@ const FabChat = () => {
   const [chatMessages, setChatMessages] = useState<DirectMessage[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
-  const [bearerToken, setBearerToken] = useState<string>("");
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -182,11 +181,15 @@ const FabChat = () => {
       try {
         const cookieToken = Cookies.get("token");
         if (cookieToken) {
-          setBearerToken(
-            `${cookieToken}, Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`
-          );
+          console.log(cookieToken);
 
-          const fullUrl = `https://resentekaizen280-001-site1.etempurl.com/live-chat?access_token=${bearerToken}`;
+          const bearerToken = `${cookieToken}, Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
+
+          const fullUrl = `https://resentekaizen280-001-site1.etempurl.com/live-chat?access_token=${encodeURIComponent(
+            bearerToken
+          )}`;
+          console.log(fullUrl);
+
           const newConnection = new HubConnectionBuilder()
             .withUrl(fullUrl, { accessTokenFactory: () => bearerToken })
             .withAutomaticReconnect()
