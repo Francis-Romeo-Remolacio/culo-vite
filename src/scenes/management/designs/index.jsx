@@ -695,7 +695,7 @@ const Designs = () => {
         {designs.map((design) => (
           <Grid size={{ xs: 6, sm: 4, md: 2, lg: 1.5 }}>
             <DesignCard
-              manager
+              manager={true}
               id={design.designId}
               name={design.displayName}
               picture={design.displayPictureData}

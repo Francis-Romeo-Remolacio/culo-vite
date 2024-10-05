@@ -122,7 +122,7 @@ const Tags = () => {
       <Stack direction="row" spacing={2}>
         <Button
           onClick={() => {
-            handleAddTagButtonClick;
+            handleAddTagButtonClick();
           }}
           variant="contained"
           color="primary"
@@ -131,7 +131,7 @@ const Tags = () => {
         </Button>
         <Button
           onClick={() => {
-            handleBulkAddTagButtonClick;
+            handleBulkAddTagButtonClick();
           }}
           variant="contained"
           color="secondary"
