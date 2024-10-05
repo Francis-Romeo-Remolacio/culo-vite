@@ -27,6 +27,7 @@ import {
   Skeleton,
   Stack,
   TextField,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -371,6 +372,41 @@ export default function MainAppBar({ children }: MainAppBarProps) {
               </Stack>
             </Link>
             <Box sx={{ flexGrow: 1 }} />
+            <Box sx={{ display: { xs: "flex", md: "flex" }, pr: 2 }}>
+              <Link to="/">
+                <Button
+                  sx={{
+                    color: colors.background,
+                    fontWeight: "bold",
+                    fontSize: 16,
+                  }}
+                >
+                  Home
+                </Button>
+              </Link>
+              <Link to="/shop">
+                <Button
+                  sx={{
+                    color: colors.background,
+                    fontWeight: "bold",
+                    fontSize: 16,
+                  }}
+                >
+                  Shop
+                </Button>
+              </Link>
+              <Link to="/custom">
+                <Button
+                  sx={{
+                    color: colors.background,
+                    fontWeight: "bold",
+                    fontSize: 16,
+                  }}
+                >
+                  Custom
+                </Button>
+              </Link>
+            </Box>
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
               {loggedIn ? (
                 <>
