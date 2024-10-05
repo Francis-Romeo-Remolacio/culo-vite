@@ -75,7 +75,7 @@ const DesignCard = ({
     >
       <Link
         component={RouterLink}
-        to={`/view-design?q=${encodeURIComponent(id)}`}
+        //to={`/view-design?q=${encodeURIComponent(id)}`}
         sx={{ textDecoration: "none", color: "inherit" }}
       >
         <CardActionArea
