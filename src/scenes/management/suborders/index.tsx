@@ -196,7 +196,7 @@ const Suborders = () => {
 
   return (
     <>
-      <Header title="ORDERS" subtitle="Suborders Management" />
+      <Header title="SUBORDERS" subtitle="Employee updates" />
       <Button variant="contained" onClick={handleAddNew}>
         Add Suborder
       </Button>
