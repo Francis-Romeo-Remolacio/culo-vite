@@ -258,12 +258,10 @@ const Register = () => {
               </FormControl>
               <Typography variant="subtitle2">
                 {
-                  "Upon registering, you will receive an email for verification."
+                  "Upon registering, you will receive an email for verification. Verification is required for ordering."
                 }
               </Typography>
-              <Typography variant="subtitle2">
-                {"Verification is required for ordering."}
-              </Typography>
+              <Typography variant="subtitle2"></Typography>
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Register" : <CircularProgress size={21} />}
               </Button>
