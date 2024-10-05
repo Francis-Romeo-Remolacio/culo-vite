@@ -38,13 +38,13 @@ import {
   Check as CheckIcon,
   Redeem as RedeemIcon,
 } from "@mui/icons-material";
-import { Badge, Paper, Popper } from "@mui/material";
+import { Badge, Paper, Popper, Tooltip } from "@mui/material";
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import api from "../../../api/axiosConfig";
 import { Notification } from "../../../utils/Schemas";
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
@@ -146,47 +146,36 @@ const SidebarItem = ({ text, open }: SidebarItemProps) => {
   const IconComponent =
     iconMapping[toKebabCase(text)] || iconMapping["default"];
   return (
-    <ListItem disablePadding sx={{ display: "block" }}>
-      <ListItemButton
-        component={Link}
-        to={`/${toKebabCase(text)}`}
-        sx={{
-          minHeight: 48,
-          justifyContent: open ? "initial" : "center",
-          px: 2.5,
-        }}
-      >
-        <ListItemIcon
-          sx={{ minWidth: 0, mr: open ? 3 : "auto", justifyContent: "center" }}
+    <Tooltip
+      title={text}
+      placement="right"
+      disableFocusListener={open}
+      disableHoverListener={open}
+      disableTouchListener={open}
+    >
+      <ListItem disablePadding sx={{ display: "block" }}>
+        <ListItemButton
+          component={Link}
+          to={text === "Dashboard" ? "/" : `/${toKebabCase(text)}`}
+          sx={{
+            minHeight: 48,
+            justifyContent: open ? "initial" : "center",
+            px: 2.5,
+          }}
         >
-          <IconComponent />
-        </ListItemIcon>
-        <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-      </ListItemButton>
-    </ListItem>
-  );
-};
-const SidebarItemHome = ({ text, open }: SidebarItemProps) => {
-  const IconComponent = iconMapping["dashboard"];
-  return (
-    <ListItem disablePadding sx={{ display: "block" }}>
-      <ListItemButton
-        component={Link}
-        to={`/`}
-        sx={{
-          minHeight: 48,
-          justifyContent: open ? "initial" : "center",
-          px: 2.5,
-        }}
-      >
-        <ListItemIcon
-          sx={{ minWidth: 0, mr: open ? 3 : "auto", justifyContent: "center" }}
-        >
-          <IconComponent />
-        </ListItemIcon>
-        <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-      </ListItemButton>
-    </ListItem>
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: open ? 3 : "auto",
+              justifyContent: "center",
+            }}
+          >
+            <IconComponent />
+          </ListItemIcon>
+          <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+        </ListItemButton>
+      </ListItem>
+    </Tooltip>
   );
 };
 
@@ -333,7 +322,7 @@ export default function ManagementAppBar({
           </DrawerHeader>
           <Divider />
           <List>
-            <SidebarItemHome key={"Dashboard"} text={"Dashboard"} open={open} />
+            <SidebarItem key={"Dashboard"} text={"Dashboard"} open={open} />
           </List>
           <Divider />
           <List>
