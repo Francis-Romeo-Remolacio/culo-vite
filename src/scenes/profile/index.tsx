@@ -11,6 +11,7 @@ import {
   Skeleton,
   Snackbar,
   Alert,
+  styled,
 } from "@mui/material";
 import { Tokens } from "../../Theme";
 import api from "../../api/axiosConfig";
@@ -22,10 +23,19 @@ import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import { getImageType } from "../../components/Base64Image";
 
-const Profile = () => {
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
+const Profile = () => {
   const [userData, setUserData] = useState<User>();
   const [userPicture, setUserPicture] = useState("");
   const [imageType, setImageType] = useState("png");
@@ -35,6 +45,13 @@ const Profile = () => {
   const [severity, setSeverity] = useState("");
   const [error, setError] = useState("");
   const [isSubmittingVerify, setIsSubmittingVerify] = useState(false);
+
+  const fetchUserPicture = async () => {
+    await api.get("current-user/profile-picture").then((response) => {
+      setUserPicture(response.data);
+      setImageType(getImageType(userPicture));
+    });
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -57,11 +74,7 @@ const Profile = () => {
             joinDate: response.data.joinDate,
           };
           setUserData(parsedUser);
-        });
-
-        await api.get("current-user/profile-picture").then((response) => {
-          setUserPicture(response.data);
-          setImageType(getImageType(userPicture));
+          fetchUserPicture();
         });
       } catch (err) {
         setError("Failed to fetch user data. Please try again.");
@@ -73,40 +86,66 @@ const Profile = () => {
     fetchUserData();
   }, []);
 
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Remove the "data:image/*;base64," part
+        const base64Image = base64String.replace(
+          /^data:image\/\w+;base64,/,
+          ""
+        );
+        resolve(base64Image);
+      };
+
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
+
+      // Check file size limit (1MB)
       if (file.size > 1024 * 1024) {
         setError("File size exceeds the limit of 1MB.");
         return;
       }
 
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+      try {
+        // Convert the file to base64 string (without header)
+        const base64String = await convertImageToBase64(file);
 
-      reader.onload = async () => {
-        const base64String = reader.result;
+        // Get the auth token from cookies
+        const token = Cookies.get("token");
+        if (!token) {
+          setError("No token found. Please log in.");
+          return;
+        }
 
-        try {
-          const token = Cookies.get("token");
-          if (!token) {
-            setError("No token found. Please log in.");
-            return;
-          }
-
-          await api.post("/current-user/upload-profile-picture", base64String, {
+        // Submit the base64 string to the API endpoint
+        if (userPicture) {
+          await api.patch("/current-user/profile-picture", base64String, {
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           });
-
-          alert("File uploaded successfully.");
-        } catch (err) {
-          console.error("File upload error:", err);
-          alert("Failed to upload file. Please try again.");
+        } else {
+          await api.post("/current-user/upload-profile-picture", base64String, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
         }
-      };
+
+        alert("File uploaded successfully.");
+      } catch (err) {
+        console.error("File upload error:", err);
+        alert("Failed to upload file. Please try again.");
+      }
     }
   };
 
@@ -172,12 +211,15 @@ const Profile = () => {
             <>
               <Skeleton variant="circular" width={160} height={160}></Skeleton>
               <Button
-                component="span"
+                component="label"
+                role={undefined}
                 variant="contained"
+                tabIndex={-1}
                 startIcon={<CloudUploadIcon />}
                 sx={{ position: "absolute", top: 180 }}
               >
                 {"Upload File"}
+                <VisuallyHiddenInput type="file" onChange={handleFileUpload} />
               </Button>
             </>
           )}
@@ -210,15 +252,6 @@ const Profile = () => {
         <Typography variant="body1">
           {`Join Date: ${String(userData?.joinDate)}`}
         </Typography>
-        <Box mt={2}>
-          <input
-            id="file-upload"
-            type="file"
-            accept=".png, .jpg"
-            style={{ display: "none" }}
-            onChange={handleFileUpload}
-          />
-        </Box>
         <Button variant="contained" onClick={handleLogout} href="/">
           Log out
         </Button>
