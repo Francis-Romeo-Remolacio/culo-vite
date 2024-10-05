@@ -27,38 +27,47 @@ import {
   HttpRequest,
   HttpResponse,
   HubConnectionBuilder,
-  ILogger,
   LogLevel,
 } from "@microsoft/signalr";
 import Cookies from "js-cookie";
 import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
-import { DirectMessage } from "../../utils/Schemas";
+import { DirectMessage, User } from "../../utils/Schemas";
 import api from "../../api/axiosConfig";
 
+// class CustomHttpClient extends DefaultHttpClient {
+//   private bearer: string | null;
+
+//   constructor(logger: ILogger, bearer: string | null = null) {
+//     super(logger);
+//     this.bearer = bearer;
+//   }
+
+//   public async send(request: HttpRequest): Promise<HttpResponse> {
+//     const baseAuth = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
+//     let authHeader = baseAuth;
+
+//     if (this.bearer) {
+//       authHeader += `, Bearer ${this.bearer}`;
+//     }
+
+//     request.headers = {
+//       ...request.headers,
+//       Authorization: authHeader,
+//     };
+
+//     return await super.send(request);
+//   }
+// }
+
 class CustomHttpClient extends DefaultHttpClient {
-  private token: string;
-  private bearer: string | null;
+  cookieToken = Cookies.get("token");
 
-  constructor(logger: ILogger, token: string, bearer: string | null = null) {
-    super(logger);
-    this.token = token;
-    this.bearer = bearer;
-  }
-
-  public async send(request: HttpRequest): Promise<HttpResponse> {
-    const baseAuth = `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
-    let authHeader = baseAuth;
-
-    if (this.bearer) {
-      authHeader += `, Bearer ${this.bearer}`;
-    }
-
+  public send(request: HttpRequest): Promise<HttpResponse> {
     request.headers = {
       ...request.headers,
-      Authorization: authHeader,
+      Authorization: `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs, Bearer ${this.cookieToken}`,
     };
-
-    return await super.send(request);
+    return super.send(request);
   }
 }
 
@@ -135,6 +144,8 @@ const FabChat = () => {
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
   );
+
+  const [currentUser, setCurrentUser] = useState<User>();
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<DirectMessage[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -148,6 +159,21 @@ const FabChat = () => {
   const open = Boolean(anchorEl);
   const id = open ? "simple-popper" : undefined;
 
+  useEffect(() => {
+    api.get("current-user").then((response) => {
+      const parsedUser: User = {
+        id: response.data.id,
+        email: response.data.email,
+        username: response.data.username,
+        roles: response.data.roles,
+        phoneNumber: response.data.phoneNumber,
+        isEmailConfirmed: response.data.isEmailConfirmed,
+        joinDate: response.data.joinDate,
+      };
+      setCurrentUser(parsedUser);
+    });
+  }, []);
+
   // Start the SignalR connection
   useEffect(() => {
     let isMounted = true;
@@ -156,19 +182,15 @@ const FabChat = () => {
       try {
         const cookieToken = Cookies.get("token");
         if (cookieToken) {
-          setBearerToken(`Bearer ${cookieToken}`);
+          setBearerToken(
+            `${cookieToken}, Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`
+          );
         }
 
         const newConnection = new HubConnectionBuilder()
           .withUrl(
             "http://resentekaizen280-001-site1.etempurl.com/live-chat/",
-            {
-              httpClient: new CustomHttpClient(
-                new ConsoleLogger(LogLevel.Information),
-                "MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs",
-                cookieToken
-              ),
-            }
+            { accessTokenFactory: () => bearerToken }
           )
           .withAutomaticReconnect()
           .build();
@@ -231,32 +253,40 @@ const FabChat = () => {
 
   // Fetch online users
   const refreshConnections = () => {
-    api.get("ui-helpers/live-chat/online-users").then((response) => {
-      setOnlineUsers(response.data);
-    });
+    api
+      .get(
+        `ui-helpers/live-chat/online-${
+          currentUser?.roles[0] === "Admin" ? "users" : "admins"
+        }`
+      )
+      .then((response) => {
+        setOnlineUsers(response.data);
+      });
   };
 
   // Send message as a customer or admin
-  const sendMessage = (role: string) => {
+  const sendMessage = (role?: string) => {
     if (!connection || !message.trim()) return;
 
-    const sendMethod =
-      role === "admin" ? "admin-send-message" : "customer-send-message";
+    if (currentUser) {
+      const sendMethod =
+        role === "admin" ? "admin-send-message" : "customer-send-message";
 
-    connection
-      .invoke(sendMethod, message.trim(), selectedUser)
-      .then(() => {
-        setChatMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            sender: role === "admin" ? "Admin" : "Customer",
-            message: message,
-            timestamp: new Date(),
-          },
-        ]);
-        setMessage("");
-      })
-      .catch((err) => console.error(`Error sending ${role} message:`, err));
+      connection
+        .invoke(sendMethod, message.trim(), selectedUser)
+        .then(() => {
+          setChatMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              sender: role === "admin" ? "Admin" : "Customer",
+              message: message,
+              timestamp: new Date(),
+            },
+          ]);
+          setMessage("");
+        })
+        .catch((err) => console.error(`Error sending ${role} message:`, err));
+    }
   };
 
   return (
@@ -302,6 +332,7 @@ const FabChat = () => {
                   labelId="user-select-label"
                   id="connection-options"
                   value={selectedUser}
+                  label="Select User"
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
                   {onlineUsers.map((user) => (
@@ -333,16 +364,9 @@ const FabChat = () => {
                 />
                 <Button
                   variant="contained"
-                  onClick={() => sendMessage("customer")}
+                  onClick={() => sendMessage(currentUser?.roles[0])}
                 >
                   <SendIcon />
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => sendMessage("admin")}
-                >
-                  Send as Admin
                 </Button>
               </Stack>
             </Box>
