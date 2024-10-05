@@ -209,11 +209,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     setMobileMoreAnchorEl(null);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    handleMobileMenuClose();
-  };
-
   const handleMobileMenuOpen = (event: MouseEvent<HTMLButtonElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
@@ -224,10 +219,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   const handleRegister = () => {
     navigate("/register");
-  };
-
-  const handleProfile = () => {
-    navigate("/profile");
   };
 
   const handleCart = () => {
@@ -245,47 +236,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
   };
 
   const menuId = "primary-search-account-menu";
-  const renderMenu = loggedIn ? (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleProfile}>Profile</MenuItem>
-      <MenuItem onClick={handleLogout} href="/">
-        Logout
-      </MenuItem>
-    </Menu>
-  ) : (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleLogin}>Login</MenuItem>
-      <MenuItem onClick={handleRegister}>Register</MenuItem>
-    </Menu>
-  );
 
   const mobileMenuId = "primary-search-account-menu-mobile";
   const renderMobileMenu = loggedIn ? (
@@ -333,7 +283,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         </IconButton>
         <p>My Orders</p>
       </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
+      <MenuItem onClick={() => navigate("/profile")}>
         <IconButton
           size="large"
           aria-label="account of current user"
@@ -455,7 +405,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     aria-label="account of current user"
                     aria-controls={menuId}
                     aria-haspopup="true"
-                    onClick={handleProfileMenuOpen}
+                    onClick={() => navigate("/profile")}
                     color="inherit"
                   >
                     <AccountCircle sx={{ color: colors.background }} />
@@ -482,16 +432,15 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 aria-label="show more"
                 aria-controls={mobileMenuId}
                 aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
+                onClick={() => navigate("/login")}
                 color="inherit"
               >
-                <MoreIcon sx={{ color: colors.background }} />
+                <Login sx={{ color: colors.background }} />
               </IconButton>
             </Box>
           </Toolbar>
         </AppBar>
         {renderMobileMenu}
-        {renderMenu}
         <Toolbar />
         <Box sx={{ flexGrow: 1, p: 2 }}>{children}</Box>
       </Box>
