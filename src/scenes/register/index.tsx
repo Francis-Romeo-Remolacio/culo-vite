@@ -50,6 +50,7 @@ const Register = () => {
 
       if (response.status === 200) {
         try {
+          await api.post("current-user/send-confirmation-email");
           const response = await api.post("users/login", values);
 
           if (response.status === 200) {
@@ -255,6 +256,14 @@ const Register = () => {
                   }
                 />
               </FormControl>
+              <Typography variant="subtitle2">
+                {
+                  "Upon registering, you will receive an email for verification."
+                }
+              </Typography>
+              <Typography variant="subtitle2">
+                {"Verification is required for ordering."}
+              </Typography>
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Register" : <CircularProgress size={21} />}
               </Button>
