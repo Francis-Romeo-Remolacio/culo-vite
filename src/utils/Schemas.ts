@@ -141,7 +141,7 @@ export interface Suborder {
   price: number;
 }
 
-export interface CustomOrder extends Suborder {
+export interface CustomOrder extends Omit<Suborder, "designId" | "pastryId"> {
   tier: string;
   cover: string;
   picture: Blob;
