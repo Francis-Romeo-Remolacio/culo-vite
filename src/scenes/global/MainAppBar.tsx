@@ -28,8 +28,6 @@ import {
   Stack,
   TextField,
   Button,
-  BottomNavigation,
-  BottomNavigationAction,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -43,7 +41,7 @@ import { Popper } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
-import { AutoAwesome, Login, Storefront, Style } from "@mui/icons-material";
+import { Login, Style } from "@mui/icons-material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -114,8 +112,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [search, setSearch] = useState("");
-
-  const [bottomNavigation, setBottomNavigation] = useState();
 
   const fetchNotifs = async () => {
     try {
@@ -484,28 +480,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
         {renderMobileMenu}
         <Toolbar />
         <Box sx={{ flexGrow: 1, p: 2 }}>{children}</Box>
-        <AppBar
-          position="fixed"
-          sx={{ top: "auto", bottom: 0, background: "none", boxShadow: "none" }}
-        >
-          <Toolbar>
-            <BottomNavigation
-              showLabels
-              value={bottomNavigation}
-              onChange={(event, newValue) => {
-                setBottomNavigation(newValue);
-                console.log(newValue);
-              }}
-            >
-              <BottomNavigationAction label="Shop" icon={<Storefront />} />
-              <BottomNavigationAction label="Custom" icon={<AutoAwesome />} />
-              <BottomNavigationAction
-                label="Profile"
-                icon={<AccountCircle />}
-              />
-            </BottomNavigation>
-          </Toolbar>
-        </AppBar>
       </Box>
       <Popper
         open={open}
