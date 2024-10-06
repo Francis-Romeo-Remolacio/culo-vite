@@ -15,9 +15,7 @@ const Header = ({ title, subtitle }: HeaderProps) => {
         <Typography variant="h5" color="secondary">
           {subtitle}
         </Typography>
-      ) : (
-        <></>
-      )}
+      ) : null}
     </Box>
   );
 };

@@ -514,9 +514,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                             >
                               <CheckIcon />
                             </IconButton>
-                          ) : (
-                            <></>
-                          )
+                          ) : null
                         }
                         disablePadding
                       >

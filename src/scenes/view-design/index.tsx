@@ -570,9 +570,7 @@ const ViewDesign = () => {
                       onChange={handleChange}
                       fullWidth
                     />
-                  ) : (
-                    <></>
-                  )}
+                  ) : null}
                 </Stack>
                 <NumberCounter
                   value={values.quantity}

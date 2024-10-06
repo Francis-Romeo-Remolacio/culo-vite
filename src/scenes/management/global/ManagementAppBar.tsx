@@ -379,9 +379,7 @@ export default function ManagementAppBar({
                           >
                             <CheckIcon />
                           </IconButton>
-                        ) : (
-                          <></>
-                        )
+                        ) : null
                       }
                       disablePadding
                     >
