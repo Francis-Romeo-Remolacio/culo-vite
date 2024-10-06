@@ -207,9 +207,7 @@ const FabChat = () => {
                 newConnection.on("RecieveMessage", (parsed_message) => {
                   const formattedMessage = {
                     sender: parsed_message.senderName || "Unknown",
-                    message: `${parsed_message.senderMessage}\n${new Date(
-                      parsed_message.senderMessageTimeSent
-                    ).toLocaleString()}`,
+                    message: `${parsed_message.senderMessage}`,
                     timestamp: new Date(parsed_message.senderMessageTimeSent),
                   };
                   setChatMessages((prevMessages) => [

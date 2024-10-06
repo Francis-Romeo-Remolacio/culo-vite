@@ -88,7 +88,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/confirm-email" element={<ConfirmEmail />} />
             <Route path="/not-found" element={<NotFound />} />
-            <Route path="/chat" element={<Chat />} />
+            {/* <Route path="/chat" element={<Chat />} /> */}
           </Routes>
         </MainAppBar>
       </AuthGuard>
@@ -151,7 +151,7 @@ function App() {
             <Route path="/tags" element={<Tags />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/not-found" element={<NotFound />} />
-            <Route path="/chat" element={<Chat />} />
+            {/* <Route path="/chat" element={<Chat />} /> */}
             {
               //<Route path="/logs" element={<Logs />} />
               //<Route path="/settings" element={<Settings />} />
