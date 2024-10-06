@@ -25,7 +25,6 @@ import { Edit, Delete, Restore } from "@mui/icons-material";
 import { useFormik } from "formik";
 import { ingredientSchema } from "../../../utils/Validation.js";
 import { Units } from "../../../utils/Schemas.js";
-import { Dayjs } from "dayjs";
 
 const Inventory = () => {
   const [mode, setMode] = useState<"add" | "edit">("add");
@@ -33,15 +32,6 @@ const Inventory = () => {
   const [rows, setRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState<any>({});
   const [validUnits, setValidUnits] = useState<Units>();
-  const [formData, setFormData] = useState({
-    name: "",
-    quantity: 0,
-    measurement: "",
-    price: 0,
-    type: "",
-    good: 0,
-    bad: 0,
-  });
   const [priceLabel, setPriceLabel] = useState("Price");
   const [error, setError] = useState(null);
 
@@ -125,15 +115,6 @@ const Inventory = () => {
   }, []);
 
   useEffect(() => {
-    if (formData.type === "count") {
-      setFormData((prevData) => ({
-        ...prevData,
-        measurement: "Piece",
-      }));
-    }
-  }, [formData.type]);
-
-  useEffect(() => {
     if (values.type === "count") {
       setFieldValue("measurement", "piece");
     }
@@ -142,12 +123,14 @@ const Inventory = () => {
   const handleAddNew = () => {
     resetForm;
     setSelectedRow([]);
+    setMode("add");
     setOpen(true);
   };
 
   const handleClickEdit = (row: any) => {
     setSelectedRow(row);
     setValues(row);
+    setMode("edit");
     setOpen(true);
   };
 
@@ -234,7 +217,7 @@ const Inventory = () => {
       headerName: "Price",
       renderCell: (params: any) => {
         if (!params.value) return "";
-        const finalFormat = `₱ ${params.value}`;
+        const finalFormat = `₱${params.value}`;
         return finalFormat;
       },
     },
@@ -341,8 +324,8 @@ const Inventory = () => {
                 value={values.type}
                 onChange={handleChange}
               >
-                <MenuItem value={"solid"}>Solid</MenuItem>
-                <MenuItem value={"liquid"}>Liquid</MenuItem>
+                <MenuItem value={"solid"}>Dry Mats.</MenuItem>
+                <MenuItem value={"liquid"}>Wet Mats.</MenuItem>
                 <MenuItem value={"count"}>Count</MenuItem>
               </Select>
             </FormControl>
@@ -389,9 +372,7 @@ const Inventory = () => {
                   )}
                 />
               )
-            ) : (
-              <></>
-            )}
+            ) : null}
             <TextField
               required
               label={priceLabel}
@@ -437,7 +418,7 @@ const Inventory = () => {
               variant="filled"
             />
           </Stack>
-          {error ? <Typography color="error">{error}</Typography> : <></>}
+          {error ? <Typography color="error">{error}</Typography> : null}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
