@@ -354,23 +354,23 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 >
                   The Pink Butter Cake Studio
                 </Typography>
-                <Search>
-                  <form onSubmit={handleSearch}>
-                    <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
-                      <IconButton type="submit">
-                        <SearchIcon sx={{ color: colors.background }} />
-                      </IconButton>
-                      <StyledInputBase
-                        placeholder="Search…"
-                        onChange={handleTypeSearch}
-                        inputProps={{ "aria-label": "search" }}
-                        sx={{ color: colors.subtle }}
-                      />
-                    </Stack>
-                  </form>
-                </Search>
               </Stack>
             </Link>
+            <Search>
+              <form onSubmit={handleSearch}>
+                <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
+                  <IconButton type="submit">
+                    <SearchIcon sx={{ color: colors.background }} />
+                  </IconButton>
+                  <StyledInputBase
+                    placeholder="Search…"
+                    onChange={handleTypeSearch}
+                    inputProps={{ "aria-label": "search" }}
+                    sx={{ color: colors.subtle }}
+                  />
+                </Stack>
+              </form>
+            </Search>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "flex", md: "flex" }, pr: 2 }}>
               <Link to="/">
