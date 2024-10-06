@@ -87,7 +87,7 @@ const Custom = () => {
       await api.post("current-user/custom-orders", {
         color: values.color,
         shape: values.color,
-        tier: tiers.length ? String(tiers.length) : "",
+        tier: tiers.length ? tiers.length : "",
         quantity: 1,
         cover: values.cover,
         description: values.description,
