@@ -1,5 +1,10 @@
-import { SetStateAction, useEffect, useState } from "react";
-import { Container, Typography, Grid2 as Grid } from "@mui/material";
+import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
+import {
+  Container,
+  Typography,
+  Grid2 as Grid,
+  Pagination,
+} from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.tsx";
 import { Design } from "../utils/Schemas.js";
@@ -21,6 +26,7 @@ const DesignGallery = ({
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   function parseDesigns(response: AxiosResponse): Design[] {
     return response.data.map((design: any) => ({
@@ -39,6 +45,10 @@ const DesignGallery = ({
       })),
     }));
   }
+
+  const handleChangePage = (event: ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+  };
 
   useEffect(() => {
     const fetchDesigns = async () => {
@@ -69,7 +79,7 @@ const DesignGallery = ({
         try {
           const tagsQuery = tagFilter?.length
             ? `/designs/with-tags/${tagFilter.join(",")}`
-            : "/designs?page=1&record_per_page=30";
+            : `/designs?page=${page}&record_per_page=12`;
           await api.get(tagsQuery).then((response) => {
             const parsedDesigns: Design[] = parseDesigns(response);
             setFetchedDesigns(parsedDesigns);
@@ -86,7 +96,7 @@ const DesignGallery = ({
     };
 
     fetchDesigns();
-  }, [tagFilter]); // Re-fetch when tagFilter changes
+  }, [tagFilter, page]); // Re-fetch when tagFilter or page changes
 
   const checkFilter = () => {
     if (setIsRefreshing) {
@@ -132,6 +142,7 @@ const DesignGallery = ({
           </Grid>
         ))}
       </Grid>
+      <Pagination count={10} value={page} onChange={handleChangePage} />
     </Container>
   );
 };

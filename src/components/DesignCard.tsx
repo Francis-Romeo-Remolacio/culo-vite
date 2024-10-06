@@ -49,7 +49,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
       sx={
         manager
           ? { height: 300, display: "inline-block" }
-          : { width: 200, height: 300, display: "inline-block" }
+          : { width: 160, height: 240, display: "inline-block" }
       }
     >
       <Link
@@ -62,7 +62,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
             sx={
               manager
                 ? { height: 140, width: "100%" }
-                : { height: 200, width: "100%" }
+                : { height: 140, width: "100%" }
             }
             image={
               design.pictureData
