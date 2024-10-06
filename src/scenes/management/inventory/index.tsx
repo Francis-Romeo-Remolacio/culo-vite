@@ -162,7 +162,7 @@ const Inventory = () => {
 
   const handleClickRestore = async (id: string) => {
     try {
-      await api.put("ingredients", null, { params: { restore: id } });
+      await api.patch("ingredients", null, { params: { restore: id } });
       fetchData();
     } catch (error) {
       console.error("Error reactivating ingredient:", error);
