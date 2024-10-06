@@ -123,16 +123,6 @@ const DesignGallery = ({
     checkFilter();
   }, [selectedTags, fetchedDesigns]); // Re-run filter whenever selectedTags or fetchedDesigns change
 
-  if (isLoading) {
-    return (
-      <Container>
-        <Typography variant="body2" sx={{ width: "100%" }}>
-          Loading designs...
-        </Typography>
-      </Container>
-    );
-  }
-
   return (
     <Container>
       <Grid container spacing={1} justifyContent="center" sx={{ p: 2 }}>
@@ -142,7 +132,7 @@ const DesignGallery = ({
           </Grid>
         ))}
       </Grid>
-      <Pagination count={10} value={page} onChange={handleChangePage} />
+      <Pagination count={10} page={page} onChange={handleChangePage} />
     </Container>
   );
 };
