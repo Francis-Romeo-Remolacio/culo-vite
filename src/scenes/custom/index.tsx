@@ -20,10 +20,12 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import dayjs from "dayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { customOrderSchema } from "../../utils/Validation.js";
-import { renderTimeViewClock } from "@mui/x-date-pickers";
-import { Add, CloudUpload, Delete, PlusOne } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  CloudUpload as UploadIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import { ChangeEvent, useState } from "react";
 import Header from "../../components/Header.js";
 import api from "../../api/axiosConfig.js";
@@ -85,13 +87,13 @@ const Custom = () => {
       await api.post("current-user/custom-orders", {
         color: values.color,
         shape: values.color,
-        tier: "",
+        tier: tiers.length ? tiers.length : "",
         quantity: 1,
         cover: values.cover,
         description: values.description,
         size: sizeOut,
         flavor: values.flavor,
-        picture: values.picture,
+        pictureBase64: values.picture,
         message: values.message,
         payment: "full",
         type: "rush B",
@@ -120,7 +122,7 @@ const Custom = () => {
       description: "",
       sizeRound: "",
       sizeHeart: "",
-      sizeRectangle: "",
+      sizeRectangle: '12"x8"x2.5"',
       flavor: "",
       picture: "",
       message: "",
@@ -132,7 +134,9 @@ const Custom = () => {
   });
 
   const handleAddTier = () => {
-    setTiers((prev) => [...prev, ""]); // Add empty string to tiers
+    if (tiers.length < 6) {
+      setTiers((prev) => [...prev, ""]); // Add empty string to tiers
+    }
   };
 
   const handleChangeTier = (index: number, value: string) => {
@@ -158,7 +162,7 @@ const Custom = () => {
         setRectangleY(value);
         break;
     }
-    setFieldValue("sizeRectangle", `${rectangleX}"x${rectangleY}"x2.5"`);
+    setFieldValue("sizeRectangle", `${rectangleX}\"x${rectangleY}\"x2.5"`);
   };
 
   const convertImageToBase64 = (file: File): Promise<string> => {
@@ -250,16 +254,18 @@ const Custom = () => {
                         );
                       }}
                     >
-                      <Delete />
+                      <DeleteIcon />
                     </IconButton>
                   </ListItem>
                 ))}
-                <ListItem key="insert_add_on" onClick={handleAddTier}>
-                  <IconButton>
-                    <Add />
-                  </IconButton>
-                  <ListItemText primary="Insert Tier" />
-                </ListItem>
+                {tiers.length < 6 ? (
+                  <ListItem key="insertTier" onClick={handleAddTier}>
+                    <IconButton>
+                      <AddIcon />
+                    </IconButton>
+                    <ListItemText primary="Insert Tier" />
+                  </ListItem>
+                ) : null}
               </List>
             </>
           ) : null}
@@ -276,8 +282,8 @@ const Custom = () => {
                 onBlur={handleBlur}
                 error={touched.sizeHeart && Boolean(errors.sizeHeart)}
               >
-                <MenuItem value={'7"'}>{'7"'}</MenuItem>
-                <MenuItem value={'9"'}>{'9"'}</MenuItem>
+                <MenuItem value={"7"}>{'7"'}</MenuItem>
+                <MenuItem value={"9"}>{'9"'}</MenuItem>
               </Select>
             </FormControl>
           ) : null}
@@ -384,7 +390,7 @@ const Custom = () => {
             role={undefined}
             variant="contained"
             tabIndex={-1}
-            startIcon={<CloudUpload />}
+            startIcon={<UploadIcon />}
           >
             {"Upload File"}
             <VisuallyHiddenInput type="file" onChange={handleFileUpload} />

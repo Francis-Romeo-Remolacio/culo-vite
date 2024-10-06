@@ -188,7 +188,7 @@ const FabChat = () => {
           const fullUrl = `https://resentekaizen280-001-site1.etempurl.com/live-chat?access_token=${encodeURIComponent(
             bearerToken
           )}`;
-          console.log(fullUrl);
+          //console.log(fullUrl);
 
           const newConnection = new HubConnectionBuilder()
             .withUrl(fullUrl, { accessTokenFactory: () => bearerToken })
@@ -207,9 +207,7 @@ const FabChat = () => {
                 newConnection.on("RecieveMessage", (parsed_message) => {
                   const formattedMessage = {
                     sender: parsed_message.senderName || "Unknown",
-                    message: `${parsed_message.senderMessage}\n${new Date(
-                      parsed_message.senderMessageTimeSent
-                    ).toLocaleString()}`,
+                    message: `${parsed_message.senderMessage}`,
                     timestamp: new Date(parsed_message.senderMessageTimeSent),
                   };
                   setChatMessages((prevMessages) => [
@@ -270,22 +268,20 @@ const FabChat = () => {
     if (!connection || !message.trim()) return;
 
     if (currentUser) {
-      const sendMethod =
-        role === "admin" ? "admin-send-message" : "customer-send-message";
-
+      var sendMethod : string = "customer-send-message";
+      switch (role) {
+        case "Admin":
+          sendMethod = "admin-send-message"
+          break;
+        case "Artist":
+          sendMethod = "artist-send-message"
+          break;
+        case "Manager":
+          sendMethod = "manager-send-message"
+          break;
+      }
       connection
-        .invoke(sendMethod, message.trim(), selectedUser)
-        .then(() => {
-          setChatMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              sender: role === "admin" ? "Admin" : "Customer",
-              message: message,
-              timestamp: new Date(),
-            },
-          ]);
-          setMessage("");
-        })
+        .invoke(sendMethod, message.trim(), selectedUser) 
         .catch((err) => console.error(`Error sending ${role} message:`, err));
     }
   };
@@ -318,7 +314,7 @@ const FabChat = () => {
             position: "sticky",
             bottom: 0,
             right: 0,
-            minWidth: "300px",
+            minWidth: "300px"
           }}
         >
           <IconButton onClick={() => setAnchorEl(null)}>
@@ -344,7 +340,8 @@ const FabChat = () => {
                 </Select>
               </FormControl>
               <Button onClick={refreshConnections}>Refresh Connections</Button>
-              <Box id="chat-container" sx={{ height: 400 }}>
+
+              <Box id="chat-container" sx={{ height: 400, overflowY:"auto" }}>
                 {chatMessages.map((msg, index) =>
                   msg.sender === "Admin" ? (
                     <MessageRight key={index} directMessage={msg} />
@@ -353,6 +350,8 @@ const FabChat = () => {
                   )
                 )}
               </Box>
+
+
             </Box>
 
             <Box>

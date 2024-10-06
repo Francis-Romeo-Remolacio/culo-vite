@@ -140,6 +140,7 @@ const ManagementOrders = () => {
         lastUpdatedBy: order.lastUpdatedBy,
       }));
       setRows(orderData);
+      console.log(orderData);
     } catch (error) {
       console.error("Error fetching suborders:", error);
     }
@@ -190,7 +191,7 @@ const ManagementOrders = () => {
       };
 
       const response = await api.post(
-        `orders/suborders/${selectedOrderItem.suborderId}/assign`, // Updated endpoint
+        `orders/suborders/${selectedOrderItem.id}/assign`, // Updated endpoint
         requestBody
       );
 
@@ -201,9 +202,9 @@ const ManagementOrders = () => {
     }
   };
 
-  const handleApproveOrder = async (orderId: string) => {
+  const handleApproveOrder = async (id: string) => {
     try {
-      const response = await api.post(`${orderId}/approve-order`);
+      const response = await api.post(`${id}/approve-order`);
       console.log("Order approved successfully:", response.data);
       // Optionally refresh the data grid or show a success message
     } catch (error) {
@@ -227,7 +228,7 @@ const ManagementOrders = () => {
           </IconButton>
           <IconButton
             color="success"
-            onClick={() => handleApproveOrder(params.row)}
+            onClick={() => handleApproveOrder(params.row.id)}
           >
             <Handshake />
           </IconButton>
