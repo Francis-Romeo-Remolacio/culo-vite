@@ -15,7 +15,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Snackbar,
   Alert,
   List,
   ListItem,
@@ -47,8 +46,11 @@ import {
 import { getImageType } from "../../components/Base64Image.tsx";
 import NumberCounter from "../../components/NumberCounter.tsx";
 import ButtonCheckout from "../../components/ButtonCheckout.tsx";
+import { useAlert } from "../../components/CuloAlert.tsx";
 
 const ViewDesign = () => {
+  const { makeAlert } = useAlert();
+
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const designId = query.get("q") || undefined;
@@ -68,9 +70,6 @@ const ViewDesign = () => {
     "Banana",
   ];
   const [openAddOn, setOpenAddOn] = useState(false);
-  const [openSnack, setOpenSnack] = useState(false);
-  const [alertType, setAlertType] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
   const [selectedVariant, setSelectedVariant] = useState<DesignVariant>();
   const [availableAddOns, setAvailableAddOns] = useState<AddOn[]>([]);
   const [filteredAddOns, setFilteredAddOns] = useState<AddOn[]>([]);
@@ -103,10 +102,10 @@ const ViewDesign = () => {
           console.log("Cart item added successfully");
         }
 
-        handleAlert("success", "Successfully added to cart!");
+        makeAlert("success", "Successfully added to cart!");
       } catch (error) {
         console.error("There was an error adding the order:", error);
-        handleAlert("error", "Failed to add to cart!");
+        makeAlert("error", "Failed to add to cart!");
       }
     } else {
       gotoLogin();
@@ -253,12 +252,6 @@ const ViewDesign = () => {
       }
     }
     handleCloseAddOn();
-  };
-
-  const handleAlert = (type: string, message: string) => {
-    setAlertType(type);
-    setAlertMessage(message);
-    setOpenSnack(true);
   };
 
   const fetchAddOns = async (variant: DesignVariant) => {
@@ -802,16 +795,6 @@ const ViewDesign = () => {
           </Stack>
         </Grid>
       </Grid>
-      <Snackbar
-        open={openSnack}
-        autoHideDuration={2500}
-        onClose={() => {
-          setOpenSnack(false);
-        }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={alertType}>{alertMessage}</Alert>
-      </Snackbar>
     </Container>
   );
 };

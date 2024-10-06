@@ -8,6 +8,7 @@ import { ColorModeContext, useMode } from "./Theme";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import App from "./App";
+import { AlertProvider } from "./components/CuloAlert";
 
 const Index = () => {
   const [theme, colorMode] = useMode();
@@ -23,7 +24,9 @@ const Index = () => {
                   //<MantineProvider theme={theme}>
                 }
                 <CssBaseline />
+                <AlertProvider>
                   <App />
+                </AlertProvider>
                 {
                   //</MantineProvider>
                 }

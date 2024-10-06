@@ -1,7 +1,6 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   Box,
-  useTheme,
   CircularProgress,
   Typography,
   Button,
@@ -9,19 +8,16 @@ import {
   Stack,
   Avatar,
   Skeleton,
-  Snackbar,
-  Alert,
   styled,
 } from "@mui/material";
-import { Tokens } from "../../Theme";
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { useNavigate } from "react-router-dom";
 import { User } from "../../utils/Schemas";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import { getImageType } from "../../components/Base64Image";
+import { useAlert } from "../../components/CuloAlert";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -36,13 +32,12 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const Profile = () => {
+  const { makeAlert } = useAlert();
+
   const [userData, setUserData] = useState<User>();
   const [userPicture, setUserPicture] = useState("");
   const [imageType, setImageType] = useState("png");
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [severity, setSeverity] = useState("");
   const [error, setError] = useState("");
   const [isSubmittingVerify, setIsSubmittingVerify] = useState(false);
 
@@ -141,10 +136,10 @@ const Profile = () => {
           });
         }
 
-        alert("File uploaded successfully.");
+        makeAlert("success", "File uploaded successfully.");
       } catch (err) {
         console.error("File upload error:", err);
-        alert("Failed to upload file. Please try again.");
+        makeAlert("error", "Failed to upload file. Please try again.");
       }
     }
   };
@@ -168,17 +163,6 @@ const Profile = () => {
   const handleLogout = () => {
     Cookies.remove("token");
     localStorage.removeItem("currentUser");
-  };
-  const makeAlert = (severity: string, message: string) => {
-    setSeverity(severity);
-    setAlertMessage(message);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setAlertMessage("");
-    setSeverity("");
   };
 
   if (loading) {
@@ -256,14 +240,6 @@ const Profile = () => {
           Log out
         </Button>
       </Stack>
-      <Snackbar
-        open={open}
-        onClose={handleClose}
-        autoHideDuration={2500}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={severity}>{alertMessage}</Alert>
-      </Snackbar>
     </Container>
   );
 };
