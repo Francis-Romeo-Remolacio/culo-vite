@@ -50,7 +50,6 @@ const Register = () => {
 
       if (response.status === 200) {
         try {
-          await api.post("current-user/send-confirmation-email");
           const response = await api.post("users/login", values);
 
           if (response.status === 200) {
@@ -63,6 +62,7 @@ const Register = () => {
             const userResponse = await api.get("current-user");
 
             if (userResponse.status === 200) {
+              await api.post("current-user/send-confirmation-email");
               const userData = userResponse.data;
 
               // Save user data in local storage
