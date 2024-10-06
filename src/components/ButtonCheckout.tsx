@@ -15,27 +15,39 @@ import {
   Accordion,
   AccordionDetails,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
 import { orderSchema } from "../utils/Validation.js";
-import { Suborder } from "../utils/Schemas.js";
+import { OrderAddOn, Suborder } from "../utils/Schemas.js";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import api from "../api/axiosConfig.js";
-import { ContentPasteGo as CheckoutIcon } from "@mui/icons-material";
+import {
+  ContentPasteGo as CheckoutIcon,
+  PointOfSale,
+} from "@mui/icons-material";
+import { Tokens } from "../Theme.js";
 
 type SuborderAccordionProps = {
   suborder: Suborder;
+  designName?: string;
 };
 
 type ButtonCheckoutProps = {
   suborders: Suborder[];
-  fetchCart: Function;
+  fetchCart?: Function;
+  buyNow?: boolean;
+  buyNowAddOns?: OrderAddOn;
+  buyNowDesignName?: string;
 };
 
-const SuborderAccordion = ({ suborder }: SuborderAccordionProps) => {
+const SuborderAccordion = ({
+  suborder,
+  designName,
+}: SuborderAccordionProps) => {
   return (
     <Accordion>
       <AccordionSummary
@@ -43,7 +55,7 @@ const SuborderAccordion = ({ suborder }: SuborderAccordionProps) => {
         aria-controls="panel2-content"
         id="panel2-header"
       >
-        {suborder.id}
+        {designName ? designName : suborder.id}
       </AccordionSummary>
       <AccordionDetails>
         <Typography>{`Size: ${suborder.size}`}</Typography>
@@ -56,7 +68,16 @@ const SuborderAccordion = ({ suborder }: SuborderAccordionProps) => {
   );
 };
 
-const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
+const ButtonCheckout = ({
+  suborders,
+  fetchCart,
+  buyNow,
+  buyNowAddOns,
+  buyNowDesignName,
+}: ButtonCheckoutProps) => {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
   const [open, setOpen] = useState(false);
   const minDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
   const suborderIds: string[] = suborders.map((suborder) => suborder.id);
@@ -79,15 +100,33 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
     const formattedTime = dayjs(values.pickupDateTime).format("hh:mm A");
 
     try {
-      await api.post(`current-user/cart/checkout/`, {
-        type: values.type,
-        pickupDate: formattedDate,
-        pickupTime: formattedTime,
-        payment: values.payment,
-        suborderIds: suborderIds as string[],
-      });
+      if (buyNow) {
+        await api.post(`current-user/buy-now/`, {
+          type: values.type,
+          pickupDate: formattedDate,
+          pickupTime: formattedTime,
+          payment: values.payment,
+          quantity: suborders[0].designId,
+          designId: suborders[0].designId,
+          description: suborders[0].designId,
+          flavor: suborders[0].designId,
+          size: suborders[0].designId,
+          color: suborders[0].designId,
+          addonItem: buyNowAddOns,
+        });
+      } else {
+        await api.post(`current-user/cart/checkout/`, {
+          type: values.type,
+          pickupDate: formattedDate,
+          pickupTime: formattedTime,
+          payment: values.payment,
+          suborderIds: suborderIds as string[],
+        });
+      }
       handleClose();
-      fetchCart();
+      if (fetchCart) {
+        fetchCart();
+      }
     } catch (error) {
       console.error("Error checkout:", error);
     }
@@ -109,8 +148,19 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
         variant="contained"
         onClick={handleClickOpen}
         disabled={suborders.length < 1}
+        startIcon={!isSubmitting ? <PointOfSale /> : ""}
+        fullWidth
+        sx={{ color: colors.background }}
       >
-        Send Order
+        {!isSubmitting ? (
+          buyNow ? (
+            "Buy Now"
+          ) : (
+            "Checkout"
+          )
+        ) : (
+          <CircularProgress size={21} />
+        )}
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Order</DialogTitle>
@@ -123,7 +173,10 @@ const ButtonCheckout = ({ suborders, fetchCart }: ButtonCheckoutProps) => {
           <DialogContent>
             <Stack spacing={2} sx={{ minWidth: 512 }}>
               {suborders.map((suborder) => (
-                <SuborderAccordion suborder={suborder}></SuborderAccordion>
+                <SuborderAccordion
+                  suborder={suborder}
+                  designName={buyNowDesignName}
+                ></SuborderAccordion>
               ))}
               <FormControl fullWidth variant="filled">
                 <InputLabel id="select-type-label">Type</InputLabel>

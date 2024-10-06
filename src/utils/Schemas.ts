@@ -13,15 +13,11 @@ export interface User {
   joinDate: Date;
 }
 
-export interface Employee {
-  id: string;
-  userId: string;
-  employed: Dayjs;
+export interface Employee extends User {
+  employed: Date;
 }
 
-export interface Customer {
-  id: string;
-  userId: string;
+export interface Customer extends User {
   timesOrdered: number;
 }
 
@@ -52,6 +48,10 @@ export interface VariantAddOn extends AddOn {
   pastryMaterialAddOnId?: string;
   amount: number;
   stock: number;
+}
+
+export interface OrderAddOn extends AddOn {
+  quantity: number;
 }
 
 export interface Shape {
@@ -108,8 +108,13 @@ export interface Order {
   id: string;
   type: "normal" | "rush";
   pickupDateTime: Dayjs;
-  payment: "half" | "full";
-  suborders: Suborder[];
+  payment: "full" | "half";
+  price: number;
+  listItems: { suborders: Suborder[]; custom: CustomOrder[] };
+}
+
+export interface ToPayOrder extends Omit<Order, "price"> {
+  price: { full: number; half: number };
 }
 
 export interface PreviewOrder extends Order {
@@ -119,6 +124,8 @@ export interface PreviewOrder extends Order {
 export interface ManagementOrder extends Order {
   customerId: string;
   customerName: string;
+  status: string;
+  isActive: boolean;
 }
 
 export interface Suborder {
@@ -132,6 +139,12 @@ export interface Suborder {
   flavor: string;
   quantity: number;
   price: number;
+}
+
+export interface CustomOrder extends Suborder {
+  tier: string;
+  cover: string;
+  picture: Blob;
 }
 
 export interface ManagementSuborder extends Required<Suborder> {
@@ -202,7 +215,8 @@ export interface OrderTotal {
 }
 
 export interface OrdersOnDay extends OrderTotal {
-  day: typeof TimePeriods.Days | number;
+  day: typeof TimePeriods.Days;
+  totalOrders: number;
 }
 
 export interface OrdersOnMonth extends OrderTotal {
@@ -228,7 +242,8 @@ export interface FullSales extends Sales {
 }
 
 export interface SalesOnDay extends Sales {
-  day: typeof TimePeriods.Days | number;
+  day: typeof TimePeriods.Days;
+  totalSales: number;
 }
 
 export interface SalesOnMonth extends Sales {

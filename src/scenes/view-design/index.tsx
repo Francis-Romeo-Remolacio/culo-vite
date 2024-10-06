@@ -27,8 +27,6 @@ import {
   DialogContent,
   DialogActions,
   Autocomplete,
-  Paper,
-  useTheme,
 } from "@mui/material";
 
 import api from "../../api/axiosConfig.js";
@@ -38,31 +36,22 @@ import Cookies from "js-cookie";
 import { useFormik } from "formik";
 import { cartSchema } from "../../utils/Validation.ts";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import {
-  Add as IncreaseIcon,
-  Remove as DecreaseIcon,
-} from "@mui/icons-material";
+import { Add as IncreaseIcon } from "@mui/icons-material";
 import {
   AddOn,
   Design,
   DesignVariant,
+  OrderAddOn,
   VariantAddOn,
 } from "../../utils/Schemas.ts";
-import { Tokens } from "../../Theme.ts";
-
-type OrderAddOn = {
-  id: number;
-  quantity: number;
-};
+import { getImageType } from "../../components/Base64Image.tsx";
+import NumberCounter from "../../components/NumberCounter.tsx";
+import ButtonCheckout from "../../components/ButtonCheckout.tsx";
 
 const ViewDesign = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const designId = query.get("q") || undefined;
-
-  const theme = useTheme();
-  const colors = Tokens(theme.palette.mode);
 
   const navigate = useNavigate();
 
@@ -79,10 +68,12 @@ const ViewDesign = () => {
     "Banana",
   ];
   const [openAddOn, setOpenAddOn] = useState(false);
-  const [openSucc, setOpenSucc] = useState(false);
-  const [openFail, setOpenFail] = useState(false);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [alertType, setAlertType] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
   const [selectedVariant, setSelectedVariant] = useState<DesignVariant>();
   const [availableAddOns, setAvailableAddOns] = useState<AddOn[]>([]);
+  const [filteredAddOns, setFilteredAddOns] = useState<AddOn[]>([]);
   const [selectedAddOns, setSelectedAddOns] = useState<OrderAddOn[]>([]);
   const [userAddOns, setUserAddOns] = useState<OrderAddOn[]>([]);
   const [selectedOption, setSelectedOption] = useState<AddOn>();
@@ -96,15 +87,13 @@ const ViewDesign = () => {
   const onSubmit = async () => {
     if (loggedIn) {
       try {
-        const finalAddOns = [...selectedAddOns, ...userAddOns];
-
         const cartResponse = await api.post("current-user/cart", {
           quantity: values.quantity,
           designId: design?.id,
           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
           flavor: values.flavor,
           size: values.size,
-          addonItem: finalAddOns,
+          addonItem: [...selectedAddOns, ...userAddOns],
           color:
             values.color === "custom"
               ? `Custom: ${values.customColor}`
@@ -114,10 +103,10 @@ const ViewDesign = () => {
           console.log("Cart item added successfully");
         }
 
-        setOpenSucc(true);
+        handleAlert("success", "Successfully added to cart!");
       } catch (error) {
         console.error("There was an error adding the order:", error);
-        setOpenFail(true);
+        handleAlert("error", "Failed to add to cart!");
       }
     } else {
       gotoLogin();
@@ -172,55 +161,85 @@ const ViewDesign = () => {
     setOpenAddOn(false);
   };
 
-  const handleToggleAddOn = (newAddOnId: number, list: string) => {
-    if (list === "variant") {
-      console.log(`Before: ${selectedAddOns}`);
-      setSelectedAddOns((prevSelected: OrderAddOn[]) => {
+  const handleToggleAddOn = (
+    newAddOnId: number,
+    list: "variant" | "custom"
+  ) => {
+    let addOnsList;
+    let setAddOnsList: any;
+    switch (list) {
+      case "variant":
+        addOnsList = selectedAddOns;
+        setAddOnsList = setSelectedAddOns;
+        break;
+      case "custom":
+        addOnsList = userAddOns;
+        setAddOnsList = setUserAddOns;
+        break;
+    }
+    if (addOnsList && setAddOnsList) {
+      setAddOnsList((prevSelected: OrderAddOn[]) => {
         const existingAddOn = prevSelected.find(
           (existing) => existing.id === newAddOnId
         );
 
         if (existingAddOn) {
-          // Remove if already selected
-          return prevSelected.filter((existing) => existing.id !== newAddOnId);
+          // Remove the add-on but keep its quantity for future toggles
+          return prevSelected
+            .map((addOn) =>
+              addOn.id === newAddOnId
+                ? { ...addOn, quantity: addOn.quantity }
+                : addOn
+            )
+            .filter((existing) => existing.id !== newAddOnId);
         } else {
-          // Retrieve the previous quantity if it exists, otherwise default to 1
+          // Keep the quantity of the add-on if previously removed
           const lastQuantity =
             prevSelected.find((existing) => existing.id === newAddOnId)
               ?.quantity || 1;
-          return [...prevSelected, { id: newAddOnId, quantity: lastQuantity }];
+          return [
+            ...prevSelected,
+            { id: newAddOnId, name: "", price: 0, quantity: lastQuantity },
+          ];
         }
       });
-      console.log(`After: ${selectedAddOns}`);
-    } else if (list === "custom") {
-      console.log(`Before: ${userAddOns}`);
-      setUserAddOns((prevSelected: OrderAddOn[]) => {
-        const existingAddOn = prevSelected.find(
-          (existing) => existing.id === newAddOnId
-        );
-
-        if (existingAddOn) {
-          // Remove if already selected
-          return prevSelected.filter((existing) => existing.id !== newAddOnId);
-        } else {
-          // Retrieve the previous quantity if it exists, otherwise default to 1
-          const lastQuantity =
-            prevSelected.find((existing) => existing.id === newAddOnId)
-              ?.quantity || 1;
-          return [...prevSelected, { id: newAddOnId, quantity: lastQuantity }];
-        }
-      });
-      console.log(`After: ${userAddOns}`);
     }
   };
 
-  const handleChangeAddOnQuantity = (id: number, quantity: number) => {
-    const parsedQuantity = Math.max(1, Math.min(5, Number(quantity))); // Clamp between 1 and 5
-    setSelectedAddOns((prevSelected) =>
-      prevSelected.map((addOn) =>
-        addOn.id === id ? { ...addOn, quantity: parsedQuantity } : addOn
-      )
-    );
+  const handleChangeAddOnQuantity = (
+    id: number,
+    newQuantity: number,
+    list: "variant" | "custom"
+  ) => {
+    let addOnsList;
+    let setAddOnsList: any;
+
+    switch (list) {
+      case "variant":
+        addOnsList = selectedAddOns;
+        setAddOnsList = setSelectedAddOns;
+        break;
+      case "custom":
+        addOnsList = userAddOns;
+        setAddOnsList = setUserAddOns;
+        break;
+    }
+
+    if (addOnsList && setAddOnsList) {
+      setAddOnsList((prevSelected: any) =>
+        prevSelected.map((addOn: any) =>
+          addOn.id === id
+            ? {
+                ...addOn,
+                quantity: Math.min(
+                  Math.max(addOn.quantity + newQuantity, 1),
+                  10
+                ),
+              }
+            : addOn
+        )
+      );
+    }
   };
 
   const handleInsertAddOn = () => {
@@ -229,32 +248,53 @@ const ViewDesign = () => {
         (item) => item.id === selectedOption.id
       );
       if (!existingAddOn) {
-        setUserAddOns([...userAddOns, { id: selectedOption.id, quantity: 1 }]);
+        // Add `quantity: 1` to the selectedOption
+        setUserAddOns([...userAddOns, { ...selectedOption, quantity: 1 }]);
       }
     }
     handleCloseAddOn();
+  };
+
+  const handleAlert = (type: string, message: string) => {
+    setAlertType(type);
+    setAlertMessage(message);
+    setOpenSnack(true);
   };
 
   const fetchAddOns = async (variant: DesignVariant) => {
     try {
       await api.get("add-ons").then((response) => {
         const parsedAddOns: AddOn[] = response.data.map((addOn: any) => ({
-          id: addOn.addOnsId,
+          id: addOn.id,
           name: addOn.addOnName,
           measurement: addOn.measurement,
-          price: addOn.pricePerUnit,
+          price: addOn.price,
           size: addOn.size,
         }));
-        const filteredAddOns = parsedAddOns.filter(
-          (addOn: AddOn) =>
-            !variant.addOns.some(
-              (variantAddOn: VariantAddOn) => variantAddOn.id === addOn.id
-            )
-        );
-        setAvailableAddOns(filteredAddOns);
+        setAvailableAddOns(parsedAddOns);
+        filterAddOns();
       });
     } catch (error) {
       console.error("Failed to fetch add-ons: ", error);
+    }
+  };
+
+  const filterAddOns = () => {
+    if (selectedVariant) {
+      // First filter to remove add-ons already in the `variant.addOns`
+      let filteredAddOns = availableAddOns.filter(
+        (addOn: AddOn) =>
+          !selectedVariant.addOns.some(
+            (variantAddOn: AddOn) => variantAddOn.id === addOn.id
+          )
+      );
+
+      // Further filter to remove add-ons already in `userAddOns`
+      filteredAddOns = filteredAddOns.filter(
+        (addOn: AddOn) =>
+          !userAddOns.some((userAddOn: AddOn) => userAddOn.id === addOn.id)
+      );
+      setFilteredAddOns(filteredAddOns);
     }
   };
 
@@ -342,25 +382,12 @@ const ViewDesign = () => {
     fetchDesignData();
   }, [designId]);
 
-  // Function to get the image type by reading the base64 header
-  const getImageType = (data: Blob) => {
-    const firstChar = data.text.toString().charAt(0);
-    switch (firstChar) {
-      case "/":
-        return "jpeg";
-      case "i":
-        return "png";
-      default:
-        throw new Error("Unknown image type.");
-    }
-  };
-
   useEffect(() => {
     if (picture) {
       const determineImageType = async () => {
         try {
           if (picture) {
-            const type = getImageType(picture);
+            const type = getImageType(String(picture));
             setImageType(type);
           }
         } catch (err) {
@@ -381,6 +408,8 @@ const ViewDesign = () => {
         setSelectedAddOns(
           variant.addOns.map((addOn: VariantAddOn) => ({
             id: addOn.id,
+            name: addOn.name,
+            price: addOn.price,
             quantity: addOn.amount,
           }))
         );
@@ -389,6 +418,12 @@ const ViewDesign = () => {
       }
     }
   }, [values.size]);
+
+  useEffect(() => {
+    if (values.size && selectedVariant) {
+      filterAddOns();
+    }
+  }, [availableAddOns, userAddOns]);
 
   const ceilThenFormat = (num: number) => {
     if (num) {
@@ -539,23 +574,10 @@ const ViewDesign = () => {
                     <></>
                   )}
                 </Stack>
-                <Stack direction="row">
-                  <IconButton onClick={() => handleChangeQuantity("decrement")}>
-                    <DecreaseIcon />
-                  </IconButton>
-                  <TextField
-                    label="Quantity"
-                    id="quantity"
-                    name="quantity"
-                    value={values.quantity}
-                    slotProps={{
-                      htmlInput: { type: "number", min: 1, max: 10 },
-                    }}
-                  />
-                  <IconButton onClick={() => handleChangeQuantity("increment")}>
-                    <IncreaseIcon />
-                  </IconButton>
-                </Stack>
+                <NumberCounter
+                  value={values.quantity}
+                  handleChange={handleChangeQuantity}
+                ></NumberCounter>
                 <TextField
                   label="Dedication / Message"
                   id="field-dedication"
@@ -564,6 +586,8 @@ const ViewDesign = () => {
                   onChange={handleChange}
                   multiline
                   rows={4}
+                  inputProps={{ maxLength: 50 }}
+                  helperText="Maximum 50 characters"
                 />
                 <TextField
                   label="Requests / Notes"
@@ -573,6 +597,8 @@ const ViewDesign = () => {
                   onChange={handleChange}
                   multiline
                   rows={4}
+                  inputProps={{ maxLength: 50 }}
+                  helperText="Maximum 50 characters"
                 />
                 {values.size && selectedVariant ? (
                   <div>
@@ -581,36 +607,7 @@ const ViewDesign = () => {
                     </Typography>
                     <List dense>
                       {selectedVariant.addOns.map((addOn) => (
-                        <ListItem
-                          key={addOn.id}
-                          onClick={() => handleToggleAddOn(addOn.id, "variant")}
-                          secondaryAction={
-                            <Paper>
-                              <TextField
-                                inputProps={{
-                                  type: "number",
-                                  min: 1,
-                                  max: 5,
-                                }}
-                                label="Quantity"
-                                id={`quantity-${addOn.id}`}
-                                name={`quantity-${addOn.id}`}
-                                value={
-                                  selectedAddOns.find(
-                                    (existing) => existing.id === addOn.id
-                                  )?.quantity ?? 1
-                                }
-                                onChange={(e) =>
-                                  handleChangeAddOnQuantity(
-                                    addOn.id,
-                                    Number(e.target.value)
-                                  )
-                                }
-                                size="small"
-                              />
-                            </Paper>
-                          }
-                        >
+                        <ListItem key={addOn.id}>
                           <Checkbox
                             edge="start"
                             checked={
@@ -618,12 +615,37 @@ const ViewDesign = () => {
                                 (existing) => existing.id === addOn.id
                               )
                             }
+                            onClick={() =>
+                              handleToggleAddOn(addOn.id, "variant")
+                            }
                             tabIndex={-1}
                             disableRipple
                           />
                           <ListItemText
                             primary={addOn.name}
                             secondary={`₱${addOn.price}`}
+                          />
+                          <NumberCounter
+                            value={
+                              selectedAddOns.find(
+                                (existing) => existing.id === addOn.id
+                              )?.quantity ?? 1 // Default to 1 if not found
+                            }
+                            handleChange={(method) => {
+                              if (method === "increment") {
+                                handleChangeAddOnQuantity(
+                                  addOn.id,
+                                  1,
+                                  "variant"
+                                ); // Increment by 1
+                              } else {
+                                handleChangeAddOnQuantity(
+                                  addOn.id,
+                                  -1,
+                                  "variant"
+                                ); // Decrement by 1
+                              }
+                            }}
                           />
                         </ListItem>
                       ))}
@@ -633,43 +655,41 @@ const ViewDesign = () => {
                       {"Your add-ons:"}
                     </Typography>
                     <List dense>
-                      {userAddOns.map((userAddOn) => (
+                      {userAddOns.map((addOn) => (
                         <ListItem
-                          key={userAddOn.id}
-                          onClick={() =>
-                            handleToggleAddOn(userAddOn.id, "custom")
-                          }
+                          key={addOn.id}
                           secondaryAction={
-                            <TextField
-                              inputProps={{
-                                type: "number",
-                                min: 1,
-                                max: 5,
-                              }}
-                              label="Quantity"
-                              id={`quantity-${userAddOn.id}`}
-                              name={`quantity-${userAddOn.id}`}
+                            <NumberCounter
                               value={
                                 userAddOns.find(
-                                  (item) => item.id === userAddOn.id
-                                )?.quantity || 1
+                                  (existing) => existing.id === addOn.id
+                                )?.quantity ?? 1 // Default to 1 if not found
                               }
-                              onChange={(e) =>
-                                handleChangeAddOnQuantity(
-                                  userAddOn.id,
-                                  Number(e.target.value)
-                                )
-                              }
-                              size="small"
+                              handleChange={(method) => {
+                                if (method === "increment") {
+                                  handleChangeAddOnQuantity(
+                                    addOn.id,
+                                    1,
+                                    "custom"
+                                  ); // Increment by 1
+                                } else {
+                                  handleChangeAddOnQuantity(
+                                    addOn.id,
+                                    -1,
+                                    "custom"
+                                  ); // Decrement by 1
+                                }
+                              }}
                             />
                           }
                         >
                           <Checkbox
                             edge="start"
                             checked={
-                              !!userAddOns.find(
-                                (item) => item.id === userAddOn.id
-                              )
+                              !!userAddOns.find((item) => item.id === addOn.id)
+                            }
+                            onClick={() =>
+                              handleToggleAddOn(addOn.id, "custom")
                             }
                             tabIndex={-1}
                             disableRipple
@@ -677,12 +697,12 @@ const ViewDesign = () => {
                           <ListItemText
                             primary={
                               availableAddOns.find(
-                                (item) => item.id === userAddOn.id
+                                (item) => item.id === addOn.id
                               )?.name
                             }
                             secondary={`₱${
                               availableAddOns.find(
-                                (item) => item.id === userAddOn.id
+                                (item) => item.id === addOn.id
                               )?.price
                             }`}
                           />
@@ -702,7 +722,7 @@ const ViewDesign = () => {
                         <DialogContent>
                           <Autocomplete
                             id="autocomplete-add-on"
-                            options={availableAddOns}
+                            options={filteredAddOns}
                             getOptionLabel={(option) => option.name}
                             onChange={(event, newValue) => {
                               if (newValue) {
@@ -751,16 +771,28 @@ const ViewDesign = () => {
                       <CircularProgress size={21} />
                     )}
                   </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    fullWidth
-                    startIcon={!isSubmitting ? <PointOfSaleIcon /> : ""}
-                    disabled={isSubmitting}
-                    sx={{ color: colors.background }}
-                  >
-                    {!isSubmitting ? "Buy Now" : <CircularProgress size={21} />}
-                  </Button>
+                  {!isSubmitting ? (
+                    <ButtonCheckout
+                      suborders={[
+                        {
+                          quantity: values.quantity,
+                          designId: design?.id,
+                          description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
+                          flavor: values.flavor,
+                          size: values.size,
+                          addonItem: [...selectedAddOns, ...userAddOns],
+                          color:
+                            values.color === "custom"
+                              ? `Custom: ${values.customColor}`
+                              : values.color,
+                        },
+                      ]}
+                      buyNowAddOns={[...selectedAddOns, ...userAddOns]}
+                      buyNowDesignName={design?.name}
+                    />
+                  ) : (
+                    <CircularProgress size={21} />
+                  )}
                 </Stack>
               </Stack>
             </form>
@@ -773,18 +805,14 @@ const ViewDesign = () => {
         </Grid>
       </Grid>
       <Snackbar
-        open={openSucc}
-        autoHideDuration={6000}
+        open={openSnack}
+        autoHideDuration={2500}
+        onClose={() => {
+          setOpenSnack(false);
+        }}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="success">Successfully added to cart!</Alert>
-      </Snackbar>
-      <Snackbar
-        open={openFail}
-        autoHideDuration={6000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="error">Failed to add to cart!</Alert>
+        <Alert severity={alertType}>{alertMessage}</Alert>
       </Snackbar>
     </Container>
   );

@@ -151,18 +151,16 @@ export const customOrderSchema = yup.object().shape({
   color: yup.string().required("Required"),
   customColor: yup.string(),
   shape: yup.string().required("Required"),
-  tier: yup.number().positive().integer().required("Required"),
   quantity: yup.number().positive().integer().required("Required"),
   cover: yup.string().required("Required"),
   description: yup.string().required("Required"),
-  size: yup.string().required("Required"),
-  customSize: yup.string(),
+  sizeRound: yup.string(),
+  sizeHeart: yup.string(),
+  sizeRectangle: yup.string(),
   flavor: yup.string().required("Required"),
   customFlavor: yup.string(),
   picture: yup.string().required("Required"),
   message: yup.string().required("Required"),
-  type: yup.string().required("Required"),
-  pickupDateTime: yup.object().dayjs().required("Required"),
 });
 
 export const managementOrderSchema = yup.object({
