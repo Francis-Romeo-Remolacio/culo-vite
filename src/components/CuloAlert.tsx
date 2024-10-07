@@ -37,8 +37,10 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   // Function to close the alert
   const handleClose = () => {
     setOpen(false);
-    setMessage("");
-    setSeverity(undefined);
+    setTimeout(function () {
+      setMessage("");
+      setSeverity(undefined);
+    }, 1000);
   };
 
   return (
