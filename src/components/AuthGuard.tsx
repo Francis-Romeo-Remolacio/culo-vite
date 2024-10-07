@@ -1,6 +1,8 @@
 import { useEffect, useState, ReactNode } from "react";
 import Cookies from "js-cookie";
 import { CircularProgress, Container } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useAlert } from "./CuloAlert";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -11,6 +13,8 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
   const [currentRole, setCurrentRole] = useState("");
   const [loading, setLoading] = useState(true);
   const token = Cookies.get("token");
+  const navigate = useNavigate();
+  const { makeAlert } = useAlert();
 
   useEffect(() => {
     const checkRoles = () => {
@@ -18,6 +22,11 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
         if (!token) {
           // If no token is present, user is unauthenticated
           setCurrentRole("Guest");
+          if (localStorage.getItem("currentUser")) {
+            localStorage.removeItem("currentUser");
+            makeAlert("warning", "Your token has expired. Please log in again");
+          }
+          navigate("/login");
         } else {
           // Token exists, check user role
           const currentUserStored = localStorage.getItem("currentUser");
