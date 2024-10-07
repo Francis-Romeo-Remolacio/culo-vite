@@ -22,13 +22,15 @@ export interface Customer extends User {
 }
 
 export interface Ingredient {
-  name?: string;
+  id?: string;
+  name: string;
   quantity: number;
-  measurements?: string;
+  measurement?: string;
   price: number;
   type: string;
   good: number;
   bad: number;
+  isActive: boolean;
 }
 
 export interface AddOn {
