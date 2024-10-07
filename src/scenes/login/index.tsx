@@ -25,6 +25,7 @@ import ButtonBack from "../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
 import { loginSchema } from "../../utils/Validation.js";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { AxiosError } from "axios";
 
 const Login = () => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const Login = () => {
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -59,10 +61,23 @@ const Login = () => {
   }, []);
 
   const onSubmit = async () => {
+    setErrorMessage("");
     try {
-      const response = await api.post("users/login", values);
+      const response = await api
+        .post("users/login", values)
+        .catch(function (error) {
+          if (error.status === 401) {
+            setErrorMessage("Invalid login credentials. Please try again.");
+          } else if (error.status >= 500) {
+            setErrorMessage(
+              "Server-side error occurred. Please try again later."
+            );
+          } else {
+            setErrorMessage("Unknown error occurred. Please try again.");
+          }
+        });
 
-      if (response.status === 200) {
+      if (response && response.status === 200) {
         const { token, expiration } = response.data;
 
         // Save token as a cookie
@@ -76,16 +91,11 @@ const Login = () => {
 
           // Save user data in local storage
           localStorage.setItem("currentUser", JSON.stringify(userData));
-
-          if (fromLink) {
-            navigate(fromLink);
-          } else {
-            navigate("/");
-          }
+          navigate(fromLink || "/");
         }
       }
     } catch (error) {
-      console.error("Login error: ", error);
+      setErrorMessage("An unexpected error occurred. Please try again later.");
     }
   };
 
@@ -168,6 +178,7 @@ const Login = () => {
                 onChange={handleChange}
                 variant="filled"
                 fullWidth
+                autoComplete="email"
                 required
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
@@ -197,6 +208,11 @@ const Login = () => {
                   }
                 />
               </FormControl>
+              {errorMessage ? (
+                <Typography variant="subtitle2" color="error">
+                  {errorMessage}
+                </Typography>
+              ) : null}
               <Button type="submit" variant="contained" disabled={isSubmitting}>
                 {!isSubmitting ? "Login" : <CircularProgress size={21} />}
               </Button>
