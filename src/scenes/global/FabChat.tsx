@@ -181,14 +181,11 @@ const FabChat = () => {
       try {
         const cookieToken = Cookies.get("token");
         if (cookieToken) {
-          console.log(cookieToken);
-
           const bearerToken = `${cookieToken}, Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs`;
 
           const fullUrl = `https://resentekaizen280-001-site1.etempurl.com/live-chat?access_token=${encodeURIComponent(
             bearerToken
           )}`;
-          //console.log(fullUrl);
 
           const newConnection = new HubConnectionBuilder()
             .withUrl(fullUrl, { accessTokenFactory: () => bearerToken })
@@ -268,20 +265,20 @@ const FabChat = () => {
     if (!connection || !message.trim()) return;
 
     if (currentUser) {
-      var sendMethod : string = "customer-send-message";
+      var sendMethod: string = "customer-send-message";
       switch (role) {
         case "Admin":
-          sendMethod = "admin-send-message"
+          sendMethod = "admin-send-message";
           break;
         case "Artist":
-          sendMethod = "artist-send-message"
+          sendMethod = "artist-send-message";
           break;
         case "Manager":
-          sendMethod = "manager-send-message"
+          sendMethod = "manager-send-message";
           break;
       }
       connection
-        .invoke(sendMethod, message.trim(), selectedUser) 
+        .invoke(sendMethod, message.trim(), selectedUser)
         .catch((err) => console.error(`Error sending ${role} message:`, err));
     }
   };
@@ -314,7 +311,7 @@ const FabChat = () => {
             position: "sticky",
             bottom: 0,
             right: 0,
-            minWidth: "300px"
+            minWidth: "300px",
           }}
         >
           <IconButton onClick={() => setAnchorEl(null)}>
@@ -341,7 +338,7 @@ const FabChat = () => {
               </FormControl>
               <Button onClick={refreshConnections}>Refresh Connections</Button>
 
-              <Box id="chat-container" sx={{ height: 400, overflowY:"auto" }}>
+              <Box id="chat-container" sx={{ height: 400, overflowY: "auto" }}>
                 {chatMessages.map((msg, index) =>
                   msg.sender === "Admin" ? (
                     <MessageRight key={index} directMessage={msg} />
@@ -350,8 +347,6 @@ const FabChat = () => {
                   )
                 )}
               </Box>
-
-
             </Box>
 
             <Box>
