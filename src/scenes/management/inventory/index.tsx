@@ -378,9 +378,20 @@ const Inventory = () => {
   return (
     <>
       <Header title="Inventory" subtitle="Manage your ingredients" />
-      <Button onClick={handleClickAdd} variant="contained" sx={{ mb: 2 }}>
-        Add Ingredient
-      </Button>
+      <Stack direction="row" spacing={2}>
+        <Button onClick={handleClickAdd} variant="contained" sx={{ mb: 2 }}>
+          Add Ingredient
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            fetchData();
+          }}
+          sx={{ width: 33, height: 33 }}
+        >
+          <Refresh />
+        </Button>
+      </Stack>
       <DataGridStyler>
         <DataGrid
           apiRef={apiRef}
