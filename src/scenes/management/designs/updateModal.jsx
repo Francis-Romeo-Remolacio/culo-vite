@@ -97,7 +97,7 @@ const UpdateDesignModal = ({
 
   const handleDelete = async () => {
     try {
-      const response = await api.get(
+      const response = await api.delete(
         `/designs/${encodeURIComponent(designData.designId)}`
       );
       handleClose();
