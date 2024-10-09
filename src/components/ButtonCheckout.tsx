@@ -40,7 +40,7 @@ type ButtonCheckoutProps = {
   suborders: Suborder[];
   fetchCart?: Function;
   buyNow?: boolean;
-  buyNowAddOns?: OrderAddOn;
+  buyNowAddOns?: OrderAddOn[];
   buyNowDesignName?: string;
 };
 
