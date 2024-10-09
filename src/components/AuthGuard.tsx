@@ -20,13 +20,12 @@ const AuthGuard = ({ children, role }: AuthGuardProps) => {
     const checkRoles = () => {
       try {
         if (!token) {
-          // If no token is present, user is unauthenticated
-          setCurrentRole("Guest");
           if (localStorage.getItem("currentUser")) {
             localStorage.removeItem("currentUser");
             makeAlert("warning", "Your token has expired. Please log in again");
             navigate("/login");
           }
+          setCurrentRole("Guest");
         } else {
           // Token exists, check user role
           const currentUserStored = localStorage.getItem("currentUser");
