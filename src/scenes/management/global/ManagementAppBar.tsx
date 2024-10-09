@@ -326,13 +326,9 @@ export default function ManagementAppBar({
           </List>
           <Divider />
           <List>
-            {["Register", "Calendar"].map((text, index) => (
-              <SidebarItem key={text} text={text} open={open} />
-            ))}
-          </List>
-          <Divider />
-          <List>
             {[
+              "Register",
+              "Calendar",
               "Inventory",
               "Add-Ons",
               "Orders",
