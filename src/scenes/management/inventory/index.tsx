@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Button, Chip } from "@mui/material";
+import { Button, Chip, IconButton, Stack } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
   GridColDef,
+  GridEditInputCell,
   GridEventListener,
   GridRowEditStopReasons,
   GridRowId,
@@ -15,7 +16,14 @@ import {
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
-import { Edit, Delete, Restore, Save, Cancel } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Restore,
+  Save,
+  Cancel,
+  Refresh,
+} from "@mui/icons-material";
 import { Ingredient } from "../../../utils/Schemas.js";
 
 const Inventory = () => {
@@ -115,6 +123,23 @@ const Inventory = () => {
       ...prev,
       [ingredient.id]: { mode: GridRowModes.View },
     }));
+
+    // Get the previous row state for comparison
+    const previousRow = rows.find((row) => row.id === ingredient.id);
+
+    // Check if any fields have changed
+    const hasChanged =
+      previousRow?.name !== ingredient.name ||
+      previousRow?.quantity !== ingredient.quantity ||
+      previousRow?.measurement !== ingredient.measurement ||
+      previousRow?.price !== ingredient.price ||
+      previousRow?.type !== ingredient.type;
+
+    if (!hasChanged) {
+      console.log("No changes detected. Skipping API call.");
+      return;
+    }
+
     if (String(ingredient.id).includes("tempId")) {
       setRows((prevRows) => prevRows.filter((row) => row.id !== ingredient.id));
       await api.post("ingredients", ingredient);
@@ -292,13 +317,13 @@ const Inventory = () => {
       renderCell: (params: any) => {
         switch (params.value) {
           case "good":
-            return <Chip label="Good" color="success"></Chip>;
+            return <Chip label="Good" color="success" />;
           case "mid":
-            return <Chip label="Caution" color="warning"></Chip>;
+            return <Chip label="Caution" color="warning" />;
           case "critical":
-            return <Chip label="Critical" color="error"></Chip>;
+            return <Chip label="Critical" color="error" />;
           default:
-            return <Chip label={params.value}></Chip>;
+            return <Chip label={`${params.value}`}></Chip>;
         }
       },
     },
@@ -319,13 +344,33 @@ const Inventory = () => {
     {
       field: "good",
       headerName: "Good Threshold",
+      type: "number",
       editable: true,
+      renderEditCell: (params) => (
+        <GridEditInputCell
+          {...params}
+          inputProps={{
+            max: 999,
+            min: 0,
+          }}
+        />
+      ),
       width: 100,
     },
     {
       field: "bad",
       headerName: "Critical Threshold",
+      type: "number",
       editable: true,
+      renderEditCell: (params) => (
+        <GridEditInputCell
+          {...params}
+          inputProps={{
+            max: 999,
+            min: 0,
+          }}
+        />
+      ),
       width: 100,
     },
   ];
