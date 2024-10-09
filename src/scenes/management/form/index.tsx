@@ -13,30 +13,43 @@ import {
 import api from "../../../api/axiosConfig";
 import { registerAdminSchema } from "../../../utils/Validation.js";
 import { useFormik } from "formik";
+import { useAlert } from "../../../components/CuloAlert.js";
 
 const Form = () => {
+  const { makeAlert } = useAlert();
+
   const onSubmit = async () => {
     try {
       await api.post(`users/register-${values.type}`, values);
+      makeAlert("success", "User was successfully registered");
+      resetForm();
     } catch (error) {
-      console.error("Registration error: ", error);
+      console.error(error);
+      makeAlert("error", `Unknown error: ${error.message}`);
     }
   };
 
-  const { values, errors, touched, isSubmitting, handleChange, handleSubmit } =
-    useFormik({
-      initialValues: {
-        username: "",
-        email: "",
-        contactNumber: "",
-        password: "",
-        confirmPassword: "",
-        type: "",
-        secretKey: null,
-      },
-      validationSchema: registerAdminSchema,
-      onSubmit,
-    });
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    handleChange,
+    handleSubmit,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      contactNumber: "",
+      password: "",
+      confirmPassword: "",
+      type: "",
+      secretKey: null,
+    },
+    validationSchema: registerAdminSchema,
+    onSubmit,
+  });
 
   return (
     <Container maxWidth={"sm"}>
@@ -111,7 +124,7 @@ const Form = () => {
             error={touched.confirmPassword && Boolean(errors.confirmPassword)}
             helperText={touched.confirmPassword && errors.confirmPassword}
           />
-          <FormControl fullWidth>
+          <FormControl variant="filled" fullWidth>
             <InputLabel id="select-type-label">Type</InputLabel>
             <Select
               labelId="select-type-label"
