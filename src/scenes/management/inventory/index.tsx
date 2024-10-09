@@ -347,11 +347,17 @@ const Inventory = () => {
           rowModesModel={rowModesModel}
           onRowEditStop={handleRowEditStop}
           slots={{ toolbar: GridToolbar }}
-          processRowUpdate={(newRow, oldRow) => {
-            if (newRow.type !== oldRow.type) {
-              newRow.measurement = undefined; // Reset measurement if type changes
-            }
-            return newRow;
+          initialState={{
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [{ field: "isActive", operator: "is", value: true }],
+              },
+            },
           }}
         />
       </DataGridStyler>
