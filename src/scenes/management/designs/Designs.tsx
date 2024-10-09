@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { CircularProgress, Container, Grid2 as Grid } from "@mui/material";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
-import { Design } from "../../../utils/Schemas";
+import { Design, Tag } from "../../../utils/Schemas";
 import { AxiosResponse } from "axios";
 import DesignCard from "../../../components/DesignCard.tsx";
 import DesignDialog from "./DesignDialog.tsx";
 
 const Designs = () => {
   const [designs, setDesigns] = useState<Design[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [designDrawerOpen, setDesignDrawerOpen] = useState(false);
   const [selectedDesign, setSelectedDesign] = useState<Design>();
   const [mode, setMode] = useState<"add" | "edit">("add");
@@ -41,6 +42,7 @@ const Designs = () => {
       })),
     }));
   }
+
   const fetchDesigns = async () => {
     await api.get("designs").then((response) => {
       const parsedDesigns: Design[] = parseDesigns(response);
@@ -48,8 +50,19 @@ const Designs = () => {
     });
   };
 
+  const fetchTags = async () => {
+    await api.get("tags").then((response) => {
+      const parsedTags: Tag[] = response.data.map((tag: any) => ({
+        id: tag.designTagId,
+        name: tag.designTagName,
+      }));
+      setTags(parsedTags);
+    });
+  };
+
   useEffect(() => {
     fetchDesigns();
+    fetchTags();
   }, []);
 
   return (
@@ -58,7 +71,7 @@ const Designs = () => {
       <Grid container spacing={2}>
         {designs
           ? designs.map((design) => (
-              <Grid size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
+              <Grid key={design.id} size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
                 <DesignCard
                   design={design}
                   onClick={() => handleOpenDrawer(design)}
@@ -69,10 +82,11 @@ const Designs = () => {
           : "Loading"}
       </Grid>
       <DesignDialog
+        mode={mode}
         open={designDrawerOpen}
         onClose={handleCloseDrawer}
         design={selectedDesign}
-        mode={mode}
+        tags={tags}
       />
     </>
   );

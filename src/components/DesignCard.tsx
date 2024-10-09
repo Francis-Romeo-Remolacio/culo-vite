@@ -79,7 +79,7 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
             </Typography>
             <div style={{ marginTop: "8px" }}>
               {design.tags.map((tag: Tag) => (
-                <TagChip id={tag.id} name={tag.name} />
+                <TagChip key={tag.id} id={tag.id} name={tag.name} />
               ))}
             </div>
           </CardContent>

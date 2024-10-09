@@ -1,13 +1,13 @@
 import {
+  Box,
   Button,
   CircularProgress,
   Dialog,
   DialogTitle,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -15,20 +15,27 @@ import {
 import { useFormik } from "formik";
 import api from "../../../api/axiosConfig";
 import { designSchema } from "../../../utils/Validation";
-import { Design } from "../../../utils/Schemas";
+import { Design, Tag } from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
-import { Close as CloseIcon, Delete } from "@mui/icons-material";
 
 type DesignDialogProps = {
+  mode: "add" | "edit";
   open: boolean;
   onClose: () => void;
   design?: Design;
-  mode: "add" | "edit";
+  tags: Tag[];
 };
 
-const DesignDialog = ({ open, onClose, design }: DesignDialogProps) => {
+const DesignDialog = ({
+  mode,
+  open,
+  onClose,
+  design,
+  tags,
+}: DesignDialogProps) => {
   const [imageType, setImageType] = useState("");
+  const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
   const initialValues: Design = {
     id: "",
@@ -40,26 +47,31 @@ const DesignDialog = ({ open, onClose, design }: DesignDialogProps) => {
     pastryMaterialId: "",
     variants: [],
   };
+
   const onSubmit = async () => {
     await api.post("designs", values);
   };
 
   const {
     values,
-    errors,
-    touched,
-    isSubmitting,
     handleChange,
     handleSubmit,
+    setFieldValue,
     setValues,
     resetForm,
+    isSubmitting,
   } = useFormik({
     initialValues: initialValues,
     validationSchema: designSchema,
     onSubmit,
   });
 
-  // Form Setup
+  // Filter available tags when values.tags changes
+  useEffect(() => {
+    filterTags();
+  }, [values.tags]);
+
+  // Form Setup on Edit Mode
   useEffect(() => {
     if (design) {
       setImageType(getImageType(design.pictureData));
@@ -67,21 +79,39 @@ const DesignDialog = ({ open, onClose, design }: DesignDialogProps) => {
     }
   }, [design]);
 
+  // Filter tags to exclude already chosen ones
+  const filterTags = () => {
+    const chosenTagIds = values.tags.map((tag) => tag.id);
+    const filteredTags = tags.filter((tag) => !chosenTagIds.includes(tag.id));
+    setAvailableTags(filteredTags);
+  };
+
+  const handleChangeTags = (index: number, newTagId: string) => {
+    const updatedTags = [...values.tags];
+    updatedTags[index] = tags.find((tag) => tag.id === newTagId) as Tag;
+    setFieldValue("tags", updatedTags);
+  };
+
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{"Edit Design"}</DialogTitle>
-      <form onSubmit={onSubmit}>
-        <Stack spacing={2} sx={{ width: 400, p: 2 }}>
-          {design ? (
-            <img
-              src={`data:image/${imageType};base64,${design?.pictureData}`}
-              alt={design?.name}
-              style={{
-                height: "auto",
-                borderRadius: "8px",
-              }}
-            />
-          ) : null}
+      <DialogTitle>
+        {mode === "edit" ? "Edit Design" : "Add Design"}
+      </DialogTitle>
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={2} sx={{ width: 600, p: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            {design ? (
+              <img
+                src={`data:image/${imageType};base64,${design?.pictureData}`}
+                alt={design?.name}
+                style={{
+                  width: "50%",
+                  height: "auto",
+                  borderRadius: "8px",
+                }}
+              />
+            ) : null}
+          </Box>
           <TextField
             label="Name"
             id="name"
@@ -106,37 +136,45 @@ const DesignDialog = ({ open, onClose, design }: DesignDialogProps) => {
             onChange={handleChange}
           />
           <Typography>{"Tags"}</Typography>
-          <List>
-            {design?.tags.map((tag) => (
-              <ListItem
-                key={tag.id}
-                secondaryAction={
-                  <IconButton edge="end" aria-label="delete">
-                    <Delete />
-                  </IconButton>
-                }
-              >
-                <ListItemText primary={tag.name} />
-              </ListItem>
-            ))}
-          </List>
+          <Stack spacing={1}>
+            {values.tags.map((tag, index) => {
+              // Create a temporary list of tags that includes the current tag + availableTags
+              const options = [
+                tag,
+                ...availableTags.filter(
+                  (availableTag) => availableTag.id !== tag.id
+                ),
+              ];
+
+              return (
+                <FormControl fullWidth key={`select-tag-form-${index}`}>
+                  <InputLabel id={`select-tag-${index}-label`}>Tag</InputLabel>
+                  <Select
+                    labelId={`select-tag-${index}`}
+                    id={`select-tag-${index}`}
+                    value={tag.id} // Use the current tag ID directly
+                    label="Tag"
+                    onChange={(e) =>
+                      handleChangeTags(index, e.target.value as string)
+                    }
+                  >
+                    {options.map((availableTag) => (
+                      <MenuItem key={availableTag.id} value={availableTag.id}>
+                        {availableTag.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              );
+            })}
+          </Stack>
+
           <Stack direction="row-reverse">
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              onClick={(e) => e.preventDefault()}
-            >
+            <Button type="submit" variant="contained" disabled={isSubmitting}>
               {!isSubmitting ? "Save" : <CircularProgress size={21} />}
             </Button>
             <Button
-              onClick={() => {
-                console.log(values);
-
-                if (design) {
-                  resetForm({ values: design });
-                }
-              }}
+              onClick={() => resetForm({ values: design || initialValues })}
             >
               Reset
             </Button>
