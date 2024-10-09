@@ -1,7 +1,12 @@
 // src/scenes/ViewDesign.jsx
 
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  createSearchParams,
+  URLSearchParamsInit,
+} from "react-router-dom";
 import {
   Typography,
   CircularProgress,
@@ -78,10 +83,23 @@ const ViewDesign = () => {
   const [selectedOption, setSelectedOption] = useState<AddOn>();
   const [loggedIn, setLoggedIn] = useState(false);
 
-  function gotoLogin() {
-    const fullPath = location.pathname + location.search;
-    navigate(`/login?from=${encodeURIComponent(fullPath)}`);
-  }
+  const useNavigateParams = () => {
+    return (url: string, params: any) => {
+      const searchParams = createSearchParams(params).toString();
+      navigate(url + "?" + searchParams);
+    };
+  };
+
+  const navigateParams = useNavigateParams();
+
+  const gotoLogin = () => {
+    // Include the current path and serialized Formik values as parameters
+    const formikParams = {
+      ...values,
+      from: location.pathname + location.search,
+    };
+    navigateParams("/login", formikParams);
+  };
 
   const onSubmit = async () => {
     if (loggedIn) {
@@ -144,7 +162,7 @@ const ViewDesign = () => {
         }
         break;
       case "increment":
-        if (values.quantity < 10) {
+        if (values.quantity < 3) {
           const newValue = values.quantity + 1;
           setFieldValue("quantity", newValue);
         }
@@ -767,7 +785,7 @@ const ViewDesign = () => {
                       suborders={[
                         {
                           quantity: values.quantity,
-                          designId: design?.id,
+                          designId: design.id,
                           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
                           flavor: values.flavor,
                           size: values.size,
