@@ -33,6 +33,14 @@ export interface Ingredient {
   isActive: boolean;
 }
 
+export interface Batch {
+  id?: string;
+  itemId: string;
+  created: Date;
+  lastModified: Date;
+  lastModifiedBy: string;
+}
+
 export interface AddOn {
   id: number;
   name: string;
@@ -56,10 +64,10 @@ export interface OrderAddOn extends AddOn {
   quantity: number;
 }
 
-export interface Shape {
-  id: string;
-  name: string;
-}
+// export interface Shape {
+//   id: string;
+//   name: string;
+// }
 
 export interface Tag {
   id: string;
@@ -71,9 +79,9 @@ export interface Design {
   name: string;
   description: string;
   pictureUrl?: URL;
-  pictureData: Blob;
+  pictureData: string;
+  shape: string;
   tags: Tag[];
-  shapes: Shape[];
 }
 
 export interface Design {
@@ -90,19 +98,18 @@ export interface DesignVariant {
 }
 
 export interface PastryMaterial {
-  pastryMaterialId: string;
+  id: string;
   designId: string;
   designName: string;
-  dateAdded: string;
-  lastModifiedDate: string;
+  created: Date;
+  lastModified: Date;
   otherCost: OtherCost;
   costEstimate: number;
-  ingredients: Array<{ itemName: string }>;
-  subVariants: Array<{ subVariantName: string }>;
+  ingredients: { itemName: string }[];
+  subVariants: { subVariantName: string }[];
   mainVariantName: string;
 }
 export interface OtherCost {
-  pastryMaterialAdditionalCostId: string;
   additionalCost: number;
 }
 
@@ -146,7 +153,7 @@ export interface Suborder {
 export interface CustomOrder extends Omit<Suborder, "designId" | "pastryId"> {
   tier: string;
   cover: string;
-  picture: Blob;
+  picture: string;
 }
 
 export interface ManagementSuborder extends Required<Suborder> {

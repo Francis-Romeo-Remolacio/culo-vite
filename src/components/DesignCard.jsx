@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "@mui/material";
+import { getImageType } from "../components/Base64Image";
 
 const DesignCard = ({
   id,
@@ -37,32 +38,9 @@ const DesignCard = ({
           console.error("Error determining image type:", err);
         }
       };
-
       determineImageType();
     }
   }, [picture]);
-
-  // Function to get the image type by reading the base64 header
-  const getImageType = (data) => {
-    const firstChar = data.charAt(0);
-    switch (firstChar) {
-      case "/":
-        return "jpeg";
-      case "i":
-        return "png";
-      default:
-        throw new Error("Unknown image type.");
-    }
-  };
-
-  const handleClick = () => {
-    if (manager) {
-      editAction(data);
-      setOpen(false);
-    } else {
-      navigate(`/view-design?q=${encodeURIComponent(id)}`);
-    }
-  };
 
   return (
     <Card

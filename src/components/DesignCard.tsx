@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
@@ -8,13 +8,15 @@ import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "@mui/material";
+import { getImageType } from "./Base64Image";
 
 type DesignCardProps = {
   design: Design;
   manager?: boolean;
+  onClick?: () => void;
 };
 
-const DesignCard = ({ design, manager }: DesignCardProps) => {
+const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
   const [imageType, setImageType] = useState("");
 
   useEffect(() => {
@@ -30,38 +32,25 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
     determineImageType();
   }, []);
 
-  // Function to get the image type by reading the base64 header
-  const getImageType = (blob: Blob) => {
-    const firstChar = blob.text.toString().charAt(0);
-    switch (firstChar) {
-      case "/":
-        return "jpeg";
-      case "i":
-        return "png";
-      default:
-        throw new Error("Unknown image type.");
-    }
-  };
-
   return (
     <Card
       elevation={2}
       sx={
         manager
-          ? { height: 300, display: "inline-block" }
+          ? { width: "100%", height: 360, display: "inline-block" }
           : { width: 160, height: 240, display: "inline-block" }
       }
     >
       <Link
         component={RouterLink}
-        to={`/view-design?q=${encodeURIComponent(design.id)}`}
+        to={!manager ? `/view-design?q=${encodeURIComponent(design.id)}` : ""}
         sx={{ textDecoration: "none", color: "inherit" }}
       >
-        <CardActionArea>
+        <CardActionArea onClick={onClick}>
           <CardMedia
             sx={
               manager
-                ? { height: 140, width: "100%" }
+                ? { height: 160, width: "100%" }
                 : { height: 140, width: "100%" }
             }
             image={
