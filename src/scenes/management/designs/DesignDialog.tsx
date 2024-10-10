@@ -3,6 +3,8 @@ import {
   Button,
   CircularProgress,
   Dialog,
+  DialogActions,
+  DialogContent,
   DialogTitle,
   FormControl,
   InputLabel,
@@ -15,9 +17,10 @@ import {
 import { useFormik } from "formik";
 import api from "../../../api/axiosConfig";
 import { designSchema } from "../../../utils/Validation";
-import { Design, Tag } from "../../../utils/Schemas";
+import { Design, PastryMaterial, Tag } from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
+import PastryMaterialDialog from "./PastryMaterialDialog";
 
 type DesignDialogProps = {
   mode: "add" | "edit";
@@ -37,6 +40,11 @@ const DesignDialog = ({
   const [imageType, setImageType] = useState("");
   const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
+  const [pastryMaterial, setPastryMaterial] = useState<PastryMaterial>();
+  const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
+  const handleTogglePastryMaterial = () => {
+    setPastryMaterialOpen(!pastryMaterialOpen);
+  };
   const initialValues: Design = {
     id: "",
     name: "",
@@ -65,6 +73,15 @@ const DesignDialog = ({
     validationSchema: designSchema,
     onSubmit,
   });
+
+  useEffect(() => {
+    if (design && design.id.length > 0) {
+      const fetchPastryMaterial = async () => {
+        api.get(`designs/${encodeURIComponent(design.id)}/pastry-material`);
+      };
+      fetchPastryMaterial();
+    }
+  }, []);
 
   // Filter available tags when values.tags changes
   useEffect(() => {
@@ -98,89 +115,100 @@ const DesignDialog = ({
         {mode === "edit" ? "Edit Design" : "Add Design"}
       </DialogTitle>
       <form onSubmit={handleSubmit}>
-        <Stack spacing={2} sx={{ width: 600, p: 2 }}>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            {design ? (
-              <img
-                src={`data:image/${imageType};base64,${design?.pictureData}`}
-                alt={design?.name}
-                style={{
-                  width: "50%",
-                  height: "auto",
-                  borderRadius: "8px",
-                }}
-              />
-            ) : null}
-          </Box>
-          <TextField
-            label="Name"
-            id="name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Description"
-            id="description"
-            name="description"
-            value={values.description}
-            onChange={handleChange}
-            multiline
-            rows={6}
-          />
-          <TextField
-            label="Shape"
-            id="shape"
-            name="shape"
-            value={values.shape}
-            onChange={handleChange}
-          />
-          <Typography>{"Tags"}</Typography>
-          <Stack spacing={1}>
-            {values.tags.map((tag, index) => {
-              // Create a temporary list of tags that includes the current tag + availableTags
-              const options = [
-                tag,
-                ...availableTags.filter(
-                  (availableTag) => availableTag.id !== tag.id
-                ),
-              ];
+        <DialogContent>
+          <Stack spacing={2} sx={{ width: 500 }}>
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              {design ? (
+                <img
+                  src={`data:image/${imageType};base64,${design?.pictureData}`}
+                  alt={design?.name}
+                  style={{
+                    width: "50%",
+                    height: "auto",
+                    borderRadius: "8px",
+                  }}
+                />
+              ) : null}
+            </Box>
+            <TextField
+              label="Name"
+              id="name"
+              name="name"
+              value={values.name}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Description"
+              id="description"
+              name="description"
+              value={values.description}
+              onChange={handleChange}
+              multiline
+              rows={6}
+            />
+            <TextField
+              label="Shape"
+              id="shape"
+              name="shape"
+              value={values.shape}
+              onChange={handleChange}
+            />
+            <Typography>{"Tags"}</Typography>
+            <Stack spacing={1}>
+              {values.tags.map((tag, index) => {
+                // Create a temporary list of tags that includes the current tag + availableTags
+                const options = [
+                  tag,
+                  ...availableTags.filter(
+                    (availableTag) => availableTag.id !== tag.id
+                  ),
+                ];
 
-              return (
-                <FormControl fullWidth key={`select-tag-form-${index}`}>
-                  <InputLabel id={`select-tag-${index}-label`}>Tag</InputLabel>
-                  <Select
-                    labelId={`select-tag-${index}`}
-                    id={`select-tag-${index}`}
-                    value={tag.id} // Use the current tag ID directly
-                    label="Tag"
-                    onChange={(e) =>
-                      handleChangeTags(index, e.target.value as string)
-                    }
-                  >
-                    {options.map((availableTag) => (
-                      <MenuItem key={availableTag.id} value={availableTag.id}>
-                        {availableTag.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              );
-            })}
+                return (
+                  <FormControl fullWidth key={`select-tag-form-${index}`}>
+                    <InputLabel id={`select-tag-${index}-label`}>
+                      Tag
+                    </InputLabel>
+                    <Select
+                      labelId={`select-tag-${index}`}
+                      id={`select-tag-${index}`}
+                      value={tag.id} // Use the current tag ID directly
+                      label="Tag"
+                      onChange={(e) =>
+                        handleChangeTags(index, e.target.value as string)
+                      }
+                    >
+                      {options.map((availableTag) => (
+                        <MenuItem key={availableTag.id} value={availableTag.id}>
+                          {availableTag.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                );
+              })}
+            </Stack>
           </Stack>
+          <Button onClick={handleTogglePastryMaterial}>
+            {"Materials List"}
+          </Button>
+          <PastryMaterialDialog
+            open={pastryMaterialOpen}
+            pastryMaterial={pastryMaterial}
+          />
+        </DialogContent>
 
-          <Stack direction="row-reverse">
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
-              {!isSubmitting ? "Save" : <CircularProgress size={21} />}
-            </Button>
-            <Button
-              onClick={() => resetForm({ values: design || initialValues })}
-            >
-              Reset
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </Stack>
-        </Stack>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            onClick={() => resetForm({ values: design || initialValues })}
+          >
+            Reset
+          </Button>
+          <Button type="submit" variant="contained" disabled={isSubmitting}>
+            {!isSubmitting ? "Save" : <CircularProgress size={21} />}
+          </Button>
+        </DialogActions>
       </form>
     </Dialog>
   );
