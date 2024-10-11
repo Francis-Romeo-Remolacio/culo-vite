@@ -101,8 +101,8 @@ const AddOns = () => {
   const handleSubmitAdd = async (values: any) => {
     try {
       const response = await api.post("/add-ons", {
-        name: values.name,
-        price: values.price,
+        name: values.addOnName,
+        price: values.pricePerUnit,
         size: values.size,
       });
       console.log("Add-On added successfully:", response.data);
