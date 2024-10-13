@@ -80,7 +80,8 @@ export interface Design {
   description: string;
   pictureUrl?: URL;
   pictureData: string;
-  shape: string;
+  shape: "round" | "heart" | "rectangle" | "custom";
+  customShape?: string;
   tags: Tag[];
 }
 
@@ -89,12 +90,10 @@ export interface Design {
   variants: DesignVariant[];
 }
 
-export interface DesignVariant {
-  id: string;
-  name: string;
+export interface DesignVariant
+  extends Omit<PastryMaterialSubVariant, "ingredients"> {
   cost: number;
   inStock: boolean;
-  addOns: VariantAddOn[];
 }
 
 export interface PastryMaterial {
@@ -103,14 +102,35 @@ export interface PastryMaterial {
   designName: string;
   created: Date;
   lastModified: Date;
-  otherCost: OtherCost;
+  otherCost: {
+    additionalCost: number;
+    multiplier: number;
+  };
   costEstimate: number;
-  ingredients: { itemName: string }[];
-  subVariants: { subVariantName: string }[];
+  costExactEstimate: number;
   mainVariantName: string;
+  ingredients: PastryMaterialIngredient[];
+  ingredientImportance: [];
+  addOns: PastryMaterialAddOn[];
+  subVariants: PastryMaterialSubVariant[];
+  inStock: boolean;
 }
-export interface OtherCost {
-  additionalCost: number;
+
+export interface PastryMaterialIngredient
+  extends Pick<Ingredient, "id" | "name" | "type"> {
+  amount: number;
+  amountMeasurement: string;
+  ingredientId?: string;
+  ingredientType: "INV";
+}
+
+export interface PastryMaterialAddOn extends Pick<AddOn, "id" | "name"> {
+  amount: number;
+}
+
+export interface PastryMaterialSubVariant
+  extends Pick<PastryMaterial, "id" | "ingredients" | "addOns"> {
+  name: string;
 }
 
 export interface Order {
@@ -262,36 +282,4 @@ export interface SalesOnMonth extends Sales {
 export interface ChartData {
   id: string | number;
   value: number;
-}
-
-//Pastry Material Input schemas
-export interface PastryMaterialAddForm {
-  designId: string;
-  otherCost: PastryMaterialAddFormOtherCost;
-  ingredients: PastryMaterialAddFormIngredients[];
-  addOns: PastryMaterialAddFormAddOns[];
-  subVariants: PastryMaterialAddFormSubVariants[];
-}
-export interface PastryMaterialAddFormOtherCost {
-  additionalCost: number;
-}
-export interface PastryMaterialAddFormIngredients {
-  ingredientType: string;
-  itemId: string;
-  itemName: string;
-  amountMeasurement: string;
-  amount: number;
-  forInsertion: string;
-}
-export interface PastryMaterialAddFormAddOns {
-  addOnsId: number;
-  addOnsName: string;
-  amount: number;
-  forInsertion: string;
-}
-export interface PastryMaterialAddFormSubVariants {
-  subVariantName?: string;
-  forInsertion?: string;
-  subVariantIngredients?: PastryMaterialAddFormIngredients[];
-  subVariantAddOns?: PastryMaterialAddFormAddOns[];
 }

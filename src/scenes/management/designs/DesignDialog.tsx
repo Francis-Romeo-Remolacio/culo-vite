@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -21,6 +22,7 @@ import { Design, PastryMaterial, Tag } from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
 import PastryMaterialDialog from "./PastryMaterialDialog";
+import { Add, Delete as DeleteIcon } from "@mui/icons-material";
 
 type DesignDialogProps = {
   mode: "add" | "edit";
@@ -40,24 +42,36 @@ const DesignDialog = ({
   const [imageType, setImageType] = useState("");
   const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
-  const [pastryMaterial, setPastryMaterial] = useState<PastryMaterial>();
+  const [pastryMaterial, setPastryMaterial] =
+    useState<Partial<PastryMaterial>>();
+  const [fetchingPastryMaterial, setFetchingPastryMaterial] = useState(true);
   const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
+
   const handleTogglePastryMaterial = () => {
     setPastryMaterialOpen(!pastryMaterialOpen);
   };
+
+  const handleClosePastryMaterial = () => {
+    setPastryMaterialOpen(false);
+  };
+
   const initialValues: Design = {
     id: "",
     name: "",
     description: "",
     pictureData: "",
-    shape: "",
+    shape: "round",
     tags: [],
     pastryMaterialId: "",
     variants: [],
   };
 
   const onSubmit = async () => {
-    await api.post("designs", values);
+    if (design?.id) {
+      await api.patch(`designs/${design.id}`, values);
+    } else {
+      await api.post("designs", values);
+    }
   };
 
   const {
@@ -74,14 +88,77 @@ const DesignDialog = ({
     onSubmit,
   });
 
-  useEffect(() => {
+  const fetchPastryMaterial = async () => {
     if (design && design.id.length > 0) {
-      const fetchPastryMaterial = async () => {
-        api.get(`designs/${encodeURIComponent(design.id)}/pastry-material`);
-      };
-      fetchPastryMaterial();
+      setFetchingPastryMaterial(true);
+      await api
+        .get(`designs/${encodeURIComponent(design.id)}/pastry-material`)
+        .then((response) => {
+          const parsedPastryMaterial: PastryMaterial = {
+            id: response.data.pastryMaterialId,
+            designId: response.data.designId,
+            designName: response.data.designName,
+            created: new Date(response.data.dateAdded),
+            lastModified: new Date(response.data.lastModifiedDate),
+            otherCost: {
+              additionalCost: response.data.otherCost.additionalCost,
+              multiplier: response.data.otherCost.ingredientCostMultiplier,
+            },
+            costEstimate: response.data.costEstimate,
+            costExactEstimate: response.data.costExactEstimate,
+            mainVariantName: response.data.mainVariantName,
+            ingredients: response.data.ingredients.map((ingredient: any) => ({
+              id: ingredient.itemId,
+              name: ingredient.itemName,
+              type: ingredient.type,
+              ingredientType: ingredient.ingredientType,
+              amountMeasurement: ingredient.amountMeasurement,
+              amount: ingredient.amount,
+            })),
+            ingredientImportance: response.data.ingredientImportance,
+            addOns: response.data.addOns.map((addOn: any) => ({
+              id: addOn.addOnsId,
+              name: addOn.addOnsName,
+              amount: addOn.amount,
+            })),
+            subVariants: response.data.subVariants.map((subVariant: any) => ({
+              id: subVariant.pastryMaterialSubVariantId,
+              name: subVariant.subVariantName,
+              ingredients: subVariant.ingredients.map((ingredient: any) => ({
+                id: ingredient.itemId,
+                name: ingredient.itemName,
+                type: ingredient.type,
+                amount: ingredient.amount,
+                amountMeasurement: ingredient.amountMeasurement,
+                ingredientId: ingredient.pastryMaterialSubVariantIngredientId,
+                ingredientType: ingredient.ingredientType,
+              })),
+              addOns: subVariant.addOns,
+            })),
+            inStock: response.data.inStock,
+          };
+          setPastryMaterial(parsedPastryMaterial);
+        });
     }
-  }, []);
+    setFetchingPastryMaterial(false);
+  };
+
+  const updatePastryMaterial = async () => {
+    if (design && pastryMaterial) {
+      await api.patch(`pastry-materials/${pastryMaterial.id}`, {
+        designId: design.id,
+        mainVariantName: pastryMaterial.mainVariantName,
+      });
+      await api.patch(`pastry-materials/${pastryMaterial.id}/other-costs`, {
+        additionalCost: pastryMaterial.otherCost?.additionalCost,
+        ingredientCostMultiplier: pastryMaterial.otherCost?.multiplier,
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchPastryMaterial();
+  }, [design]);
 
   // Filter available tags when values.tags changes
   useEffect(() => {
@@ -101,6 +178,16 @@ const DesignDialog = ({
     const chosenTagIds = values.tags.map((tag) => tag.id);
     const filteredTags = tags.filter((tag) => !chosenTagIds.includes(tag.id));
     setAvailableTags(filteredTags);
+  };
+  const handleAddTag = () => {
+    if (availableTags.length === 0) return; // Prevent adding if no tags are available
+    setFieldValue("tags", [...values.tags, availableTags[0]]);
+  };
+
+  const handleRemoveTag = (index: number) => {
+    const updatedTags = [...values.tags];
+    updatedTags.splice(index, 1); // Remove tag at the specified index
+    setFieldValue("tags", updatedTags);
   };
 
   const handleChangeTags = (index: number, newTagId: string) => {
@@ -146,15 +233,50 @@ const DesignDialog = ({
               multiline
               rows={6}
             />
-            <TextField
-              label="Shape"
-              id="shape"
-              name="shape"
-              value={values.shape}
-              onChange={handleChange}
-            />
-            <Typography>{"Tags"}</Typography>
-            <Stack spacing={1}>
+            <Stack direction="row" spacing={2}>
+              <FormControl fullWidth>
+                <InputLabel id="select-shape-label">Shape</InputLabel>
+                <Select
+                  labelId="select-shape"
+                  label="Shape"
+                  id="shape"
+                  name="shape"
+                  value={values.shape}
+                  onChange={handleChange}
+                >
+                  <MenuItem value={"round"}>{"Round"}</MenuItem>
+                  <MenuItem value={"heart"}>{"Heart"}</MenuItem>
+                  <MenuItem value={"rectangle"}>{"Rectangle"}</MenuItem>
+                  <MenuItem value={"custom"}>{"Custom"}</MenuItem>
+                </Select>
+              </FormControl>
+              {values.shape === "custom" ? (
+                <TextField
+                  label="Custom Shape"
+                  id="customShape"
+                  name="customShape"
+                  value={values.customShape}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              ) : null}
+            </Stack>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h3">{"Tags"}</Typography>
+
+              {availableTags.length > 0 && values.tags.length < 5 ? (
+                <Button
+                  color="primary"
+                  variant="contained"
+                  size="small"
+                  onClick={handleAddTag}
+                >
+                  <Add />
+                  Add
+                </Button>
+              ) : null}
+            </Stack>
+            <Stack spacing={2}>
               {values.tags.map((tag, index) => {
                 // Create a temporary list of tags that includes the current tag + availableTags
                 const options = [
@@ -165,37 +287,57 @@ const DesignDialog = ({
                 ];
 
                 return (
-                  <FormControl fullWidth key={`select-tag-form-${index}`}>
-                    <InputLabel id={`select-tag-${index}-label`}>
-                      Tag
-                    </InputLabel>
-                    <Select
-                      labelId={`select-tag-${index}`}
-                      id={`select-tag-${index}`}
-                      value={tag.id} // Use the current tag ID directly
-                      label="Tag"
-                      onChange={(e) =>
-                        handleChangeTags(index, e.target.value as string)
-                      }
+                  <Stack direction="row" spacing={2}>
+                    <FormControl
+                      fullWidth
+                      key={`select-tag-form-${index}`}
+                      size="small"
                     >
-                      {options.map((availableTag) => (
-                        <MenuItem key={availableTag.id} value={availableTag.id}>
-                          {availableTag.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      <Select
+                        labelId={`select-tag-${index}`}
+                        id={`select-tag-${index}`}
+                        value={tag.id} // Use the current tag ID directly
+                        onChange={(e) =>
+                          handleChangeTags(index, e.target.value as string)
+                        }
+                      >
+                        {options.map((availableTag) => (
+                          <MenuItem
+                            key={availableTag.id}
+                            value={availableTag.id}
+                          >
+                            {availableTag.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleRemoveTag(index)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
                 );
               })}
             </Stack>
+            <Button
+              onClick={handleTogglePastryMaterial}
+              variant="contained"
+              color="secondary"
+              disabled={fetchingPastryMaterial}
+            >
+              {"Materials List"}
+            </Button>
+            <PastryMaterialDialog
+              pastryMaterial={pastryMaterial as PastryMaterial}
+              setPastryMaterial={setPastryMaterial}
+              shape={values.shape}
+              mode={design && design.id.length > 0 ? "edit" : "add"}
+              open={pastryMaterialOpen}
+              onClose={handleClosePastryMaterial}
+            />
           </Stack>
-          <Button onClick={handleTogglePastryMaterial}>
-            {"Materials List"}
-          </Button>
-          <PastryMaterialDialog
-            open={pastryMaterialOpen}
-            pastryMaterial={pastryMaterial}
-          />
         </DialogContent>
 
         <DialogActions>

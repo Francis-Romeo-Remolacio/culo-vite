@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Container,
-  Grid2 as Grid,
-  Skeleton,
-} from "@mui/material";
+import { Button, CircularProgress, Grid2 as Grid } from "@mui/material";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import { Design, Tag } from "../../../utils/Schemas";
@@ -35,7 +25,7 @@ const Designs = () => {
         name: "",
         description: "",
         pictureData: "",
-        shape: "",
+        shape: "round",
         tags: [],
         pastryMaterialId: "",
         variants: [],
@@ -46,7 +36,7 @@ const Designs = () => {
     setDesignOpen(true);
   };
 
-  const handleCloseDrawer = () => {
+  const handleCloseDesignDialog = () => {
     setDesignOpen(false);
     setMode("add");
   };
@@ -94,16 +84,11 @@ const Designs = () => {
   return (
     <>
       <Header title="DESIGNS" subtitle="Gallery of all designs" />
-      <Grid container spacing={2}>
-        <Grid>
-          <Button
-            variant="contained"
-            onClick={() => handleOpenDialog}
-            sx={{ width: 140, height: 360 }}
-          >
-            <Add />
-          </Button>
-        </Grid>
+      <Grid
+        container
+        spacing={2}
+        justifyContent={designs && designs.length ? "start" : "center"}
+      >
         {/* <Grid size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
           <Card elevation={2} sx={{ height: 300, display: "inline-block" }}>
             <CardActionArea
@@ -132,6 +117,17 @@ const Designs = () => {
             </CardActionArea>
           </Card>
         </Grid> */}
+        {designs && designs.length ? (
+          <Grid size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
+            <Button
+              variant="contained"
+              onClick={() => handleOpenDialog}
+              sx={{ width: "100%", height: 360 }}
+            >
+              <Add />
+            </Button>
+          </Grid>
+        ) : null}
         {designs && designs.length > 0 ? (
           designs.map((design) => (
             <Grid key={design.id} size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
@@ -151,7 +147,7 @@ const Designs = () => {
       <DesignDialog
         mode={mode}
         open={designOpen}
-        onClose={handleCloseDrawer}
+        onClose={handleCloseDesignDialog}
         design={selectedDesign}
         tags={tags}
       />
