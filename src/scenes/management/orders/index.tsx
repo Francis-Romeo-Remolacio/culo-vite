@@ -12,107 +12,69 @@ import {
   IconButton,
   Typography,
   Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Stack,
+  colors,
+  useTheme,
+  CircularProgress,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import { Edit, Delete, Handshake, Visibility } from "@mui/icons-material";
+import { Handshake, Visibility, ArrowDropDown } from "@mui/icons-material";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import Header from "../../../components/Header";
+import {
+  ManagementOrder,
+  Suborder,
+  CustomOrder,
+  OrderAddOn,
+} from "../../../utils/Schemas.ts";
+import { toCurrency } from "../../../utils/Formatter.ts";
+import { Tokens } from "../../../Theme.ts";
 
-const ManagementOrders = () => {
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [corderDetails, setCorderDetails] = useState(null);
+const Orders = () => {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
+  const [orderDetails, setOrderDetails] = useState<Omit<
+    ManagementOrder,
+    "customerId" | "customerName" | "isActive"
+  > | null>(null);
+  const [rows, setRows] = useState<Partial<ManagementOrder>[]>([]);
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<Order[]>([]);
   const [assignOpen, setAssignOpen] = useState(false);
   const [employeeUsername, setEmployeeUsername] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [viewOrderOpen, setViewOrderOpen] = useState(false);
-  const [viewCustomOrderOpen, setCustomViewOrderOpen] = useState(false);
-  const [selectedOrderItem, setSelectedOrderItem] = useState<OrderItem | null>(
+  const [selectedOrder, setSelectedOrder] = useState<ManagementOrder | null>(
     null
   );
-
-  interface Order {
-    id: string;
-    customId: string;
-    designId: string;
-    payment: string;
-    customerId: string;
-    customerName: string;
-    status: string;
-    designName: string;
-    pickup: Date;
-    isActive: boolean;
-    created: Date;
-    lastModified: Date;
-    lastUpdatedBy: string;
-  }
-  interface OrderItem {
-    suborderId: string;
-    customerName: string;
-    employeeName?: string;
-    designName: string;
-    price: number;
-    quantity: number;
-    createdAt: Date;
-    lastUpdatedBy?: string;
-    lastUpdatedAt: Date;
-    description: string;
-    flavor: string;
-    size: string;
-    color: string;
-    shape: string;
-    isActive: boolean;
-    subOrderTotal: number;
-    orderAddons: OrderAddons[];
-  }
-
-  interface OrderDetails {
-    orderId: string;
-    status: string;
-    paymentMethod: string;
-    orderType: string;
-    pickupDateTime: Date;
-    orderTotal: number;
-    orderItems: OrderItem[];
-  }
-
-  interface OrderAddons {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-    addOnTotal: number;
-  }
+  const [viewOrderOpen, setViewOrderOpen] = useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<
+    Suborder | CustomOrder | null
+  >(null);
 
   interface Employee {
     userId: string;
-    name: string; // Adjust according to your actual response structure
+    name: string;
   }
 
-  const handleViewOrderClickOpen = (order: any) => {
+  const handleViewOrderClickOpen = (order: ManagementOrder) => {
     setSelectedOrder(order);
     setViewOrderOpen(true);
   };
 
-  const handleViewCustomOrderClickOpen = (order: any) => {
-    console.log("Selected order:", order); // Debugging
-    setSelectedOrder(order);
-    setCustomViewOrderOpen(true);
-  };
-
-  const handleAssignClickOpen = (item: OrderItem) => {
+  const handleAssignClickOpen = (item: Suborder | CustomOrder) => {
     setSelectedOrderItem(item);
     setAssignOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setOrderDetails(null);
     setViewOrderOpen(false);
     setSelectedOrder(null);
-    setCustomViewOrderOpen(false);
     setAssignOpen(false);
   };
 
@@ -123,42 +85,63 @@ const ManagementOrders = () => {
 
   const fetchData = async () => {
     try {
-      const response = await api.get("orders/partial-details");
-      const orderData = response.data.map((order: any) => ({
-        id: order.orderId,
-        customId: order.customId,
-        designId: order.designId,
-        payment: order.payment,
-        customerId: order.customerId,
-        customerName: order.customerName,
-        status: order.status,
-        designName: order.designName,
-        pickup: new Date(order.pickup),
-        isActive: order.isActive,
-        created: new Date(order.createdAt),
-        lastModified: new Date(order.lastUpdatedAt),
-        lastUpdatedBy: order.lastUpdatedBy,
-      }));
-      setRows(orderData);
-      console.log(orderData);
+      await api.get("orders/partial-details").then((response) => {
+        const parsedOrders: Partial<ManagementOrder>[] = response.data.map(
+          (order: any) => ({
+            id: order.orderId,
+            type: order.type,
+            customerId: order.customerId,
+            customerName: order.customerName,
+            status: order.status,
+            payment: order.payment,
+            pickupDateTime: new Date(order.pickup),
+            isActive: order.isActive,
+          })
+        );
+        setRows(parsedOrders);
+      });
     } catch (error) {
-      console.error("Error fetching suborders:", error);
+      console.error("Error fetching orders:", error);
     }
   };
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
-      if (selectedOrder?.id) {
+    if (viewOrderOpen && selectedOrder) {
+      const fetchOrderDetails = async () => {
         try {
-          const response = await api.get(`orders/${selectedOrder.id}/full`);
-          setOrderDetails(response.data);
+          await api.get(`orders/${selectedOrder.id}/full`).then((response) => {
+            const parsedOrder: Omit<
+              ManagementOrder,
+              "customerId" | "customerName" | "isActive"
+            > = {
+              id: response.data.orderId,
+              type: response.data.orderType,
+              pickupDateTime: new Date(response.data.pickupDateTime),
+              payment: response.data.paymentMethod,
+              price: response.data.orderTotal,
+              listItems: {
+                suborders: response.data.orderItems.map((suborder: any) => ({
+                  id: suborder.suborderId,
+                  designId: suborder.designId,
+                  designName: suborder.designName,
+                  pastryId: suborder.pastryId,
+                  description: suborder.description,
+                  size: suborder.size,
+                  color: suborder.color,
+                  flavor: suborder.flavor,
+                  quantity: suborder.quantity,
+                  price: suborder.price,
+                })),
+                custom: response.data.customItems,
+              },
+              status: response.data.status,
+            };
+            setOrderDetails(parsedOrder);
+          });
         } catch (error) {
           console.error("Error fetching order details:", error);
         }
-      }
-    };
-
-    if (viewOrderOpen) {
+      };
       fetchOrderDetails();
     }
   }, [viewOrderOpen, selectedOrder]);
@@ -169,34 +152,32 @@ const ManagementOrders = () => {
 
   useEffect(() => {
     const fetchEmployees = async () => {
-      console.log("Fetching employees..."); // Log fetching attempt
       try {
         const response = await api.get<Employee[]>("orders/employees-name");
-        console.log("Fetched employees:", response.data); // Log the response
-        setEmployees(response.data); // Assuming response.data is an array of Employee objects
+        setEmployees(response.data);
       } catch (error) {
         console.error("Error fetching employees:", error);
       }
     };
-
-    fetchEmployees(); // Call the function
-  }, []); // Run once on component mount
+    fetchEmployees();
+  }, []);
 
   const handleAssignEmployee = async () => {
     if (!selectedOrderItem || !employeeUsername || !orderDetails) return;
 
     try {
       const requestBody = {
-        employeeId: employeeUsername, // employeeUsername contains employee.userId
+        employeeId: employeeUsername,
       };
 
       const response = await api.post(
-        `orders/suborders/${selectedOrderItem.id}/assign`, // Updated endpoint
+        `orders/suborders/${selectedOrderItem.id}/assign`,
         requestBody
       );
 
       console.log("Employee assigned successfully:", response.data);
       handleClose();
+      fetchData();
     } catch (error) {
       console.error("Error assigning employee:", error);
     }
@@ -206,10 +187,8 @@ const ManagementOrders = () => {
     try {
       const response = await api.post(`${id}/approve-order`);
       console.log("Order approved successfully:", response.data);
-      // Optionally refresh the data grid or show a success message
     } catch (error) {
       console.error("Error approving order:", error);
-      // Optionally show an error message to the user
     }
   };
 
@@ -217,21 +196,17 @@ const ManagementOrders = () => {
     {
       field: "action",
       type: "actions",
-      minWidth: 120,
+      minWidth: 100,
       renderCell: (params) => (
         <>
-          <IconButton
-            color="primary"
-            onClick={() => handleViewOrderClickOpen(params.row)}
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            color="success"
-            onClick={() => handleApproveOrder(params.row.id)}
-          >
-            <Handshake />
-          </IconButton>
+          {params.row.status === "for approval" ? (
+            <IconButton
+              color="success"
+              onClick={() => handleApproveOrder(params.row.id)}
+            >
+              <Handshake />
+            </IconButton>
+          ) : null}
           <IconButton
             color="info"
             onClick={() => handleViewOrderClickOpen(params.row)}
@@ -241,20 +216,12 @@ const ManagementOrders = () => {
         </>
       ),
     },
-    { field: "id", headerName: "OrderId" },
-    { field: "designName", headerName: "Design" },
+    { field: "id", headerName: "ID" },
+    { field: "type", headerName: "Order Type" },
     { field: "customerName", headerName: "Ordered by" },
-    { field: "employeeName", headerName: "Employee" },
     { field: "payment", headerName: "Payment" },
     { field: "status", headerName: "Status", width: 120 },
-    { field: "pickup", headerName: "Pick Up", type: "date" },
-    { field: "createdAt", headerName: "Date Created", type: "date" },
-    { field: "lastUpdatedBy", headerName: "Modified By" },
-    {
-      field: "lastUpdatedAt",
-      headerName: "Last Modified",
-      type: "date",
-    },
+    { field: "pickupDateTime", headerName: "Pick Up", type: "date" },
     { field: "isActive", headerName: "Active", type: "boolean" },
   ];
 
@@ -267,167 +234,136 @@ const ManagementOrders = () => {
           columns={columns}
           slots={{ toolbar: GridToolbar }}
           initialState={{
-            columns: { columnVisibilityModel: { id: false } },
+            columns: {
+              columnVisibilityModel: {
+                id: false,
+                isActive: false,
+              },
+            },
+            filter: {
+              filterModel: {
+                items: [{ field: "isActive", operator: "is", value: true }],
+              },
+            },
           }}
         />
       </DataGridStyler>
-      {/* Dialogs for order details */}
-      <Dialog
-        open={viewOrderOpen}
-        onClose={() => setViewOrderOpen(false)}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle>Order Details</DialogTitle>
-        <DialogContent>
-          {/* Add content for order details here */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewOrderOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={viewCustomOrderOpen}
-        onClose={() => setCustomViewOrderOpen(false)}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle>Custom Order Details</DialogTitle>
-        <DialogContent>
-          {/* Add content for custom order details here */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCustomViewOrderOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-      {/* View Order Details Dialog */}
-      <Dialog
-        open={viewOrderOpen}
-        onClose={handleClose}
-        fullWidth
-        maxWidth="md"
-      >
+
+      <Dialog open={viewOrderOpen} onClose={handleClose} maxWidth="md">
         <DialogTitle>Order Details</DialogTitle>
         <DialogContent>
           {orderDetails ? (
             <Box>
-              <Typography variant="h6">
-                Order ID: {orderDetails.orderId}
-              </Typography>
+              <Typography variant="h6">Order ID: {orderDetails.id}</Typography>
               <Typography variant="h6">
                 Status: {orderDetails.status}
               </Typography>
               <Typography variant="h6">
-                Payment Method: {orderDetails.paymentMethod}
+                Payment: {orderDetails.payment}
               </Typography>
               <Typography variant="h6">
-                Order Type: {orderDetails.orderType}
+                Pickup: {String(orderDetails.pickupDateTime)}
               </Typography>
               <Typography variant="h6">
-                Pickup Date and Time:{" "}
-                {formatDate(orderDetails.pickupDateTime, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                Price: {toCurrency(orderDetails.price)}
               </Typography>
-              <Typography variant="h6">
-                Order Total: {orderDetails.orderTotal}
-              </Typography>
+
               <Typography variant="h6">Order Items:</Typography>
-              {orderDetails.orderItems.length > 0 ? (
-                <Box>
-                  {orderDetails.orderItems.map((item, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                      <Typography variant="h6">
-                        Suborder ID: {item.suborderId}
-                      </Typography>
-                      <Typography variant="h6">
-                        Customer Name: {item.customerName}
-                      </Typography>
-                      <Typography variant="h6">
-                        Employee Name: {item.employeeName || "Not assigned"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Design Name: {item.designName}
-                      </Typography>
-                      <Typography variant="h6">Price: {item.price}</Typography>
-                      <Typography variant="h6">
-                        Quantity: {item.quantity}
-                      </Typography>
-                      <Typography variant="h6">
-                        Created At:{" "}
-                        {formatDate(item.createdAt, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Typography>
-                      <Typography variant="h6">
-                        Last Updated By: {item.lastUpdatedBy || "Not updated"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Last Updated At:{" "}
-                        {formatDate(item.lastUpdatedAt, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Typography>
-                      <Typography variant="h6">
-                        Description: {item.description}
-                      </Typography>
-                      <Typography variant="h6">
-                        Flavor: {item.flavor}
-                      </Typography>
-                      <Typography variant="h6">Size: {item.size}</Typography>
-                      <Typography variant="h6">Color: {item.color}</Typography>
-                      <Typography variant="h6">Shape: {item.shape}</Typography>
-                      <Typography variant="h6">
-                        Is Active: {item.isActive ? "Yes" : "No"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Suborder Total: {item.subOrderTotal}
-                      </Typography>
-                      Order Addons:
-                      {item.orderAddons.length > 0
-                        ? item.orderAddons
-                            .map(
-                              (addon) =>
-                                `${addon.name} (Qty: ${
-                                  addon.quantity
-                                }, Total: ${addon.addOnTotal.toFixed(2)})`
-                            )
-                            .join(", ")
-                        : "None"}
-                      <Button
-                        variant="outlined"
-                        onClick={() => handleAssignClickOpen(item)}
+              {orderDetails.listItems.suborders.map((suborder, index) => {
+                // Dynamically get key-value pairs except 'id'
+                const suborderDetails = Object.entries(suborder).filter(
+                  ([key, _]) => key !== "id"
+                );
+
+                return (
+                  <Accordion
+                    key={index}
+                    sx={{ backgroundColor: colors.primary[100] }}
+                  >
+                    <AccordionSummary
+                      expandIcon={<ArrowDropDown />}
+                      aria-controls={`panel${index}-content`}
+                      id={`panel${index}-header`}
+                    >
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
                       >
-                        Assign Employee
-                      </Button>{" "}
-                      {/* Moved button here */}
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Typography>No items available</Typography>
-              )}
+                        <Typography>{`Suborder ID: ${suborder.id}`}</Typography>
+                        <Button
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                            handleAssignClickOpen(suborder);
+                          }}
+                        >
+                          Assign
+                        </Button>
+                      </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {suborderDetails.map(([key, value]) => (
+                        <Box key={key} sx={{ marginBottom: 1 }}>
+                          <Typography variant="body1">
+                            <strong>{key}:</strong> {String(value)}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
+              {orderDetails.listItems.custom.map((customOrder, index) => {
+                // Dynamically get key-value pairs except 'id'
+                const customOrderDetails = Object.entries(customOrder).filter(
+                  ([key, _]) => key !== "id"
+                );
+
+                return (
+                  <Accordion key={index}>
+                    <AccordionSummary
+                      expandIcon={<ArrowDropDown />}
+                      aria-controls={`custom-panel${index}-content`}
+                      id={`custom-panel${index}-header`}
+                    >
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography>
+                          {`Custom Order ID: ${customOrder.id}`}
+                        </Typography>
+                        <Button
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                            handleAssignClickOpen(customOrder);
+                          }}
+                        >
+                          Assign
+                        </Button>
+                      </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {customOrderDetails.map(([key, value]) => (
+                        <Box key={key} sx={{ marginBottom: 1 }}>
+                          <Typography variant="body1">
+                            <strong>{key}:</strong> {String(value)}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
             </Box>
           ) : (
-            <Typography>No details available</Typography>
+            <CircularProgress />
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={assignOpen} onClose={handleClose}>
         <DialogTitle>Assign Employee</DialogTitle>
         <DialogContent>
@@ -435,14 +371,12 @@ const ManagementOrders = () => {
             <FormControl fullWidth variant="standard" margin="dense">
               <InputLabel>Employee Username</InputLabel>
               <Select
-                value={employeeUsername} // employeeUsername will store selected employee's userId
-                onChange={(e) => setEmployeeUsername(e.target.value)} // Set the selected employee's userId
+                value={employeeUsername}
+                onChange={(e) => setEmployeeUsername(e.target.value)}
                 label="Employee Username"
               >
                 {employees.map((employee) => (
                   <MenuItem key={employee.userId} value={employee.userId}>
-                    {" "}
-                    {/* employee.userId is sent as value */}
                     {employee.name}
                   </MenuItem>
                 ))}
@@ -457,9 +391,8 @@ const ManagementOrders = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      ;
     </>
   );
 };
 
-export default ManagementOrders;
+export default Orders;

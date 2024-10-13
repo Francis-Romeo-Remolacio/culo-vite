@@ -109,7 +109,7 @@ export interface OtherCost {
 export interface Order {
   id: string;
   type: "normal" | "rush";
-  pickupDateTime: Dayjs;
+  pickupDateTime: Dayjs | Date;
   payment: "full" | "half";
   price: number;
   listItems: { suborders: Suborder[]; custom: CustomOrder[] };
@@ -154,6 +154,7 @@ export interface ManagementSuborder extends Required<Suborder> {
   employeeId: string;
   employeeName: string;
   customerName: string;
+  designName: string;
   pastryId: string;
   created: Date;
   lastModified: Date;
