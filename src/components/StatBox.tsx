@@ -38,13 +38,13 @@ const StatBox = ({
         </Box>
       </Box>
       <Box display="flex" justifyContent="space-between" mt="2px">
-        <Typography variant="h5" sx={{ color: colors.gween }}>
+        <Typography variant="h5" sx={{ color: colors.primary[400] }}>
           {subtitle}
         </Typography>
         <Typography
           variant="h5"
           fontStyle="italic"
-          sx={{ color: colors.gween }}
+          sx={{ color: colors.primary[400] }}
         >
           {increase}
         </Typography>
