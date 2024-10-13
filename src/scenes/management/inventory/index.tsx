@@ -461,6 +461,7 @@ const Inventory = () => {
             columns: {
               columnVisibilityModel: {
                 id: false,
+                isActive: false,
               },
             },
             filter: {
