@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Chip, IconButton, Stack } from "@mui/material";
+import { Box, Button, Chip, Drawer, Stack } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -17,12 +17,14 @@ import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import {
-  Edit,
-  Delete,
-  Restore,
-  Save,
-  Cancel,
-  Refresh,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Restore as RestoreIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  Warehouse as WarehouseIcon,
 } from "@mui/icons-material";
 import { Ingredient } from "../../../utils/Schemas.js";
 
@@ -47,22 +49,24 @@ const Inventory = () => {
   const fetchData = async () => {
     try {
       const response = await api.get("ingredients");
-      const parsedIngredients = response.data.map((ingredient: any) => ({
-        id: ingredient.id,
-        name: ingredient.name,
-        quantity: ingredient.quantity,
-        measurement: ingredient.measurements,
-        price: ingredient.price,
-        status: ingredient.status,
-        type: ingredient.type,
-        created: new Date(ingredient.createdAt),
-        lastUpdatedBy: ingredient.lastUpdatedBy,
-        lastUpdated: new Date(ingredient.lastUpdatedAt),
-        isActive: ingredient.isActive,
-        good: ingredient.goodThreshold,
-        bad: ingredient.criticalThreshold,
-      }));
-      setIngredients(parsedIngredients as any);
+      const parsedIngredients: Ingredient[] = response.data.map(
+        (ingredient: any) => ({
+          id: ingredient.id,
+          name: ingredient.name,
+          quantity: ingredient.quantity,
+          measurement: ingredient.measurements,
+          price: ingredient.price,
+          status: ingredient.status,
+          type: ingredient.type,
+          created: new Date(ingredient.createdAt),
+          lastUpdatedBy: ingredient.lastUpdatedBy,
+          lastUpdated: new Date(ingredient.lastUpdatedAt),
+          isActive: ingredient.isActive,
+          good: ingredient.goodThreshold,
+          bad: ingredient.criticalThreshold,
+        })
+      );
+      setIngredients(parsedIngredients);
       setRows([...tempRows, ...parsedIngredients]);
     } catch (error) {
       console.error("Error fetching ingredients:", error);
@@ -111,55 +115,77 @@ const Inventory = () => {
     }));
   };
 
-  const handleEditClick = (id: GridRowId) => {
+  const handleClickEdit = (id: GridRowId) => {
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.Edit },
     }));
   };
 
-  const handleSaveClick = async (ingredient: Ingredient) => {
+  const handleClickSave = async (
+    updatedRow: Ingredient,
+    originalRow: Ingredient
+  ) => {
+    // Set the mode to view
     setRowModesModel((prev) => ({
       ...prev,
-      [ingredient.id]: { mode: GridRowModes.View },
+      [updatedRow.id as string]: { mode: GridRowModes.View },
     }));
-
-    // Get the previous row state for comparison
-    const previousRow = rows.find((row) => row.id === ingredient.id);
 
     // Check if any fields have changed
     const hasChanged =
-      previousRow?.name !== ingredient.name ||
-      previousRow?.quantity !== ingredient.quantity ||
-      previousRow?.measurement !== ingredient.measurement ||
-      previousRow?.price !== ingredient.price ||
-      previousRow?.type !== ingredient.type;
+      originalRow.name !== updatedRow.name ||
+      originalRow.quantity !== updatedRow.quantity ||
+      originalRow.measurement !== updatedRow.measurement ||
+      originalRow.price !== updatedRow.price ||
+      originalRow.type !== updatedRow.type;
+
+    console.log("Has Changed:", hasChanged);
 
     if (!hasChanged) {
       console.log("No changes detected. Skipping API call.");
-      return;
+      return updatedRow; // Return the original row since no changes are made
     }
 
-    if (String(ingredient.id).includes("tempId")) {
-      setRows((prevRows) => prevRows.filter((row) => row.id !== ingredient.id));
-      await api.post("ingredients", ingredient);
-    } else {
-      try {
-        await api.patch(`ingredients/${ingredient.id}`, {
-          name: ingredient.name,
-          quantity: ingredient.quantity,
-          measurements: ingredient.measurement,
-          price: ingredient.price,
-          type: ingredient.type,
-        });
-        fetchData(); // Refresh data after update
-      } catch (error) {
-        console.error("Error updating ingredient:", error);
-      }
+    // Create an object to hold only the changed fields
+    const changedFields: any = {};
+
+    if (originalRow.name !== updatedRow.name) {
+      changedFields.name = updatedRow.name;
     }
+    if (originalRow.quantity !== updatedRow.quantity) {
+      changedFields.quantity = updatedRow.quantity;
+    }
+    if (originalRow.measurement !== updatedRow.measurement) {
+      changedFields.measurements = updatedRow.measurement;
+    }
+    if (originalRow.price !== updatedRow.price) {
+      changedFields.price = updatedRow.price;
+    }
+    if (originalRow.type !== updatedRow.type) {
+      changedFields.type = updatedRow.type;
+    }
+
+    // Handle temporary IDs and API calls
+    try {
+      if (String(updatedRow.id).includes("tempId")) {
+        setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== updatedRow.id)
+        );
+        await api.post("ingredients", updatedRow); // For new items, send the entire updatedRow
+      } else {
+        await api.patch(`ingredients/${updatedRow.id}`, changedFields); // Send only changed fields
+      }
+      fetchData(); // Refresh data after update
+    } catch (error) {
+      console.error("Error updating ingredient:", error);
+      // You might want to handle the error accordingly
+    }
+
+    return updatedRow; // Return the updated row to the DataGrid
   };
 
-  const handleCancelClick = (id: GridRowId) => {
+  const handleClickCancel = (id: GridRowId) => {
     setRowModesModel((prev) => ({
       ...prev,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
@@ -210,18 +236,21 @@ const Inventory = () => {
         if (isInEditMode) {
           return [
             <GridActionsCellItem
-              icon={<Save />}
+              icon={<SaveIcon />}
               label="Save"
               onClick={(event) => {
                 event.stopPropagation(); // Prevent row click event
-                handleSaveClick(params.row);
+                setRowModesModel((prev) => ({
+                  ...prev,
+                  [params.row.id as string]: { mode: GridRowModes.View },
+                }));
               }}
               color="success"
             />,
             <GridActionsCellItem
-              icon={<Cancel />}
+              icon={<CancelIcon />}
               label="Cancel"
-              onClick={() => handleCancelClick(params.row.id)}
+              onClick={() => handleClickCancel(params.row.id)}
               color="inherit"
             />,
           ];
@@ -230,13 +259,13 @@ const Inventory = () => {
         if (params.row.isActive) {
           return [
             <GridActionsCellItem
-              icon={<Edit />}
+              icon={<EditIcon />}
               label="Edit"
-              onClick={() => handleEditClick(params.row.id)}
+              onClick={() => handleClickEdit(params.row.id)}
               color="primary"
             />,
             <GridActionsCellItem
-              icon={<Delete />}
+              icon={<DeleteIcon />}
               label="Delete"
               onClick={() => handleClickDelete(params.row.id)}
               color="error"
@@ -245,13 +274,13 @@ const Inventory = () => {
         } else {
           return [
             <GridActionsCellItem
-              icon={<Edit />}
+              icon={<EditIcon />}
               label="Edit"
-              onClick={() => handleEditClick(params.row.id)}
+              onClick={() => handleClickEdit(params.row.id)}
               color="primary"
             />,
             <GridActionsCellItem
-              icon={<Restore />}
+              icon={<RestoreIcon />}
               label="Restore"
               onClick={() => handleClickRestore(params.row.id)}
               color="success"
@@ -263,7 +292,6 @@ const Inventory = () => {
     {
       field: "id",
       headerName: "ID",
-      cellClassName: "name-column--cell",
     },
     {
       field: "name",
@@ -373,24 +401,47 @@ const Inventory = () => {
       ),
       width: 100,
     },
+    {
+      field: "isActive",
+      headerName: "Active",
+      type: "boolean",
+    },
   ];
+
+  const [batchesOpen, setBatchesOpen] = useState(false);
+
+  const toggleDrawer = (newOpen: boolean) => () => {
+    setBatchesOpen(newOpen);
+  };
 
   return (
     <>
       <Header title="Inventory" subtitle="Manage your ingredients" />
       <Stack direction="row" spacing={2}>
-        <Button onClick={handleClickAdd} variant="contained" sx={{ mb: 2 }}>
-          Add Ingredient
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleClickAdd}
+        >
+          Add
         </Button>
         <Button
           variant="contained"
-          onClick={() => {
-            fetchData();
-          }}
-          sx={{ width: 33, height: 33 }}
+          startIcon={<RefreshIcon />}
+          onClick={fetchData}
         >
-          <Refresh />
+          Refresh
         </Button>
+        <Button
+          variant="contained"
+          startIcon={<WarehouseIcon />}
+          onClick={toggleDrawer(true)}
+        >
+          {"View Batches"}
+        </Button>
+        <Drawer open={batchesOpen} onClose={toggleDrawer(false)} anchor="right">
+          <Box sx={{ minWidth: 400 }}></Box>
+        </Drawer>
       </Stack>
       <DataGridStyler>
         <DataGrid
@@ -398,10 +449,13 @@ const Inventory = () => {
           rows={rows}
           columns={columns}
           editMode="row"
-          rowHeight={60}
-          getRowId={(row) => row.id}
           rowModesModel={rowModesModel}
           onRowEditStop={handleRowEditStop}
+          processRowUpdate={async (updatedRow, originalRow) => {
+            const result = await handleClickSave(updatedRow, originalRow);
+            return result; // Return the updated row to the DataGrid
+          }}
+          onProcessRowUpdateError={(error) => console.error(error)}
           slots={{ toolbar: GridToolbar }}
           initialState={{
             columns: {
