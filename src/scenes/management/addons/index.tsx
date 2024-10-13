@@ -1,156 +1,318 @@
-import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  IconButton,
-} from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Button, Chip, Drawer, Stack, Typography } from "@mui/material";
 import {
   DataGrid,
+  GridActionsCellItem,
   GridColDef,
-  GridRowsProp,
+  GridEventListener,
+  GridRowEditStopReasons,
+  GridRowId,
+  GridRowModes,
+  GridRowModesModel,
   GridToolbar,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
-import api from "../../../api/axiosConfig"; // Assuming api encapsulates Axios methods
+import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
-import EditIcon from "@mui/icons-material/Edit";
-import { useFormik } from "formik";
+import {
+  Edit,
+  Delete,
+  Restore,
+  Save,
+  Cancel,
+  Refresh,
+  Add,
+} from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
 
 const AddOns = () => {
-  const [rows, setRows] = useState<ManagementAddOn[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedAddOnId, setSelectedAddOnId] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const apiRef = useGridApiRef();
+  const [tempRows, setTempRows] = useState<ManagementAddOn[]>([]);
+  const [addOns, setAddOns] = useState<ManagementAddOn[]>([]);
+  const [rows, setRows] = useState<any[]>([]);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+  const [iterator, setIterator] = useState(0);
 
-  useEffect(() => {
-    fetchAddOns();
-  }, []);
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
+    params,
+    event
+  ) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
 
-  const fetchAddOns = async () => {
+  const fetchData = async () => {
     try {
-      await api.get("/add-ons").then((response) => {
-        const parsedAddOns: ManagementAddOn[] = response.data.map(
-          (addOn: any) => ({
-            id: addOn.id,
-            name: addOn.addOnName,
-            price: addOn.price,
-            size: addOn.size,
-            measurement: addOn.measurement,
-            created: new Date(addOn.dateAdded),
-            lastModified: new Date(addOn.lastModifiedDate),
-          })
-        );
-        setRows(parsedAddOns);
-      });
+      const response = await api.get("add-ons");
+      const parsedAddOns: ManagementAddOn[] = response.data.map(
+        (addOn: any) => ({
+          id: addOn.id,
+          name: addOn.addOnName,
+          price: addOn.price,
+          measurement: addOn.measurement,
+          created: new Date(addOn.dateAdded),
+          lastModified: new Date(addOn.lastModifiedDate),
+        })
+      );
+      setAddOns(parsedAddOns);
+      setRows([...tempRows, ...parsedAddOns]);
     } catch (error) {
       console.error("Error fetching add-ons:", error);
     }
   };
 
-  const handleEditClick = (row: any) => {
-    setSelectedAddOnId(row.id);
-    formik.setValues({
-      name: row.name,
-      price: row.price,
-    });
-    setIsDialogOpen(true);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleClickAdd = () => {
+    const newRow = {
+      id: `tempId-${iterator}`,
+      name: "New Add-On",
+      price: 0,
+      measurement: "Piece",
+      created: new Date(),
+      lastModified: new Date(),
+    };
+    setTempRows((prev) => [newRow, ...prev]);
+    setRows((prev) => [newRow, ...prev]);
+    setIterator(iterator + 1);
+
+    setRowModesModel((prev) => ({
+      ...prev,
+      [newRow.id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+    }));
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setSelectedAddOnId(null);
+  const handleClickEdit = (id: GridRowId) => {
+    setRowModesModel((prev) => ({
+      ...prev,
+      [id]: { mode: GridRowModes.Edit },
+    }));
   };
 
-  const handleSubmit = async (values: any) => {
-    console.log("Submitting values:", values); // Debug: check values being submitted
+  const handleClickSave = async (
+    updatedRow: ManagementAddOn,
+    originalRow: ManagementAddOn
+  ) => {
+    // Set the mode to view
+    setRowModesModel((prev) => ({
+      ...prev,
+      [updatedRow.id]: { mode: GridRowModes.View },
+    }));
+
+    // Check if any fields have changed
+    const hasChanged =
+      originalRow.name !== updatedRow.name ||
+      originalRow.price !== updatedRow.price ||
+      originalRow.measurement !== updatedRow.measurement;
+
+    console.log("Has Changed:", hasChanged);
+
+    if (!hasChanged) {
+      console.log("No changes detected. Skipping API call.");
+      return updatedRow; // Return the original row since no changes are made
+    }
+
+    // Create an object to hold only the changed fields
+    const changedFields: any = {};
+
+    if (originalRow.name !== updatedRow.name) {
+      changedFields.addOnName = updatedRow.name;
+    }
+    if (originalRow.price !== updatedRow.price) {
+      changedFields.price = updatedRow.price;
+    }
+    if (originalRow.measurement !== updatedRow.measurement) {
+      changedFields.measurement = updatedRow.measurement;
+    }
+
+    // Handle temporary IDs and API calls
     try {
-      const response = await api.patch(`/add-ons/${selectedAddOnId}`, {
-        name: values.name,
-        price: values.price,
-      });
-      console.log("Add-On updated successfully:", response.data);
-      fetchAddOns(); // Refresh the list after update
-      handleCloseDialog(); // Close the dialog after update
+      if (String(updatedRow.id).includes("tempId")) {
+        setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== updatedRow.id)
+        );
+        await api.post("add-ons", updatedRow); // For new add-ons, send the entire updatedRow
+      } else {
+        await api.patch(`add-ons/${updatedRow.id}`, changedFields); // Send only changed fields
+      }
+      fetchData(); // Refresh data after update
     } catch (error) {
       console.error("Error updating add-on:", error);
+      // You might want to handle the error accordingly
+    }
+
+    return updatedRow; // Return the updated row to the DataGrid
+  };
+
+  const handleClickCancel = (id: GridRowId) => {
+    setRowModesModel((prev) => ({
+      ...prev,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    }));
+
+    const isInTempRows = tempRows.some((row) => row.id === id);
+    if (isInTempRows) {
+      setTempRows((prev) => prev.filter((row) => row.id !== id));
+      setRows((prev) => prev.filter((row) => row.id !== id));
     }
   };
 
-  const formik = useFormik({
-    initialValues: {
-      name: "",
-      price: 0,
-    },
-    onSubmit: handleSubmit,
-  });
-
-  const handleAddClick = () => {
-    formikAdd.resetForm(); // Reset form values for new add-on
-    setIsAddDialogOpen(true);
+  const handleClickDelete = async (id: string) => {
+    if (String(id).includes("tempId")) {
+      const newRows = tempRows.filter((row) => row.id !== id);
+      setTempRows(newRows);
+      setRows([...newRows, ...addOns]);
+    } else {
+      try {
+        await api.delete(`add-ons/${id}`); // Updated API endpoint
+        fetchData(); // Refresh data after delete
+      } catch (error) {
+        console.error("Error deleting add-on:", error);
+      }
+    }
   };
 
-  const handleCloseAddDialog = () => {
-    setIsAddDialogOpen(false);
-  };
-
-  const handleSubmitAdd = async (values: any) => {
+  const handleClickRestore = async (id: string) => {
     try {
-      const response = await api.post("/add-ons", {
-        name: values.addOnName,
-        price: values.pricePerUnit,
-        size: values.size,
-      });
-      console.log("Add-On added successfully:", response.data);
-      fetchAddOns(); // Refresh the list after add
-      handleCloseAddDialog(); // Close the add dialog after adding
+      await api.patch("add-ons", null, { params: { restore: id } }); // Updated API endpoint
+      fetchData(); // Refresh data after restore
     } catch (error) {
-      console.error("Error adding add-on:", error);
+      console.error("Error restoring add-on:", error);
     }
   };
 
-  const formikAdd = useFormik({
-    initialValues: {
-      addOnName: "",
-      pricePerUnit: 0,
-      size: 0, // Include size if needed
-    },
-    onSubmit: handleSubmitAdd,
-  });
-
-  const columns: readonly GridColDef[] = [
+  const columns: GridColDef[] = [
     {
       field: "action",
-      headerName: "Actions",
-      renderCell: (params: any) => (
-        <IconButton color="primary" onClick={() => handleEditClick(params.row)}>
-          <EditIcon />
-        </IconButton>
-      ),
+      type: "actions",
+      minWidth: 100,
+      getActions: (params) => {
+        const isInEditMode =
+          rowModesModel[params.id]?.mode === GridRowModes.Edit;
+
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<Save />}
+              label="Save"
+              onClick={(event) => {
+                event.stopPropagation(); // Prevent row click event
+                setRowModesModel((prev) => ({
+                  ...prev,
+                  [params.row.id as string]: { mode: GridRowModes.View },
+                }));
+              }}
+              color="success"
+            />,
+            <GridActionsCellItem
+              icon={<Cancel />}
+              label="Cancel"
+              onClick={() => handleClickCancel(params.row.id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<Edit />}
+            label="Edit"
+            onClick={() => handleClickEdit(params.row.id)}
+            color="primary"
+          />,
+          <GridActionsCellItem
+            icon={<Delete />}
+            label="Delete"
+            onClick={() => handleClickDelete(params.row.id)}
+            color="error"
+          />,
+        ];
+      },
     },
-    { field: "id", headerName: "ID" },
-    { field: "name", headerName: "Name" },
-    { field: "measurement", headerName: "Measurement" },
-    { field: "price", headerName: "Price" },
-    { field: "size", headerName: "Size" },
-    { field: "created", headerName: "Date Created", type: "date" },
-    { field: "lastModified", headerName: "Last Modified", type: "date" },
+    {
+      field: "id",
+      headerName: "ID",
+    },
+    {
+      field: "name",
+      headerName: "Name",
+      cellClassName: "name-column--cell",
+      minWidth: 200,
+      editable: true,
+    },
+    {
+      field: "price",
+      headerName: "Price",
+      type: "number",
+      renderCell: (params: any) => {
+        if (!params.value) return "";
+        return `₱${params.value.toFixed(2)}`;
+      },
+      editable: true,
+      width: 80,
+    },
+    {
+      field: "measurement",
+      headerName: "Measurement",
+      editable: true,
+      width: 150,
+    },
+    {
+      field: "created",
+      headerName: "Created",
+      type: "date",
+    },
+    {
+      field: "lastModified",
+      headerName: "Last Modified",
+      type: "date",
+    },
   ];
+
+  const [batchesOpen, setBatchesOpen] = useState(false);
+
+  const toggleDrawer = (open: boolean) => (event: any) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setBatchesOpen(open);
+  };
 
   return (
     <>
-      <Header title="ADD-ONS" subtitle="Manage Add-Ons" />
-      <Button variant="contained" color="primary" onClick={handleAddClick}>
-        {"Add New Add-On"}
-      </Button>
+      <Header title="Add-Ons" subtitle="Manage your add-ons" />
+      <Stack direction="row" spacing={2}>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={handleClickAdd}
+        >
+          Add
+        </Button>
+        <Button variant="contained" startIcon={<Refresh />} onClick={fetchData}>
+          Refresh
+        </Button>
+      </Stack>
+
       <DataGridStyler>
         <DataGrid
+          apiRef={apiRef}
           rows={rows}
           columns={columns}
+          rowModesModel={rowModesModel}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={async (updatedRow, originalRow) => {
+            const result = await handleClickSave(updatedRow, originalRow);
+            return result; // Return the updated row to the DataGrid
+          }}
+          onProcessRowUpdateError={(error) => console.error(error)}
           slots={{ toolbar: GridToolbar }}
           initialState={{
             columns: {
@@ -166,114 +328,6 @@ const AddOns = () => {
           }}
         />
       </DataGridStyler>
-
-      {/* Edit Add-On Dialog */}
-      <Dialog
-        open={isDialogOpen}
-        onClose={handleCloseDialog}
-        aria-labelledby="edit-add-on-dialog-title"
-      >
-        <DialogTitle id="edit-add-on-dialog-title">Edit Add-On</DialogTitle>
-        <DialogContent>
-          <form onSubmit={formik.handleSubmit}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              name="name"
-              label="Name"
-              fullWidth
-              variant="standard"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
-            />
-            <TextField
-              margin="dense"
-              id="price"
-              name="price"
-              label="Price"
-              type="number"
-              fullWidth
-              variant="standard"
-              value={formik.values.price}
-              onChange={formik.handleChange}
-              error={formik.touched.price && Boolean(formik.errors.price)}
-              helperText={formik.touched.price && formik.errors.price}
-            />
-            <DialogActions>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
-      {/* Add New Add-On Dialog */}
-      <Dialog
-        open={isAddDialogOpen}
-        onClose={handleCloseAddDialog}
-        aria-labelledby="add-add-on-dialog-title"
-      >
-        <DialogTitle id="add-add-on-dialog-title">Add New Add-On</DialogTitle>
-        <DialogContent>
-          <form onSubmit={formikAdd.handleSubmit}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="addOnName"
-              name="addOnName"
-              label="Add-On Name"
-              fullWidth
-              variant="standard"
-              value={formikAdd.values.addOnName}
-              onChange={formikAdd.handleChange}
-              error={
-                formikAdd.touched.addOnName &&
-                Boolean(formikAdd.errors.addOnName)
-              }
-              helperText={
-                formikAdd.touched.addOnName && formikAdd.errors.addOnName
-              }
-            />
-            <TextField
-              margin="dense"
-              id="pricePerUnit"
-              name="pricePerUnit"
-              label="Price"
-              type="number"
-              fullWidth
-              variant="standard"
-              value={formikAdd.values.pricePerUnit}
-              onChange={formikAdd.handleChange}
-              error={
-                formikAdd.touched.pricePerUnit &&
-                Boolean(formikAdd.errors.pricePerUnit)
-              }
-              helperText={
-                formikAdd.touched.pricePerUnit && formikAdd.errors.pricePerUnit
-              }
-            />
-            <TextField
-              margin="dense"
-              id="size"
-              name="size"
-              label="Size"
-              type="number"
-              fullWidth
-              variant="standard"
-              value={formikAdd.values.size}
-              onChange={formikAdd.handleChange}
-              error={formikAdd.touched.size && Boolean(formikAdd.errors.size)}
-              helperText={formikAdd.touched.size && formikAdd.errors.size}
-            />
-            <DialogActions>
-              <Button onClick={handleCloseAddDialog}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

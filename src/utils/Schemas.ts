@@ -34,16 +34,16 @@ export interface Ingredient {
 }
 
 export interface AddOn {
-  id: number;
+  id: string;
   name: string;
   price: number;
   size?: string;
 }
 
-export interface ManagementAddOn {
+export interface ManagementAddOn extends AddOn {
   measurement: string;
-  created: Dayjs;
-  lastModified: Dayjs;
+  created: Date;
+  lastModified: Date;
 }
 
 export interface VariantAddOn extends AddOn {
