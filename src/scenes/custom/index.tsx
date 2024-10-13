@@ -42,6 +42,7 @@ const availableTiers = [
   '18"x4" (round - dummy)',
   '20"x4" (round - dummy)',
 ];
+
 const availableFlavors = [
   "Dark Chocolate",
   "Funfetti (vanilla with sprinkles)",
@@ -65,7 +66,7 @@ const VisuallyHiddenInput = styled("input")({
 
 const Custom = () => {
   const [tiers, setTiers] = useState<string[]>([]);
-  const [heart, setHeart] = useState("");
+  const [sizeHeart, setSizeHeart] = useState<number>(8);
   const [rectangleX, setRectangleX] = useState(12);
   const [rectangleY, setRectangleY] = useState(8);
   const minDate = dayjs().add(7, "day");
@@ -151,6 +152,11 @@ const Custom = () => {
       setFieldValue("sizeRound", csvString);
       return newTiers;
     });
+  };
+
+  const handleChangeHeart = (event: Event, value: number | number[]) => {
+    setSizeHeart(value as number);
+    setFieldValue("mainVariantName", String(value));
   };
 
   const handleChangeRectangle = (dir: string, value: number) => {
@@ -270,22 +276,22 @@ const Custom = () => {
             </>
           ) : null}
           {values.shape === "heart" ? (
-            <FormControl fullWidth>
-              <InputLabel id="select-size-label">Size</InputLabel>
-              <Select
-                labelId="select-size-label"
-                label="Flavor"
-                id="select-size"
-                name="Size"
-                value={values.sizeHeart}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.sizeHeart && Boolean(errors.sizeHeart)}
-              >
-                <MenuItem value={"7"}>{'7"'}</MenuItem>
-                <MenuItem value={"9"}>{'9"'}</MenuItem>
-              </Select>
-            </FormControl>
+            <>
+              <Typography variant="h4">{`Size: ${values.sizeHeart}`}</Typography>
+              <Slider
+                id="sizeHeart"
+                name="sizeHeart"
+                value={sizeHeart}
+                onChange={handleChangeHeart}
+                defaultValue={8}
+                valueLabelDisplay="auto"
+                shiftStep={5}
+                step={1}
+                marks
+                min={6}
+                max={10}
+              />
+            </>
           ) : null}
           {values.shape === "rectangle" ? (
             <>
@@ -293,7 +299,9 @@ const Custom = () => {
               <Typography variant="h5">{values.sizeRectangle}</Typography>
               <Slider
                 value={rectangleX}
-                onChange={(event, value) => handleChangeRectangle("x", value)}
+                onChange={(event, value) =>
+                  handleChangeRectangle("x", value as number)
+                }
                 defaultValue={12}
                 valueLabelDisplay="auto"
                 shiftStep={5}
@@ -304,7 +312,9 @@ const Custom = () => {
               />
               <Slider
                 value={rectangleY}
-                onChange={(event, value) => handleChangeRectangle("y", value)}
+                onChange={(event, value) =>
+                  handleChangeRectangle("y", value as number)
+                }
                 defaultValue={12}
                 valueLabelDisplay="auto"
                 shiftStep={5}
