@@ -105,7 +105,9 @@ const Results = () => {
         {searchQuery
           ? `Search results for: "${searchQuery}"`
           : tagId
-          ? `Search results for: "${tagId}"`
+          ? `Search results for: "${
+              designs[0].tags.find((tag) => tag.id === tagId)?.name
+            }"`
           : "Cake Gallery"}
       </Typography>
       {error ? (
