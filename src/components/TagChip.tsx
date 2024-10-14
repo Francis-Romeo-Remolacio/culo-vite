@@ -34,7 +34,16 @@ const TagChip = ({ id, name }: TagChipProps) => {
     navigate(`/results?tag-id=${id}`);
   };
 
-  return <Chip label={tagName} onClick={handleClick} />;
+  return (
+    <Chip
+      label={tagName}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleClick();
+      }}
+      size="small"
+    />
+  );
 };
 
 export default TagChip;
