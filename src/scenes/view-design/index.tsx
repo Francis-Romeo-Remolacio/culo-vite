@@ -780,7 +780,7 @@ const ViewDesign = () => {
                       <CircularProgress size={21} />
                     )}
                   </Button>
-                  {!isSubmitting ? (
+                  {!isSubmitting && design ? (
                     <ButtonCheckout
                       suborders={[
                         {
