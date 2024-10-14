@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
 import ButtonEdit from "./ButtonEdit.jsx";
 import { Design, Suborder } from "../../utils/Schemas.js";
+import { getImageType } from "../../components/Base64Image.js";
 
 type CartItemProps = {
   itemData: Suborder;
@@ -53,8 +54,6 @@ const CartItem = ({
             id: designDataResponse.data.designId,
             name: designDataResponse.data.displayName,
             description: designDataResponse.data.cakeDescription,
-            pictureUrl: designDataResponse.data.designPictureUrl,
-            pictureData: designDataResponse.data.displayPictureData,
             tags: designDataResponse.data.designTags.map((tag: any) => ({
               id: tag.designTagId,
               name: tag.designTagName,
@@ -97,6 +96,31 @@ const CartItem = ({
 
     fetchDesignData();
   }, []);
+
+  const [image, setImage] = useState("");
+  const [imageType, setImageType] = useState("");
+
+  useEffect(() => {
+    if (design) {
+      const fetchImage = async () => {
+        const response = await api.get(
+          `designs/${design.id}/display-picture-data`
+        );
+        setImage(response.data.displayPictureData);
+        console.log(response.data.displayPictureData);
+      };
+      fetchImage();
+    }
+  }, [design]);
+
+  useEffect(() => {
+    try {
+      const type = getImageType(image);
+      setImageType(type);
+    } catch (err) {
+      console.error("Error determining image type:", err);
+    }
+  }, [image]);
 
   const deleteItem = async () => {
     try {
@@ -149,9 +173,9 @@ const CartItem = ({
           />
         </ListItemIcon>
         <ListItemAvatar sx={{ height: "160px" }}>
-          {design?.pictureData ? (
+          {design && image ? (
             <img
-              src={`data:image/png;base64,${design.pictureData}`}
+              src={`data:${imageType};base64,${image}`}
               alt={design.name}
               style={{
                 height: "100%",

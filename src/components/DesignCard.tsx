@@ -8,6 +8,8 @@ import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "@mui/material";
+import api from "../api/axiosConfig";
+import { getImageType } from "./Base64Image";
 
 type DesignCardProps = {
   design: Design;
@@ -15,33 +17,28 @@ type DesignCardProps = {
 };
 
 const DesignCard = ({ design, manager }: DesignCardProps) => {
+  const [image, setImage] = useState("");
   const [imageType, setImageType] = useState("");
 
   useEffect(() => {
-    const determineImageType = async () => {
-      try {
-        const type = getImageType(design.pictureData);
-        setImageType(type);
-      } catch (err) {
-        console.error("Error determining image type:", err);
-      }
+    const fetchImage = async () => {
+      const response = await api.get(
+        `designs/${design.id}/display-picture-data`
+      );
+      setImage(response.data.displayPictureData);
+      console.log(response.data.displayPictureData);
     };
-
-    determineImageType();
+    fetchImage();
   }, []);
 
-  // Function to get the image type by reading the base64 header
-  const getImageType = (blob: Blob) => {
-    const firstChar = blob.text.toString().charAt(0);
-    switch (firstChar) {
-      case "/":
-        return "jpeg";
-      case "i":
-        return "png";
-      default:
-        throw new Error("Unknown image type.");
+  useEffect(() => {
+    try {
+      const type = getImageType(image);
+      setImageType(type);
+    } catch (err) {
+      console.error("Error determining image type:", err);
     }
-  };
+  }, [image]);
 
   return (
     <Card
@@ -64,13 +61,7 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
                 ? { height: 140, width: "100%" }
                 : { height: 140, width: "100%" }
             }
-            image={
-              design.pictureData
-                ? `data:image/${imageType};base64,${design.pictureData}`
-                : design.pictureUrl
-                ? design.pictureUrl.toString()
-                : "design.png"
-            }
+            image={image ? `data:${imageType};base64,${image}` : "design.png"}
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">

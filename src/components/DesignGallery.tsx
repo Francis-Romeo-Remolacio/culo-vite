@@ -33,8 +33,6 @@ const DesignGallery = ({
       id: design.designId,
       name: design.displayName,
       description: design.cakeDescription,
-      pictureUrl: design.designPictureUrl,
-      pictureData: design.displayPictureData,
       tags: design.designTags.map((tag: any) => ({
         id: tag.designTagId,
         name: tag.designTagName,

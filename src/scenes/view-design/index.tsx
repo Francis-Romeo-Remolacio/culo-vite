@@ -1,12 +1,7 @@
 // src/scenes/ViewDesign.jsx
 
 import { useEffect, useState } from "react";
-import {
-  useNavigate,
-  useLocation,
-  createSearchParams,
-  URLSearchParamsInit,
-} from "react-router-dom";
+import { useNavigate, useLocation, createSearchParams } from "react-router-dom";
 import {
   Typography,
   CircularProgress,
@@ -20,7 +15,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert,
   List,
   ListItem,
   Checkbox,
@@ -63,8 +57,6 @@ const ViewDesign = () => {
   const navigate = useNavigate();
 
   const [design, setDesign] = useState<Design>();
-  const [imageType, setImageType] = useState("");
-  const [picture, setPicture] = useState<Blob>();
   const [stockStatus, setStockStatus] = useState(false);
   const availableFlavors = [
     "Dark Chocolate",
@@ -101,6 +93,31 @@ const ViewDesign = () => {
     navigateParams("/login", formikParams);
   };
 
+  const [image, setImage] = useState("");
+  const [imageType, setImageType] = useState("");
+
+  useEffect(() => {
+    if (design) {
+      const fetchImage = async () => {
+        const response = await api.get(
+          `designs/${design.id}/display-picture-data`
+        );
+        setImage(response.data.displayPictureData);
+        console.log(response.data.displayPictureData);
+      };
+      fetchImage();
+    }
+  }, [design]);
+
+  useEffect(() => {
+    try {
+      const type = getImageType(image);
+      setImageType(type);
+    } catch (err) {
+      console.error("Error determining image type:", err);
+    }
+  }, [image]);
+
   const onSubmit = async () => {
     if (loggedIn) {
       try {
@@ -119,7 +136,6 @@ const ViewDesign = () => {
         if (cartResponse.status === 200) {
           console.log("Cart item added successfully");
         }
-
         makeAlert("success", "Successfully added to cart!");
       } catch (error) {
         console.error("There was an error adding the order:", error);
@@ -179,7 +195,7 @@ const ViewDesign = () => {
   };
 
   const handleToggleAddOn = (
-    newAddOnId: number,
+    newAddOnId: string,
     list: "variant" | "custom"
   ) => {
     let addOnsList;
@@ -224,7 +240,7 @@ const ViewDesign = () => {
   };
 
   const handleChangeAddOnQuantity = (
-    id: number,
+    id: string,
     newQuantity: number,
     list: "variant" | "custom"
   ) => {
@@ -343,8 +359,6 @@ const ViewDesign = () => {
             id: designDataResponse.data.designId,
             name: designDataResponse.data.displayName,
             description: designDataResponse.data.cakeDescription,
-            pictureUrl: designDataResponse.data.designPictureUrl,
-            pictureData: designDataResponse.data.displayPictureData,
             tags: designDataResponse.data.designTags.map((tag: any) => ({
               id: tag.designTagId,
               name: tag.designTagName,
@@ -379,9 +393,6 @@ const ViewDesign = () => {
             ...parsedDesignInfo,
           };
           setDesign(combinedDesignData as Design);
-
-          // Set picture data
-          setPicture(parsedDesignData.pictureData);
         } catch (error) {
           console.error("Error fetching design data or design info: ", error);
         }
@@ -392,22 +403,6 @@ const ViewDesign = () => {
 
     fetchDesignData();
   }, [designId]);
-
-  useEffect(() => {
-    if (picture) {
-      const determineImageType = async () => {
-        try {
-          if (picture) {
-            const type = getImageType(String(picture));
-            setImageType(type);
-          }
-        } catch (err) {
-          console.error("Error determining image type:", err);
-        }
-      };
-      determineImageType();
-    }
-  }, [picture]);
 
   useEffect(() => {
     if (values.size) {
@@ -454,9 +449,9 @@ const ViewDesign = () => {
       </Helmet>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
-          {picture ? (
+          {image ? (
             <img
-              src={`data:image/${imageType};base64,${picture}`}
+              src={`data:${imageType};base64,${image}`}
               alt={design?.name}
               style={{
                 maxWidth: "100%",
@@ -789,7 +784,7 @@ const ViewDesign = () => {
                           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
                           flavor: values.flavor,
                           size: values.size,
-                          addonItem: [...selectedAddOns, ...userAddOns],
+                          addOns: [...selectedAddOns, ...userAddOns],
                           color:
                             values.color === "custom"
                               ? `Custom: ${values.customColor}`

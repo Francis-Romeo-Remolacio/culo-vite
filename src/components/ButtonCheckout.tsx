@@ -32,12 +32,12 @@ import {
 import { Tokens } from "../Theme.js";
 
 type SuborderAccordionProps = {
-  suborder: Suborder;
+  suborder: Partial<Suborder>;
   designName?: string;
 };
 
 type ButtonCheckoutProps = {
-  suborders: Suborder[];
+  suborders: Partial<Suborder>[];
   fetchCart?: Function;
   buyNow?: boolean;
   buyNowAddOns?: OrderAddOn[];
@@ -55,7 +55,7 @@ const SuborderAccordion = ({
         aria-controls="panel2-content"
         id="panel2-header"
       >
-        {designName ? designName : suborder.id}
+        {designName ? designName : "Your Order"}
       </AccordionSummary>
       <AccordionDetails>
         <Typography>{`Size: ${suborder.size}`}</Typography>
@@ -80,7 +80,12 @@ const ButtonCheckout = ({
 
   const [open, setOpen] = useState(false);
   const minDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
-  const suborderIds: string[] = suborders.map((suborder) => suborder.id);
+  const suborderIds: string[] =
+    suborders.length > 0
+      ? suborders
+          .map((suborder) => suborder.id)
+          .filter((id): id is string => id !== undefined)
+      : [];
 
   const handleClickOpen = () => {
     if (suborders.length > 0) {
@@ -94,8 +99,6 @@ const ButtonCheckout = ({
   };
 
   const onSubmit = async () => {
-    console.log(suborderIds);
-
     const formattedDate = dayjs(values.pickupDateTime).format("YYYY-MM-DD");
     const formattedTime = dayjs(values.pickupDateTime).format("hh:mm A");
 

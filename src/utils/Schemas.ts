@@ -70,8 +70,6 @@ export interface Design {
   id: string;
   name: string;
   description: string;
-  pictureUrl?: URL;
-  pictureData: Blob;
   tags: Tag[];
   shapes: Shape[];
 }
@@ -141,6 +139,7 @@ export interface Suborder {
   flavor: string;
   quantity: number;
   price: number;
+  addOns: OrderAddOn[];
 }
 
 export interface CustomOrder extends Omit<Suborder, "designId" | "pastryId"> {

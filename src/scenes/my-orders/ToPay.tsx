@@ -59,8 +59,6 @@ const ToPay = () => {
               id: designDataResponse.data.designId,
               name: designDataResponse.data.displayName,
               description: designDataResponse.data.cakeDescription,
-              pictureUrl: designDataResponse.data.designPictureUrl,
-              pictureData: designDataResponse.data.displayPictureData,
               tags: designDataResponse.data.designTags.map((tag: any) => ({
                 id: tag.designTagId,
                 name: tag.designTagName,

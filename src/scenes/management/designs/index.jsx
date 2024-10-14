@@ -111,11 +111,9 @@ const Designs = () => {
       }
       const formattedRequestBody = {
         displayName: formData.displayName,
-        displayPictureUrl: formData.displayPictureUrl,
         cakeDescription: formData.cakeDescription,
         designTagIds: formData.designTagIds,
         designShapeNames: formattedDesignShapeNames,
-        displayPictureData: formData.displayPictureDataEncoded,
       };
       const response = await api.post("/designs/", formattedRequestBody);
       const responseId = response.data.id;
@@ -193,11 +191,9 @@ const Designs = () => {
     //First step: Update the design
     const bodyForPatchRequest = {
       displayName: formData.displayName,
-      displayPictureUrl: formData.designPictureUrl,
       cakeDescription: formData.cakeDescription,
       designTagIds: formData.designTags.map((item) => item.designTagId),
       designShapeNames: formData.designShapes.map((item) => item.shapeName),
-      displayPictureData: formData.displayPictureData,
     };
     try {
       const response = await api.patch(
@@ -698,7 +694,6 @@ const Designs = () => {
               manager={true}
               id={design.designId}
               name={design.displayName}
-              picture={design.displayPictureData}
               description={design.cakeDescription}
               tags={design.designTags}
               editAction={(data) => {
