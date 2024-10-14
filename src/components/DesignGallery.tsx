@@ -4,6 +4,7 @@ import {
   Typography,
   Grid2 as Grid,
   Pagination,
+  Stack,
 } from "@mui/material";
 import api from "./../api/axiosConfig.js";
 import DesignCard from "./DesignCard.tsx";
@@ -27,6 +28,7 @@ const DesignGallery = ({
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [maxPages, setMaxPages] = useState(1);
 
   function parseDesigns(response: AxiosResponse): Design[] {
     return response.data.map((design: any) => ({
@@ -82,6 +84,7 @@ const DesignGallery = ({
             const parsedDesigns: Design[] = parseDesigns(response);
             setFetchedDesigns(parsedDesigns);
             setOutputDesigns(parsedDesigns);
+            setMaxPages(response.headers["X-Number-Of-Pages"]);
           });
           if (setIsRefreshing) {
             setIsRefreshing(false);
@@ -122,7 +125,7 @@ const DesignGallery = ({
   }, [selectedTags, fetchedDesigns]); // Re-run filter whenever selectedTags or fetchedDesigns change
 
   return (
-    <Container>
+    <Stack alignItems="center">
       <Grid container spacing={1} justifyContent="center" sx={{ p: 2 }}>
         {outputDesigns.map((design) => (
           <Grid key={design.id}>
@@ -130,8 +133,8 @@ const DesignGallery = ({
           </Grid>
         ))}
       </Grid>
-      <Pagination count={10} page={page} onChange={handleChangePage} />
-    </Container>
+      <Pagination count={maxPages} page={page} onChange={handleChangePage} />
+    </Stack>
   );
 };
 
