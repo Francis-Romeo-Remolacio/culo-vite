@@ -25,6 +25,7 @@ import {
   DialogContent,
   DialogActions,
   Autocomplete,
+  ListItemButton,
 } from "@mui/material";
 
 import api from "../../api/axiosConfig.js";
@@ -716,10 +717,12 @@ const ViewDesign = () => {
                         key="insert_add_on"
                         onClick={() => handleOpenAddOn()}
                       >
-                        <IconButton>
-                          <IncreaseIcon />
-                        </IconButton>
-                        <ListItemText primary="Insert Add-On" />
+                        <ListItemButton>
+                          <IconButton>
+                            <IncreaseIcon />
+                          </IconButton>
+                          <ListItemText primary="Insert Add-On" />
+                        </ListItemButton>
                       </ListItem>
                       <Dialog open={openAddOn} onClose={handleCloseAddOn}>
                         <DialogTitle>Insert Add-On</DialogTitle>
@@ -754,27 +757,31 @@ const ViewDesign = () => {
                 ) : (
                   ""
                 )}
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    color="primary"
-                    variant="outlined"
-                    fullWidth
-                    type="submit"
-                    startIcon={!isSubmitting ? <AddShoppingCartIcon /> : ""}
-                    onClick={() => {
-                      console.log(errors);
-                      if (!loggedIn) {
-                        gotoLogin();
-                      }
-                    }}
-                    disabled={isSubmitting}
-                  >
-                    {!isSubmitting ? (
-                      "Add to Cart"
-                    ) : (
-                      <CircularProgress size={21} />
-                    )}
-                  </Button>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  justifyContent="space-evenly"
+                >
+                  {!isSubmitting ? (
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      fullWidth
+                      type="submit"
+                      startIcon={!isSubmitting ? <AddShoppingCartIcon /> : ""}
+                      onClick={() => {
+                        console.log(errors);
+                        if (!loggedIn) {
+                          gotoLogin();
+                        }
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      {"Add to Cart"}
+                    </Button>
+                  ) : (
+                    <CircularProgress size={21} />
+                  )}
                   {!isSubmitting && design ? (
                     <ButtonCheckout
                       suborders={[
