@@ -79,7 +79,7 @@ const DesignGallery = ({
         try {
           const tagsQuery = tagFilter?.length
             ? `/designs/with-tags/${tagFilter.join(",")}`
-            : `/designs?page=${page}&record_per_page=12`;
+            : `/designs?page=${page}&record_per_page=18`;
           await api.get(tagsQuery).then((response) => {
             const parsedDesigns: Design[] = parseDesigns(response);
             setFetchedDesigns(parsedDesigns);
