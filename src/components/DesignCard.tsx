@@ -61,7 +61,9 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
                 ? { height: 140, width: "100%" }
                 : { height: 140, width: "100%" }
             }
-            image={image ? `data:${imageType};base64,${image}` : "design.png"}
+            component="img"
+            loading="lazy"
+            image={image ? `data:${imageType};base64,${image}` : ""}
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
