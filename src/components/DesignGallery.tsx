@@ -26,7 +26,6 @@ const DesignGallery = ({
 }: DesignGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [maxPages, setMaxPages] = useState(1);
 
@@ -52,7 +51,6 @@ const DesignGallery = ({
 
   useEffect(() => {
     const fetchDesigns = async () => {
-      setIsLoading(true);
       if (setIsRefreshing) {
         setIsRefreshing(true);
       }
@@ -93,7 +91,6 @@ const DesignGallery = ({
           console.error("Error fetching designs:", error);
         }
       }
-      setIsLoading(false);
     };
 
     fetchDesigns();
