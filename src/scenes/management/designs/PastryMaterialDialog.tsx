@@ -25,293 +25,206 @@ import {
   PastryMaterial,
   PastryMaterialAddOn,
   PastryMaterialIngredient,
-  PastryMaterialSubVariant,
+  PastryMaterialVariant,
 } from "../../../utils/Schemas";
-import { pastryMaterialSchema } from "../../../utils/Validation";
-import { useFormik } from "formik";
 import { ChangeEvent, useEffect, useReducer, useState } from "react";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import api from "../../../api/axiosConfig";
 import { toCurrency } from "../../../utils/Formatter";
 
-// Actions for ingredients and add-ons
-const INGREDIENT_ACTIONS = {
-  ADD_INGREDIENT: "addIngredient",
-  UPDATE_INGREDIENT: "updateIngredient",
-  REMOVE_INGREDIENT: "removeIngredient",
-} as const;
-
-type IngredientAction =
-  | {
-      type: typeof INGREDIENT_ACTIONS.ADD_INGREDIENT;
-      payload: PastryMaterialIngredient;
-    }
-  | { type: typeof INGREDIENT_ACTIONS.REMOVE_INGREDIENT; payload: number }
-  | {
-      type: typeof INGREDIENT_ACTIONS.UPDATE_INGREDIENT;
-      payload: { index: number; ingredient: Partial<PastryMaterialIngredient> };
-    };
-
-// Reducer function for ingredients
-function ingredientsReducer(
-  state: PastryMaterialIngredient[],
-  action: IngredientAction
-) {
-  switch (action.type) {
-    case INGREDIENT_ACTIONS.ADD_INGREDIENT:
-      return [...state, action.payload]; // PastryMaterialIngredient
-
-    case INGREDIENT_ACTIONS.REMOVE_INGREDIENT:
-      return state.filter((_, index) => index !== action.payload); // number (index)
-
-    case INGREDIENT_ACTIONS.UPDATE_INGREDIENT:
-      return state.map((ingredient, index) => {
-        if (index === action.payload.index) {
-          return { ...ingredient, ...action.payload.ingredient };
-        }
-        return ingredient;
-      });
-
-    default:
-      return state;
-  }
+interface PastryMaterialState {
+  values: Pick<
+    PastryMaterial,
+    "otherCost" | "variants" | "costEstimate" | "costExactEstimate"
+  >;
+  variantsToDelete: string[]; // Array of variant IDs to delete
+  ingredientsToDelete: string[]; // Array of ingredient IDs to delete
+  addOnsToDelete: string[]; // Array of add-on IDs to delete
 }
 
-const ADDON_ACTIONS = {
-  ADD_ADDON: "addAddon",
-  UPDATE_ADDON: "updateAddon",
-  REMOVE_ADDON: "removeAddon",
+const ACTIONS = {
+  ADD_VARIANT: "addVariant",
+  UPDATE_VARIANT: "updateVariant",
+  REMOVE_VARIANT: "removeVariant",
+  ADD_INGREDIENT_TO_VARIANT: "addIngredientToVariant",
+  REMOVE_INGREDIENT_FROM_VARIANT: "removeIngredientFromVariant",
+  UPDATE_INGREDIENT_IN_VARIANT: "updateIngredientInVariant",
+  ADD_ADDON_TO_VARIANT: "addAddonToVariant",
+  REMOVE_ADDON_FROM_VARIANT: "removeAddonFromVariant",
+  UPDATE_ADDON_IN_VARIANT: "updateAddonInVariant",
+  MARK_VARIANT_FOR_DELETION: "markVariantForDeletion",
+  MARK_INGREDIENT_FOR_DELETION: "markIngredientForDeletion",
+  MARK_ADDON_FOR_DELETION: "markAddonForDeletion",
+  UPDATE_PASTRY_MATERIAL: "updatePastryMaterial",
 } as const;
 
-type AddOnAction =
-  | { type: typeof ADDON_ACTIONS.ADD_ADDON; payload: PastryMaterialAddOn }
+type VariantAction =
   | {
-      type: typeof ADDON_ACTIONS.UPDATE_ADDON;
-      payload: { index: number; addOn: Partial<PastryMaterialAddOn> };
-    }
-  | { type: typeof ADDON_ACTIONS.REMOVE_ADDON; payload: number };
-
-function addOnsReducer(state: PastryMaterialAddOn[], action: AddOnAction) {
-  switch (action.type) {
-    case ADDON_ACTIONS.ADD_ADDON:
-      return [...state, action.payload];
-    case ADDON_ACTIONS.UPDATE_ADDON:
-      const updatedAddOns = [...state];
-      updatedAddOns[action.payload.index] = {
-        ...updatedAddOns[action.payload.index],
-        ...action.payload.addOn,
-      };
-      return updatedAddOns;
-    case ADDON_ACTIONS.REMOVE_ADDON:
-      return state.filter((_, index) => index !== action.payload);
-    default:
-      return state;
-  }
-}
-
-// Actions for subvariants
-interface SubVariantsState {
-  subVariants: PastryMaterialSubVariant[];
-  availableIngredients: Pick<Ingredient, "id" | "name" | "type">[][]; // one list per subvariant
-  availableAddOns: Pick<AddOn, "id" | "name">[][]; // one list per subvariant
-}
-
-const SUBVARIANT_ACTIONS = {
-  ADD_SUBVARIANT: "addSubVariant",
-  UPDATE_SUBVARIANT: "updateSubVariant",
-  REMOVE_SUBVARIANT: "removeSubVariant",
-  ADD_INGREDIENT_TO_SUBVARIANT: "addIngredientToSubVariant",
-  REMOVE_INGREDIENT_FROM_SUBVARIANT: "removeIngredientFromSubVariant",
-  UPDATE_INGREDIENT_IN_SUBVARIANT: "updateIngredientInSubVariant",
-  ADD_ADDON_TO_SUBVARIANT: "addAddonToSubVariant",
-  REMOVE_ADDON_FROM_SUBVARIANT: "removeAddonFromSubVariant",
-  UPDATE_ADDON_IN_SUBVARIANT: "updateAddonInSubVariant",
-} as const;
-
-type SubVariantAction =
-  | {
-      type: typeof SUBVARIANT_ACTIONS.ADD_SUBVARIANT;
-      payload: Partial<PastryMaterialSubVariant>;
+      type: typeof ACTIONS.ADD_VARIANT;
+      payload: Partial<PastryMaterialVariant>;
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.UPDATE_SUBVARIANT;
-      payload: { index: number; subVariant: Partial<PastryMaterialSubVariant> };
+      type: typeof ACTIONS.UPDATE_VARIANT;
+      payload: { index: number; variant: Partial<PastryMaterialVariant> };
     }
-  | { type: typeof SUBVARIANT_ACTIONS.REMOVE_SUBVARIANT; payload: number }
+  | { type: typeof ACTIONS.REMOVE_VARIANT; payload: number }
   | {
-      type: typeof SUBVARIANT_ACTIONS.ADD_INGREDIENT_TO_SUBVARIANT;
+      type: typeof ACTIONS.ADD_INGREDIENT_TO_VARIANT;
       payload: { index: number; ingredient: PastryMaterialIngredient };
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.REMOVE_INGREDIENT_FROM_SUBVARIANT;
-      payload: { subVariantIndex: number; ingredientIndex: number };
+      type: typeof ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT;
+      payload: { variantIndex: number; ingredientIndex: number };
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.UPDATE_INGREDIENT_IN_SUBVARIANT;
+      type: typeof ACTIONS.UPDATE_INGREDIENT_IN_VARIANT;
       payload: {
-        subVariantIndex: number;
+        variantIndex: number;
         ingredientIndex: number;
         ingredient: Partial<PastryMaterialIngredient>;
       };
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.ADD_ADDON_TO_SUBVARIANT;
+      type: typeof ACTIONS.ADD_ADDON_TO_VARIANT;
       payload: { index: number; addOn: PastryMaterialAddOn };
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.REMOVE_ADDON_FROM_SUBVARIANT;
-      payload: { subVariantIndex: number; addOnIndex: number };
+      type: typeof ACTIONS.REMOVE_ADDON_FROM_VARIANT;
+      payload: { variantIndex: number; addOnIndex: number };
     }
   | {
-      type: typeof SUBVARIANT_ACTIONS.UPDATE_ADDON_IN_SUBVARIANT;
+      type: typeof ACTIONS.UPDATE_ADDON_IN_VARIANT;
       payload: {
-        subVariantIndex: number;
+        variantIndex: number;
         addOnIndex: number;
         addOn: Partial<PastryMaterialAddOn>;
       };
+    }
+  | { type: typeof ACTIONS.MARK_VARIANT_FOR_DELETION; payload: number }
+  | {
+      type: typeof ACTIONS.MARK_INGREDIENT_FOR_DELETION;
+      payload: { variantIndex: number; ingredientIndex: number };
+    }
+  | {
+      type: typeof ACTIONS.MARK_ADDON_FOR_DELETION;
+      payload: { variantIndex: number; addOnIndex: number };
+    }
+  | {
+      type: typeof ACTIONS.UPDATE_PASTRY_MATERIAL;
+      payload: Partial<Pick<PastryMaterial, "otherCost">>;
     };
 
-function subVariantsReducer(state: SubVariantsState, action: SubVariantAction) {
+function reducer(state: PastryMaterialState, action: VariantAction) {
   switch (action.type) {
-    case SUBVARIANT_ACTIONS.ADD_SUBVARIANT:
+    // Add a new variant
+    case ACTIONS.ADD_VARIANT:
       return {
         ...state,
-        subVariants: [
-          ...state.subVariants,
-          action.payload as PastryMaterialSubVariant,
-        ],
-        availableIngredients: [...state.availableIngredients, []], // Initialize an empty list for new subvariant
-        availableAddOns: [...state.availableAddOns, []], // Initialize an empty list for new subvariant
+        pastryMaterial: {
+          ...state.values,
+          variants: [
+            ...state.values.variants,
+            action.payload as PastryMaterialVariant,
+          ],
+        },
       };
 
-    case SUBVARIANT_ACTIONS.UPDATE_SUBVARIANT:
+    // Update an existing variant
+    case ACTIONS.UPDATE_VARIANT:
       return {
         ...state,
-        subVariants: state.subVariants.map((subVariant, index) => {
-          if (index === action.payload.index) {
-            return { ...subVariant, ...action.payload.subVariant };
-          }
-          return subVariant;
-        }),
+        pastryMaterial: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.index) {
+              return { ...variant, ...action.payload.variant };
+            }
+            return variant;
+          }),
+        },
       };
 
-    case SUBVARIANT_ACTIONS.REMOVE_SUBVARIANT:
+    // Update pastry material top-level properties like "otherCost"
+    case ACTIONS.UPDATE_PASTRY_MATERIAL:
       return {
         ...state,
-        subVariants: state.subVariants.filter(
-          (_, index) => index !== action.payload
-        ),
-        availableIngredients: state.availableIngredients.filter(
-          (_, index) => index !== action.payload
-        ),
-        availableAddOns: state.availableAddOns.filter(
-          (_, index) => index !== action.payload
-        ),
+        values: {
+          ...state.values,
+          otherCost: {
+            ...state.values.otherCost,
+            ...action.payload.otherCost,
+          },
+        },
       };
 
-    case SUBVARIANT_ACTIONS.ADD_INGREDIENT_TO_SUBVARIANT:
+    // Remove a variant (mark for deletion if already exists, otherwise remove from state)
+    case ACTIONS.REMOVE_VARIANT:
+      const variantToRemove = state.values.variants[action.payload];
+      const variantId = variantToRemove.id;
+
       return {
         ...state,
-        subVariants: state.subVariants.map((subVariant, index) => {
-          if (index === action.payload.index) {
-            return {
-              ...subVariant,
-              ingredients: [
-                ...subVariant.ingredients,
-                action.payload.ingredient,
-              ],
-            };
-          }
-          return subVariant;
-        }),
+        pastryMaterial: {
+          ...state.values,
+          variants: state.values.variants.filter(
+            (_, index) => index !== action.payload
+          ),
+        },
+        variantsToDelete: variantId
+          ? [...state.variantsToDelete, variantId]
+          : state.variantsToDelete,
       };
 
-    case SUBVARIANT_ACTIONS.REMOVE_INGREDIENT_FROM_SUBVARIANT:
+    // Add an ingredient to a variant
+    case ACTIONS.ADD_INGREDIENT_TO_VARIANT:
       return {
         ...state,
-        subVariants: state.subVariants.map((subVariant, subIndex) => {
-          if (subIndex === action.payload.subVariantIndex) {
-            return {
-              ...subVariant,
-              ingredients: subVariant.ingredients.filter(
-                (_, ingredientIndex) =>
-                  ingredientIndex !== action.payload.ingredientIndex
-              ),
-            };
-          }
-          return subVariant;
-        }),
+        pastryMaterial: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.index) {
+              return {
+                ...variant,
+                ingredients: [
+                  ...variant.ingredients,
+                  action.payload.ingredient,
+                ],
+              };
+            }
+            return variant;
+          }),
+        },
       };
 
-    case SUBVARIANT_ACTIONS.UPDATE_INGREDIENT_IN_SUBVARIANT:
+    // Mark ingredient for deletion if it already exists, otherwise remove from the state
+    case ACTIONS.MARK_INGREDIENT_FOR_DELETION:
+      const ingredientToRemove =
+        state.values.variants[action.payload.variantIndex].ingredients[
+          action.payload.ingredientIndex
+        ];
+
       return {
         ...state,
-        subVariants: state.subVariants.map((subVariant, subIndex) => {
-          if (subIndex === action.payload.subVariantIndex) {
-            return {
-              ...subVariant,
-              ingredients: subVariant.ingredients.map(
-                (ingredient, ingredientIndex) => {
-                  if (ingredientIndex === action.payload.ingredientIndex) {
-                    return { ...ingredient, ...action.payload.ingredient };
-                  }
-                  return ingredient;
-                }
-              ),
-            };
-          }
-          return subVariant;
-        }),
+        pastryMaterial: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.variantIndex) {
+              return {
+                ...variant,
+                ingredients: variant.ingredients.filter(
+                  (_, i) => i !== action.payload.ingredientIndex
+                ),
+              };
+            }
+            return variant;
+          }),
+        },
+        ingredientsToDelete: ingredientToRemove.id
+          ? [...state.ingredientsToDelete, ingredientToRemove.id]
+          : state.ingredientsToDelete,
       };
 
-    case SUBVARIANT_ACTIONS.ADD_ADDON_TO_SUBVARIANT:
-      return {
-        ...state,
-        subVariants: state.subVariants.map((subVariant, index) => {
-          if (index === action.payload.index) {
-            return {
-              ...subVariant,
-              addOns: [...subVariant.addOns, action.payload.addOn],
-            };
-          }
-          return subVariant;
-        }),
-      };
-
-    case SUBVARIANT_ACTIONS.REMOVE_ADDON_FROM_SUBVARIANT:
-      return {
-        ...state,
-        subVariants: state.subVariants.map((subVariant, subIndex) => {
-          if (subIndex === action.payload.subVariantIndex) {
-            return {
-              ...subVariant,
-              addOns: subVariant.addOns.filter(
-                (_, addOnIndex) => addOnIndex !== action.payload.addOnIndex
-              ),
-            };
-          }
-          return subVariant;
-        }),
-      };
-
-    case SUBVARIANT_ACTIONS.UPDATE_ADDON_IN_SUBVARIANT:
-      return {
-        ...state,
-        subVariants: state.subVariants.map((subVariant, subIndex) => {
-          if (subIndex === action.payload.subVariantIndex) {
-            return {
-              ...subVariant,
-              addOns: subVariant.addOns.map((addOn, addOnIndex) => {
-                if (addOnIndex === action.payload.addOnIndex) {
-                  return { ...addOn, ...action.payload.addOn };
-                }
-                return addOn;
-              }),
-            };
-          }
-          return subVariant;
-        }),
-      };
+    // Handle add-ons similarly to ingredients
 
     default:
       return state;
@@ -336,23 +249,38 @@ const PastryMaterialDialog = ({
   open,
   onClose,
 }: PastryMaterialDialogProps) => {
+  // Initial state for PastryMaterial
+  const initialState: PastryMaterialState = {
+    values: {
+      costEstimate: 0,
+      costExactEstimate: 0,
+      otherCost: {
+        additionalCost: pastryMaterial?.otherCost.additionalCost
+          ? pastryMaterial?.otherCost.additionalCost
+          : 0,
+        multiplier: pastryMaterial?.otherCost.multiplier
+          ? pastryMaterial?.otherCost.multiplier
+          : 2,
+      },
+      variants: pastryMaterial?.variants ? pastryMaterial?.variants : [],
+    },
+    variantsToDelete: [],
+    ingredientsToDelete: [],
+    addOnsToDelete: [],
+  };
+  console.log("PM");
   console.log(pastryMaterial);
 
-  const [ingredients, dispatchIngredients] = useReducer(
-    ingredientsReducer,
-    pastryMaterial ? pastryMaterial.ingredients : []
-  );
-  const [addOns, dispatchAddOns] = useReducer(
-    addOnsReducer,
-    pastryMaterial ? pastryMaterial.addOns : []
-  );
+  const [pmState, dispatch] = useReducer(reducer, initialState);
+  console.log("STATE");
+  console.log(pmState);
 
   const [tiers, setTiers] = useState<string[]>([]);
   const [sizeHeart, setSizeHeart] = useState<number>(8);
   const [rectangleX, setRectangleX] = useState(12);
   const [rectangleY, setRectangleY] = useState(8);
   const [isCustomPrice, setIsCustomPrice] = useState(
-    pastryMaterial?.otherCost.additionalCost ? true : false
+    pmState.values.otherCost.additionalCost ? true : false
   );
 
   const [fetchedIngredients, setFetchedIngredients] = useState<
@@ -361,24 +289,7 @@ const PastryMaterialDialog = ({
   const [fetchedAddOns, setFetchedAddOns] = useState<
     Pick<AddOn, "id" | "name">[]
   >([]);
-
-  const [availableIngredients, setAvailableIngredients] = useState<
-    Pick<Ingredient, "id" | "name" | "type">[]
-  >([]);
-  const [availableAddOns, setAvailableAddOns] = useState<
-    Pick<AddOn, "id" | "name">[]
-  >([]);
   const [unitMapping, setUnitMapping] = useState<Record<string, string[]>>();
-
-  const initialState: SubVariantsState = {
-    subVariants: [],
-    availableIngredients: fetchedIngredients.map(() => [...fetchedIngredients]), // initialize per subvariant
-    availableAddOns: fetchedAddOns.map(() => [...fetchedAddOns]), // initialize per subvariant
-  };
-  const [subVariants, dispatchSubVariants] = useReducer(
-    subVariantsReducer,
-    initialState
-  );
 
   const availableTiers = [
     '5"x4" (round)',
@@ -393,17 +304,6 @@ const PastryMaterialDialog = ({
     '20"x4" (round - dummy)',
   ];
 
-  const initialValues: Partial<PastryMaterial> = {
-    id: "",
-    designId: "",
-    otherCost: {
-      additionalCost: 0,
-      multiplier: 3,
-    },
-    mainVariantName: "",
-    ingredientImportance: [],
-  };
-
   const fetchIngredients = async () => {
     await api.get("ingredients").then((response) => {
       const parsedIngredients: Pick<Ingredient, "id" | "name" | "type">[] =
@@ -413,7 +313,6 @@ const PastryMaterialDialog = ({
           type: ingredient.type,
         }));
       setFetchedIngredients(parsedIngredients);
-      setAvailableIngredients(parsedIngredients);
     });
   };
 
@@ -426,7 +325,6 @@ const PastryMaterialDialog = ({
         })
       );
       setFetchedAddOns(parsedAddOns);
-      setAvailableAddOns(parsedAddOns);
     });
   };
 
@@ -450,266 +348,80 @@ const PastryMaterialDialog = ({
     fetchUnits();
   }, []);
 
-  useEffect(() => {
-    const filteredIngredients = availableIngredients.filter(
-      (availableIngredient) =>
-        !ingredients.some(
-          (ingredient) => ingredient.id === availableIngredient.id
-        )
-    );
-    setAvailableIngredients(filteredIngredients);
-  }, [ingredients]);
-
-  useEffect(() => {
-    const filteredAddOns = availableAddOns.filter(
-      (availableAddOn) =>
-        !addOns.some((addOn) => addOn.id === availableAddOn.id)
-    );
-    setAvailableAddOns(filteredAddOns);
-  }, [addOns]);
-
   const onSubmit = async () => {
-    const payload = {
-      ...values,
-      ingredients: ingredients,
-      addOns: addOns,
-    };
-
+    // const payload = {
+    //   ...values,
+    //   ingredients: ingredients,
+    //   addOns: addOns,
+    // };
     // Make API request with the payload
   };
 
-  const {
-    values,
-    errors,
-    touched,
-    handleChange,
-    handleSubmit,
-    handleBlur,
-    setFieldValue,
-    setValues,
-    resetForm,
-    isSubmitting,
-  } = useFormik({
-    initialValues: initialValues,
-    validationSchema: pastryMaterialSchema,
-    onSubmit,
-  });
-
   // Sizing
-  const handleAddTier = () => {
-    if (tiers.length < 6) {
-      setTiers((prev) => [...prev, ""]); // Add empty string to tiers
-    }
-  };
+  // const handleAddTier = () => {
+  //   if (tiers.length < 6) {
+  //     setTiers((prev) => [...prev, ""]); // Add empty string to tiers
+  //   }
+  // };
 
-  const handleChangeTier = (index: number, value: string) => {
-    setTiers((prev) => {
-      const newTiers = [...prev];
-      newTiers[index] = value; // Update tier at the specific index
+  // const handleChangeTier = (index: number, value: string) => {
+  //   setTiers((prev) => {
+  //     const newTiers = [...prev];
+  //     newTiers[index] = value; // Update tier at the specific index
 
-      // Convert the updated `newTiers` array to a CSV string
-      const csvString = newTiers.join(", ");
+  //     // Convert the updated `newTiers` array to a CSV string
+  //     const csvString = newTiers.join(", ");
 
-      // Use the CSV string for `setFieldValue`
-      setFieldValue("mainVariantName", csvString);
-      return newTiers;
-    });
-  };
+  //     // Use the CSV string for `setFieldValue`
+  //     setFieldValue("mainVariantName", csvString);
+  //     return newTiers;
+  //   });
+  // };
 
-  const handleChangeHeart = (event: Event, value: number | number[]) => {
-    setSizeHeart(value as number);
-    setFieldValue("mainVariantName", String(value));
-  };
+  // const handleChangeHeart = (event: Event, value: number | number[]) => {
+  //   setSizeHeart(value as number);
+  //   setFieldValue("mainVariantName", String(value));
+  // };
 
-  const handleChangeRectangle = (dir: string, value: number | number[]) => {
-    if (typeof value === "number") {
-      switch (dir) {
-        case "x":
-          setRectangleX(value);
-          break;
-        case "y":
-          setRectangleY(value);
-          break;
-      }
-    }
-    setFieldValue("mainVariantName", `${rectangleX}\"x${rectangleY}\"x2.5"`);
-  };
+  // const handleChangeRectangle = (dir: string, value: number | number[]) => {
+  //   if (typeof value === "number") {
+  //     switch (dir) {
+  //       case "x":
+  //         setRectangleX(value);
+  //         break;
+  //       case "y":
+  //         setRectangleY(value);
+  //         break;
+  //     }
+  //   }
+  //   setFieldValue("mainVariantName", `${rectangleX}\"x${rectangleY}\"x2.5"`);
+  // };
 
   // Pricing
   const handleChangeSwitch = (event: ChangeEvent<HTMLInputElement>) => {
     setIsCustomPrice(event.target.checked);
-
-    event.target.checked ? setFieldValue("otherCosts.multiplier", 2) : null;
   };
 
   // Ingredients
-  const handleAddIngredient = () => {
-    if (availableIngredients.length > 0) {
-      const newIngredient: PastryMaterialIngredient = {
-        id: availableIngredients[0].id,
-        name: availableIngredients[0].name,
-        type: availableIngredients[0].type,
-        ingredientType: "INV",
-        amountMeasurement: "",
-        amount: 0,
-      };
-      dispatchIngredients({
-        type: INGREDIENT_ACTIONS.ADD_INGREDIENT,
-        payload: newIngredient,
-      });
-    }
-  };
+  const handleAddIngredient = () => {};
 
-  const handleUpdateIngredient = (
-    index: number,
-    updatedData: Partial<PastryMaterialIngredient>
-  ) => {
-    dispatchIngredients({
-      type: INGREDIENT_ACTIONS.UPDATE_INGREDIENT,
-      payload: { index, ingredient: updatedData },
-    });
-  };
+  const handleUpdateIngredient = () => {};
 
-  const handleRemoveIngredient = (index: number) => {
-    dispatchIngredients({
-      type: INGREDIENT_ACTIONS.REMOVE_INGREDIENT,
-      payload: index,
-    });
-  };
+  const handleRemoveIngredient = () => {};
 
   // Add-Ons
-  const handleAddAddOn = () => {
-    if (availableAddOns.length > 0) {
-      const newAddOn = availableAddOns[0]; // Get the first available add-on or customize logic for selection
-      dispatchAddOns({
-        type: ADDON_ACTIONS.ADD_ADDON,
-        payload: { ...newAddOn, amount: 0 },
-      });
-    } else {
-      console.warn("No available add-ons to add.");
-    }
-  };
+  const handleAddAddOn = () => {};
 
-  const handleUpdateAddOn = (
-    index: number,
-    updatedData: Partial<PastryMaterialAddOn>
-  ) => {
-    dispatchAddOns({
-      type: ADDON_ACTIONS.UPDATE_ADDON,
-      payload: { index, addOn: updatedData },
-    });
-  };
+  const handleUpdateAddOn = () => {};
 
-  const handleRemoveAddOn = (index: number) => {
-    dispatchAddOns({ type: ADDON_ACTIONS.REMOVE_ADDON, payload: index });
-  };
+  const handleRemoveAddOn = () => {};
 
   // SubVariants
-  const handleAddSubVariant = () => {
-    const newSubVariant: Partial<PastryMaterialSubVariant> = {
-      name: "",
-      ingredients: [],
-      addOns: [],
-    };
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.ADD_SUBVARIANT,
-      payload: newSubVariant,
-    });
-  };
+  const handleAddVariant = () => {};
 
-  const handleUpdateSubVariant = (
-    index: number,
-    updatedData: Partial<PastryMaterialSubVariant>
-  ) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.UPDATE_SUBVARIANT,
-      payload: { index, subVariant: updatedData },
-    });
-  };
+  const handleUpdateVariant = () => {};
 
-  const handleRemoveSubVariant = (index: number) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.REMOVE_SUBVARIANT,
-      payload: index,
-    });
-  };
-
-  // Updated to account for subvariant-specific available ingredients
-  const handleAddIngredientToSubVariant = (index: number) => {
-    const availableForSubVariant = subVariants.availableIngredients[index]; // Use subVariantsState
-    if (availableForSubVariant.length > 0) {
-      const newIngredient: PastryMaterialIngredient = {
-        id: availableForSubVariant[0].id,
-        name: availableForSubVariant[0].name,
-        type: availableForSubVariant[0].type,
-        ingredientType: "INV",
-        amountMeasurement: "",
-        amount: 0,
-      };
-      dispatchSubVariants({
-        type: SUBVARIANT_ACTIONS.ADD_INGREDIENT_TO_SUBVARIANT,
-        payload: { index, ingredient: newIngredient },
-      });
-    }
-  };
-
-  const handleUpdateIngredientInSubVariant = (
-    subVariantIndex: number,
-    ingredientIndex: number,
-    updatedData: Partial<PastryMaterialIngredient>
-  ) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.UPDATE_INGREDIENT_IN_SUBVARIANT,
-      payload: { subVariantIndex, ingredientIndex, ingredient: updatedData },
-    });
-  };
-
-  const handleRemoveIngredientFromSubVariant = (
-    subVariantIndex: number,
-    ingredientIndex: number
-  ) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.REMOVE_INGREDIENT_FROM_SUBVARIANT,
-      payload: { subVariantIndex, ingredientIndex },
-    });
-  };
-
-  // Updated to account for subvariant-specific available add-ons
-  const handleAddAddOnToSubVariant = (index: number) => {
-    const availableForSubVariant = subVariants.availableAddOns[index]; // Use subVariantsState
-    if (availableForSubVariant.length > 0) {
-      const newAddOn: PastryMaterialAddOn = {
-        id: availableForSubVariant[0].id,
-        name: availableForSubVariant[0].name,
-        amount: 0,
-      };
-      dispatchSubVariants({
-        type: SUBVARIANT_ACTIONS.ADD_ADDON_TO_SUBVARIANT,
-        payload: { index, addOn: newAddOn },
-      });
-    }
-  };
-
-  const handleUpdateAddOnInSubVariant = (
-    subVariantIndex: number,
-    addOnIndex: number,
-    updatedData: Partial<PastryMaterialAddOn>
-  ) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.UPDATE_ADDON_IN_SUBVARIANT,
-      payload: { subVariantIndex, addOnIndex, addOn: updatedData },
-    });
-  };
-
-  const handleRemoveAddOnFromSubVariant = (
-    subVariantIndex: number,
-    addOnIndex: number
-  ) => {
-    dispatchSubVariants({
-      type: SUBVARIANT_ACTIONS.REMOVE_ADDON_FROM_SUBVARIANT,
-      payload: { subVariantIndex, addOnIndex },
-    });
-  };
+  const handleRemoveVariant = () => {};
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -747,9 +459,9 @@ const PastryMaterialDialog = ({
                           labelId={`tier-select-label-${index}`}
                           label="Select Tier"
                           value={tier}
-                          onChange={(e) =>
-                            handleChangeTier(index, e.target.value)
-                          }
+                          // onChange={(e) =>
+                          //   handleChangeTier(index, e.target.value)
+                          // }
                         >
                           {availableTiers.map((availableTier, i) => (
                             <MenuItem key={i} value={availableTier}>
@@ -771,7 +483,10 @@ const PastryMaterialDialog = ({
                     </ListItem>
                   ))}
                   {tiers.length < 6 ? (
-                    <ListItem key="insertTier" onClick={handleAddTier}>
+                    <ListItem
+                      key="insertTier"
+                      // onClick={handleAddTier}
+                    >
                       <IconButton>
                         <AddIcon />
                       </IconButton>
@@ -783,12 +498,12 @@ const PastryMaterialDialog = ({
             ) : null}
             {shape === "heart" ? (
               <>
-                <Typography variant="h4">{`Size: ${values.mainVariantName}`}</Typography>
+                <Typography variant="h4">{`Size: ${pmState.values.variants[0].name}`}</Typography>
                 <Slider
-                  id="mainVariantName"
-                  name="mainVariantName"
+                  id="sizeHeart"
+                  name="sizeHeart"
                   value={sizeHeart}
-                  onChange={handleChangeHeart}
+                  // onChange={handleChangeHeart}
                   defaultValue={8}
                   valueLabelDisplay="auto"
                   shiftStep={5}
@@ -801,11 +516,10 @@ const PastryMaterialDialog = ({
             ) : null}
             {shape === "rectangle" ? (
               <>
-                <Typography variant="h4">{"Size"}</Typography>
-                <Typography variant="h5">{values.mainVariantName}</Typography>
+                <Typography variant="h4">{`Size: ${pmState.values.variants[0].name}`}</Typography>
                 <Slider
                   value={rectangleX}
-                  onChange={(event, value) => handleChangeRectangle("x", value)}
+                  // onChange={(event, value) => handleChangeRectangle("x", value)}
                   defaultValue={12}
                   valueLabelDisplay="auto"
                   shiftStep={5}
@@ -816,7 +530,7 @@ const PastryMaterialDialog = ({
                 />
                 <Slider
                   value={rectangleY}
-                  onChange={(event, value) => handleChangeRectangle("y", value)}
+                  // onChange={(event, value) => handleChangeRectangle("y", value)}
                   defaultValue={12}
                   valueLabelDisplay="auto"
                   shiftStep={5}
@@ -830,12 +544,17 @@ const PastryMaterialDialog = ({
             {shape === "custom" ? (
               <TextField
                 label="Size"
-                id="mainVariantName"
-                name="mainVariantName"
-                value={values.mainVariantName}
-                onChange={handleChange}
+                id="size"
+                name="size"
+                value={pmState.values.variants[0].name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  dispatch({
+                    type: ACTIONS.UPDATE_VARIANT,
+                    payload: { index: 0, variant: { name: e.target.value } },
+                  });
+                }}
                 fullWidth
-              ></TextField>
+              />
             ) : null}
 
             {/* Pricing */}
@@ -850,20 +569,32 @@ const PastryMaterialDialog = ({
                 }
               </Typography>
             </Box>
-            {pastryMaterial && values.otherCost ? (
+            {pmState.values.otherCost &&
+            pmState.values.variants[0].costExactEstimate ? (
               <>
-                <Typography variant="h4">{`Multiplier: ${
-                  values.otherCost.multiplier
-                }x (${toCurrency(
-                  pastryMaterial.costExactEstimate * values.otherCost.multiplier
-                )})`}</Typography>
+                <Typography variant="h4">
+                  {`Multiplier: ${
+                    pmState.values.otherCost.multiplier
+                  }x (${toCurrency(
+                    pmState.values.variants[0].costExactEstimate *
+                      pmState.values.otherCost.multiplier
+                  )})`}
+                </Typography>
                 <Slider
                   disabled={isCustomPrice}
                   id="multiplier"
                   name="multiplier"
-                  value={values.otherCost.multiplier}
-                  onChange={(event, newValue) => {
-                    setFieldValue("otherCost.multiplier", newValue);
+                  value={pmState.values.otherCost.multiplier}
+                  onChange={(e: Event, v: number | number[]) => {
+                    dispatch({
+                      type: ACTIONS.UPDATE_PASTRY_MATERIAL,
+                      payload: {
+                        otherCost: {
+                          additionalCost: 0,
+                          multiplier: v as number,
+                        },
+                      },
+                    });
                   }}
                   defaultValue={3}
                   valueLabelDisplay="auto"
@@ -889,8 +620,18 @@ const PastryMaterialDialog = ({
                     id="additionalCost"
                     name="additionalCost"
                     type="number"
-                    value={values.otherCost.additionalCost}
-                    onChange={handleChange}
+                    value={pmState.values.otherCost.additionalCost}
+                    onChange={(e) =>
+                      dispatch({
+                        type: ACTIONS.UPDATE_PASTRY_MATERIAL,
+                        payload: {
+                          otherCost: {
+                            additionalCost: Number(e.target.value),
+                            multiplier: 2,
+                          },
+                        },
+                      })
+                    }
                     slotProps={{ htmlInput: { min: 0 } }}
                   />
                 ) : null}
@@ -900,7 +641,7 @@ const PastryMaterialDialog = ({
             )}
 
             {/* Ingredients */}
-            <Stack direction="row" justifyContent="space-between">
+            {/* <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Main Ingredients"}</Typography>
               <Button
                 color="primary"
@@ -1016,10 +757,10 @@ const PastryMaterialDialog = ({
                   </Stack>
                 );
               })}
-            </Stack>
+            </Stack> */}
 
             {/* Add-Ons */}
-            <Stack direction="row" justifyContent="space-between">
+            {/* <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Main Add-Ons"}</Typography>
               <Button
                 color="primary"
@@ -1095,263 +836,7 @@ const PastryMaterialDialog = ({
                   </Stack>
                 );
               })}
-            </Stack>
-
-            {/* Subvariants */}
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="h3">{"Other Sizes"}</Typography>
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                onClick={handleAddSubVariant}
-              >
-                <AddIcon />
-                Add
-              </Button>
-            </Stack>
-
-            <Stack spacing={2}>
-              {subVariants.map((subVariant, subIndex) => (
-                <Box key={`subvariant-${subIndex}`}>
-                  <Stack spacing={2}>
-                    {/* Subvariant Name */}
-                    <TextField
-                      label="Subvariant Name"
-                      value={subVariant.name}
-                      onChange={(e) =>
-                        handleUpdateSubVariant(subIndex, {
-                          name: e.target.value,
-                        })
-                      }
-                      fullWidth
-                      size="small"
-                    />
-
-                    {/* Subvariant Ingredients */}
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="h5">Ingredients</Typography>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                          handleAddIngredientToSubVariant(subIndex)
-                        }
-                      >
-                        <AddIcon />
-                        Add
-                      </Button>
-                    </Stack>
-
-                    <Stack spacing={1}>
-                      {subVariant.ingredients.map(
-                        (ingredient, ingredientIndex) => {
-                          // Fetch the specific available ingredients for this subvariant
-                          const optionsIngredients = [
-                            ingredient,
-                            ...availableIngredients[subIndex].filter(
-                              (availableIngredient) =>
-                                availableIngredient.id !== ingredient.id
-                            ),
-                          ];
-
-                          const fetchedIngredient = fetchedIngredients.find(
-                            (fetched) => fetched.id === ingredient.id
-                          );
-                          const ingredientType = fetchedIngredient
-                            ? fetchedIngredient.type
-                            : null;
-                          const optionsMeasurements =
-                            ingredientType && unitMapping
-                              ? unitMapping[ingredientType]
-                              : [];
-
-                          return (
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              key={`subvariant-ingredient-${ingredientIndex}`}
-                            >
-                              {/* Ingredient Selection */}
-                              <FormControl fullWidth size="small">
-                                <Select
-                                  value={ingredient.id}
-                                  onChange={(e) =>
-                                    handleUpdateIngredientInSubVariant(
-                                      subIndex,
-                                      ingredientIndex,
-                                      {
-                                        id: e.target.value,
-                                      }
-                                    )
-                                  }
-                                >
-                                  {optionsIngredients.map((option) => (
-                                    <MenuItem key={option.id} value={option.id}>
-                                      {option.name}
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-
-                              {/* Measurement */}
-                              <FormControl fullWidth size="small">
-                                <Select
-                                  value={ingredient.amountMeasurement}
-                                  onChange={(e) =>
-                                    handleUpdateIngredientInSubVariant(
-                                      subIndex,
-                                      ingredientIndex,
-                                      {
-                                        amountMeasurement: e.target.value,
-                                      }
-                                    )
-                                  }
-                                >
-                                  {optionsMeasurements.map((measurement) => (
-                                    <MenuItem
-                                      key={measurement}
-                                      value={measurement}
-                                    >
-                                      {measurement}
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-
-                              {/* Amount */}
-                              <TextField
-                                label="Amount"
-                                type="number"
-                                value={ingredient.amount}
-                                onChange={(e) =>
-                                  handleUpdateIngredientInSubVariant(
-                                    subIndex,
-                                    ingredientIndex,
-                                    {
-                                      amount: Number(e.target.value),
-                                    }
-                                  )
-                                }
-                                size="small"
-                              />
-
-                              <IconButton
-                                color="error"
-                                onClick={() =>
-                                  handleRemoveIngredientFromSubVariant(
-                                    subIndex,
-                                    ingredientIndex
-                                  )
-                                }
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Stack>
-                          );
-                        }
-                      )}
-                    </Stack>
-
-                    {/* Subvariant Add-Ons */}
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="h5">Add-Ons</Typography>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        size="small"
-                        onClick={() => handleAddAddOnToSubVariant(subIndex)}
-                      >
-                        <AddIcon />
-                        Add
-                      </Button>
-                    </Stack>
-
-                    <Stack spacing={1}>
-                      {subVariant.addOns.map((addOn, addOnIndex) => {
-                        // Fetch the specific available add-ons for this subvariant
-                        const optionsAddOns = [
-                          addOn,
-                          ...availableAddOns[subIndex].filter(
-                            (availableAddOn) => availableAddOn.id !== addOn.id
-                          ),
-                        ];
-
-                        return (
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            key={`subvariant-addon-${addOnIndex}`}
-                          >
-                            {/* Add-On Selection */}
-                            <FormControl fullWidth size="small">
-                              <Select
-                                value={addOn.id}
-                                onChange={(e) =>
-                                  handleUpdateAddOnInSubVariant(
-                                    subIndex,
-                                    addOnIndex,
-                                    {
-                                      id: e.target.value as number,
-                                    }
-                                  )
-                                }
-                              >
-                                {optionsAddOns.map((option) => (
-                                  <MenuItem key={option.id} value={option.id}>
-                                    {option.name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-
-                            {/* Add-On Amount */}
-                            <TextField
-                              label="Amount"
-                              type="number"
-                              value={addOn.amount}
-                              onChange={(e) =>
-                                handleUpdateAddOnInSubVariant(
-                                  subIndex,
-                                  addOnIndex,
-                                  {
-                                    amount: Number(e.target.value),
-                                  }
-                                )
-                              }
-                              size="small"
-                            />
-
-                            <IconButton
-                              color="error"
-                              onClick={() =>
-                                handleRemoveAddOnFromSubVariant(
-                                  subIndex,
-                                  addOnIndex
-                                )
-                              }
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Stack>
-                        );
-                      })}
-                    </Stack>
-
-                    {/* Remove Subvariant */}
-                    <Button
-                      color="error"
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleRemoveSubVariant(subIndex)}
-                    >
-                      Remove Subvariant
-                    </Button>
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
+            </Stack> */}
           </Stack>
         </DialogContent>
         <DialogActions>
