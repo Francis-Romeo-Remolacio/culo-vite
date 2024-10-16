@@ -26,20 +26,16 @@ import { Add, Delete as DeleteIcon } from "@mui/icons-material";
 import PastryMaterialDialog from "./PastryMaterialDialog";
 
 type DesignDialogProps = {
-  mode: "add" | "edit";
+  design?: Design;
   open: boolean;
   onClose: () => void;
-  design?: Design;
   tags: Tag[];
 };
 
-const DesignDialog = ({
-  mode,
-  open,
-  onClose,
-  design,
-  tags,
-}: DesignDialogProps) => {
+const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
+  console.log("DESIGN::");
+  console.log(design);
+
   const [imageType, setImageType] = useState("");
   const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
@@ -57,7 +53,6 @@ const DesignDialog = ({
   };
 
   const initialValues: Partial<Design> = {
-    id: "",
     name: "",
     description: "",
     shape: "round",
@@ -83,7 +78,7 @@ const DesignDialog = ({
     resetForm,
     isSubmitting,
   } = useFormik({
-    initialValues: initialValues,
+    initialValues: design ? design : initialValues,
     validationSchema: designSchema,
     onSubmit,
   });
@@ -100,8 +95,6 @@ const DesignDialog = ({
             designName: response.data.designName,
             created: new Date(response.data.dateAdded),
             lastModified: new Date(response.data.lastModifiedDate),
-            costEstimate: response.data.costEstimate,
-            costExactEstimate: response.data.costExactEstimate,
             otherCost: {
               additionalCost: response.data.otherCost.additionalCost,
               multiplier: response.data.otherCost.ingredientCostMultiplier,
@@ -152,7 +145,7 @@ const DesignDialog = ({
                   lastModified: new Date(ingredient.lastModifiedDate),
                 })),
                 addOns: subVariant.addOns.map((addOn: any) => ({
-                  relationId: addOn.pastryMaterialSubVariantAddOnId,
+                  relationId: addOn.pastryMaterialAddOnId,
                   id: addOn.addOnsId,
                   name: addOn.addOnsName,
                   amount: addOn.amount,
@@ -164,6 +157,7 @@ const DesignDialog = ({
             ],
           };
           setPastryMaterial(parsedPastryMaterial);
+          console.log("FETCHED::");
           console.log(parsedPastryMaterial);
         });
       setFetchingPastryMaterial(false);
@@ -189,32 +183,38 @@ const DesignDialog = ({
 
   // Filter tags to exclude already chosen ones
   const filterTags = () => {
-    const chosenTagIds = values.tags.map((tag) => tag.id);
-    const filteredTags = tags.filter((tag) => !chosenTagIds.includes(tag.id));
-    setAvailableTags(filteredTags);
+    if (values.tags) {
+      const chosenTagIds = values.tags.map((tag) => tag.id);
+      const filteredTags = tags.filter((tag) => !chosenTagIds.includes(tag.id));
+      setAvailableTags(filteredTags);
+    }
   };
   const handleAddTag = () => {
-    if (availableTags.length === 0) return; // Prevent adding if no tags are available
-    setFieldValue("tags", [...values.tags, availableTags[0]]);
+    if (values.tags) {
+      if (availableTags.length === 0) return; // Prevent adding if no tags are available
+      setFieldValue("tags", [...values.tags, availableTags[0]]);
+    }
   };
 
   const handleRemoveTag = (index: number) => {
-    const updatedTags = [...values.tags];
-    updatedTags.splice(index, 1); // Remove tag at the specified index
-    setFieldValue("tags", updatedTags);
+    if (values.tags) {
+      const updatedTags = [...values.tags];
+      updatedTags.splice(index, 1); // Remove tag at the specified index
+      setFieldValue("tags", updatedTags);
+    }
   };
 
   const handleChangeTags = (index: number, newTagId: string) => {
-    const updatedTags = [...values.tags];
-    updatedTags[index] = tags.find((tag) => tag.id === newTagId) as Tag;
-    setFieldValue("tags", updatedTags);
+    if (values.tags) {
+      const updatedTags = [...values.tags];
+      updatedTags[index] = tags.find((tag) => tag.id === newTagId) as Tag;
+      setFieldValue("tags", updatedTags);
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>
-        {mode === "edit" ? "Edit Design" : "Add Design"}
-      </DialogTitle>
+      <DialogTitle>{design ? "Edit Design" : "Add Design"}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <Stack spacing={2} sx={{ width: 500 }}>
@@ -278,7 +278,9 @@ const DesignDialog = ({
             <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Tags"}</Typography>
 
-              {availableTags.length > 0 && values.tags.length < 5 ? (
+              {availableTags.length > 0 &&
+              values.tags &&
+              values.tags.length < 5 ? (
                 <Button
                   color="primary"
                   variant="contained"
@@ -291,49 +293,50 @@ const DesignDialog = ({
               ) : null}
             </Stack>
             <Stack spacing={2}>
-              {values.tags.map((tag, index) => {
-                // Create a temporary list of tags that includes the current tag + availableTags
-                const options = [
-                  tag,
-                  ...availableTags.filter(
-                    (availableTag) => availableTag.id !== tag.id
-                  ),
-                ];
+              {values.tags &&
+                values.tags.map((tag, index) => {
+                  // Create a temporary list of tags that includes the current tag + availableTags
+                  const options = [
+                    tag,
+                    ...availableTags.filter(
+                      (availableTag) => availableTag.id !== tag.id
+                    ),
+                  ];
 
-                return (
-                  <Stack direction="row" spacing={2}>
-                    <FormControl
-                      fullWidth
-                      key={`select-tag-form-${index}`}
-                      size="small"
-                    >
-                      <Select
-                        labelId={`select-tag-${index}`}
-                        id={`select-tag-${index}`}
-                        value={tag.id} // Use the current tag ID directly
-                        onChange={(e) =>
-                          handleChangeTags(index, e.target.value as string)
-                        }
+                  return (
+                    <Stack direction="row" spacing={2}>
+                      <FormControl
+                        fullWidth
+                        key={`select-tag-form-${index}`}
+                        size="small"
                       >
-                        {options.map((availableTag) => (
-                          <MenuItem
-                            key={availableTag.id}
-                            value={availableTag.id}
-                          >
-                            {availableTag.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleRemoveTag(index)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                );
-              })}
+                        <Select
+                          labelId={`select-tag-${index}`}
+                          id={`select-tag-${index}`}
+                          value={tag.id} // Use the current tag ID directly
+                          onChange={(e) =>
+                            handleChangeTags(index, e.target.value as string)
+                          }
+                        >
+                          {options.map((availableTag) => (
+                            <MenuItem
+                              key={availableTag.id}
+                              value={availableTag.id}
+                            >
+                              {availableTag.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleRemoveTag(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Stack>
+                  );
+                })}
             </Stack>
             <Button
               onClick={handleTogglePastryMaterial}
@@ -343,14 +346,16 @@ const DesignDialog = ({
             >
               {"Materials List"}
             </Button>
-            <PastryMaterialDialog
-              pastryMaterial={pastryMaterial as PastryMaterial}
-              setPastryMaterial={setPastryMaterial}
-              shape={values.shape ? values.shape : "custom"}
-              mode={design && design.id.length > 0 ? "edit" : "add"}
-              open={pastryMaterialOpen}
-              onClose={handleClosePastryMaterial}
-            />
+            {!fetchingPastryMaterial ? (
+              <PastryMaterialDialog
+                pastryMaterial={pastryMaterial as PastryMaterial}
+                setPastryMaterial={setPastryMaterial}
+                shape={values.shape ? values.shape : "custom"}
+                mode={design && design.id.length > 0 ? "edit" : "add"}
+                open={pastryMaterialOpen}
+                onClose={handleClosePastryMaterial}
+              />
+            ) : null}
           </Stack>
         </DialogContent>
 

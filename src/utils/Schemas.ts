@@ -42,7 +42,7 @@ export interface Batch {
 }
 
 export interface AddOn {
-  id: number;
+  id: string;
   name: string;
   price: number;
   size?: string;
@@ -52,12 +52,6 @@ export interface ManagementAddOn {
   measurement: string;
   created: Date;
   lastModified: Date;
-}
-
-export interface VariantAddOn extends AddOn {
-  pastryMaterialAddOnId?: string;
-  amount: number;
-  stock: number;
 }
 
 export interface OrderAddOn extends AddOn {
@@ -97,46 +91,45 @@ export interface DesignVariant
 }
 
 export interface PastryMaterial {
-  id: string;
-  designId: string;
-  designName: string;
-  costEstimate?: number;
-  costExactEstimate?: number;
+  id?: string;
+  designId?: string;
+  designName?: string;
   otherCost: {
     additionalCost: number;
     multiplier: number;
   };
   variants: PastryMaterialVariant[];
-  created: Date;
-  lastModified: Date;
+  created?: Date;
+  lastModified?: Date;
 }
 
 export interface PastryMaterialVariant {
-  id: string;
+  id?: string;
   name: string;
-  costEstimate: number;
-  costExactEstimate: number;
+  costEstimate?: number;
+  costExactEstimate?: number;
   ingredients: PastryMaterialIngredient[];
-  ingredientImportance: [];
+  ingredientImportance?: [];
   addOns: PastryMaterialAddOn[];
-  inStock: boolean;
-  created: Date;
-  lastModified: Date;
+  inStock?: boolean;
+  created?: Date;
+  lastModified?: Date;
 }
 
 export interface PastryMaterialIngredient
   extends Pick<Ingredient, "id" | "name" | "type" | "measurement"> {
-  relationId: string;
+  relationId?: string;
   amount: number;
   ingredientType: "INV";
-  created: Date;
-  lastModified: Date;
+  created?: Date;
+  lastModified?: Date;
 }
 
 export interface PastryMaterialAddOn extends Pick<AddOn, "id" | "name"> {
+  relationId?: string;
   amount: number;
-  created: Date;
-  lastModified: Date;
+  created?: Date;
+  lastModified?: Date;
 }
 
 export interface Order {

@@ -33,13 +33,13 @@ import api from "../../../api/axiosConfig";
 import { toCurrency } from "../../../utils/Formatter";
 
 interface PastryMaterialState {
-  values: Pick<
-    PastryMaterial,
-    "otherCost" | "variants" | "costEstimate" | "costExactEstimate"
-  >;
-  variantsToDelete: string[]; // Array of variant IDs to delete
-  ingredientsToDelete: string[]; // Array of ingredient IDs to delete
-  addOnsToDelete: string[]; // Array of add-on IDs to delete
+  values: {
+    variants: PastryMaterialVariant[];
+    otherCost: { additionalCost: number; multiplier: number };
+  };
+  variantsToDelete: string[];
+  ingredientsToDelete: string[];
+  addOnsToDelete: string[];
 }
 
 const ACTIONS = {
@@ -58,61 +58,66 @@ const ACTIONS = {
   UPDATE_PASTRY_MATERIAL: "updatePastryMaterial",
 } as const;
 
-type VariantAction =
-  | {
-      type: typeof ACTIONS.ADD_VARIANT;
-      payload: Partial<PastryMaterialVariant>;
-    }
-  | {
-      type: typeof ACTIONS.UPDATE_VARIANT;
-      payload: { index: number; variant: Partial<PastryMaterialVariant> };
-    }
-  | { type: typeof ACTIONS.REMOVE_VARIANT; payload: number }
-  | {
-      type: typeof ACTIONS.ADD_INGREDIENT_TO_VARIANT;
-      payload: { index: number; ingredient: PastryMaterialIngredient };
-    }
-  | {
-      type: typeof ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT;
-      payload: { variantIndex: number; ingredientIndex: number };
-    }
-  | {
-      type: typeof ACTIONS.UPDATE_INGREDIENT_IN_VARIANT;
-      payload: {
-        variantIndex: number;
-        ingredientIndex: number;
-        ingredient: Partial<PastryMaterialIngredient>;
-      };
-    }
-  | {
-      type: typeof ACTIONS.ADD_ADDON_TO_VARIANT;
-      payload: { index: number; addOn: PastryMaterialAddOn };
-    }
-  | {
-      type: typeof ACTIONS.REMOVE_ADDON_FROM_VARIANT;
-      payload: { variantIndex: number; addOnIndex: number };
-    }
-  | {
-      type: typeof ACTIONS.UPDATE_ADDON_IN_VARIANT;
-      payload: {
-        variantIndex: number;
-        addOnIndex: number;
-        addOn: Partial<PastryMaterialAddOn>;
-      };
-    }
-  | { type: typeof ACTIONS.MARK_VARIANT_FOR_DELETION; payload: number }
-  | {
-      type: typeof ACTIONS.MARK_INGREDIENT_FOR_DELETION;
-      payload: { variantIndex: number; ingredientIndex: number };
-    }
-  | {
-      type: typeof ACTIONS.MARK_ADDON_FOR_DELETION;
-      payload: { variantIndex: number; addOnIndex: number };
-    }
-  | {
-      type: typeof ACTIONS.UPDATE_PASTRY_MATERIAL;
-      payload: Partial<Pick<PastryMaterial, "otherCost">>;
-    };
+interface VariantAction {
+  type: string;
+  payload?: any; // This should be more specific if possible
+}
+
+// type VariantAction =
+//   | {
+//       type: typeof ACTIONS.ADD_VARIANT;
+//       payload: Partial<PastryMaterialVariant>;
+//     }
+//   | {
+//       type: typeof ACTIONS.UPDATE_VARIANT;
+//       payload: { index: number; variant: Partial<PastryMaterialVariant> };
+//     }
+//   | { type: typeof ACTIONS.REMOVE_VARIANT; payload: number }
+//   | {
+//       type: typeof ACTIONS.ADD_INGREDIENT_TO_VARIANT;
+//       payload: { index: number; ingredient: Partial<PastryMaterialIngredient> };
+//     }
+//   | {
+//       type: typeof ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT;
+//       payload: { variantIndex: number; ingredientIndex: number };
+//     }
+//   | {
+//       type: typeof ACTIONS.UPDATE_INGREDIENT_IN_VARIANT;
+//       payload: {
+//         variantIndex: number;
+//         ingredientIndex: number;
+//         ingredient: Partial<PastryMaterialIngredient>;
+//       };
+//     }
+//   | {
+//       type: typeof ACTIONS.ADD_ADDON_TO_VARIANT;
+//       payload: { index: number; addOn: Partial<PastryMaterialAddOn> };
+//     }
+//   | {
+//       type: typeof ACTIONS.REMOVE_ADDON_FROM_VARIANT;
+//       payload: { variantIndex: number; addOnIndex: number };
+//     }
+//   | {
+//       type: typeof ACTIONS.UPDATE_ADDON_IN_VARIANT;
+//       payload: {
+//         variantIndex: number;
+//         addOnIndex: number;
+//         addOn: Partial<PastryMaterialAddOn>;
+//       };
+//     }
+//   | { type: typeof ACTIONS.MARK_VARIANT_FOR_DELETION; payload: number }
+//   | {
+//       type: typeof ACTIONS.MARK_INGREDIENT_FOR_DELETION;
+//       payload: { variantIndex: number; ingredientIndex: number };
+//     }
+//   | {
+//       type: typeof ACTIONS.MARK_ADDON_FOR_DELETION;
+//       payload: { variantIndex: number; addOnIndex: number };
+//     }
+//   | {
+//       type: typeof ACTIONS.UPDATE_PASTRY_MATERIAL;
+//       payload: Partial<Pick<PastryMaterial, "otherCost">>;
+//     };
 
 function reducer(state: PastryMaterialState, action: VariantAction) {
   switch (action.type) {
@@ -120,7 +125,7 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
     case ACTIONS.ADD_VARIANT:
       return {
         ...state,
-        pastryMaterial: {
+        values: {
           ...state.values,
           variants: [
             ...state.values.variants,
@@ -133,7 +138,7 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
     case ACTIONS.UPDATE_VARIANT:
       return {
         ...state,
-        pastryMaterial: {
+        values: {
           ...state.values,
           variants: state.values.variants.map((variant, index) => {
             if (index === action.payload.index) {
@@ -164,7 +169,7 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
 
       return {
         ...state,
-        pastryMaterial: {
+        values: {
           ...state.values,
           variants: state.values.variants.filter(
             (_, index) => index !== action.payload
@@ -179,7 +184,7 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
     case ACTIONS.ADD_INGREDIENT_TO_VARIANT:
       return {
         ...state,
-        pastryMaterial: {
+        values: {
           ...state.values,
           variants: state.values.variants.map((variant, index) => {
             if (index === action.payload.index) {
@@ -196,16 +201,11 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
         },
       };
 
-    // Mark ingredient for deletion if it already exists, otherwise remove from the state
-    case ACTIONS.MARK_INGREDIENT_FOR_DELETION:
-      const ingredientToRemove =
-        state.values.variants[action.payload.variantIndex].ingredients[
-          action.payload.ingredientIndex
-        ];
-
+    // Remove an ingredient from a variant
+    case ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT:
       return {
         ...state,
-        pastryMaterial: {
+        values: {
           ...state.values,
           variants: state.values.variants.map((variant, index) => {
             if (index === action.payload.variantIndex) {
@@ -219,12 +219,125 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
             return variant;
           }),
         },
-        ingredientsToDelete: ingredientToRemove.id
-          ? [...state.ingredientsToDelete, ingredientToRemove.id]
+      };
+
+    // Mark ingredient for deletion without removing from state
+    case ACTIONS.MARK_INGREDIENT_FOR_DELETION:
+      const ingredientToMark =
+        state.values.variants[action.payload.variantIndex].ingredients[
+          action.payload.ingredientIndex
+        ];
+
+      return {
+        ...state,
+        ingredientsToDelete: ingredientToMark.relationId
+          ? [...state.ingredientsToDelete, ingredientToMark.relationId]
           : state.ingredientsToDelete,
       };
 
-    // Handle add-ons similarly to ingredients
+    // Update an ingredient in a variant
+    case ACTIONS.UPDATE_INGREDIENT_IN_VARIANT:
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.variantIndex) {
+              return {
+                ...variant,
+                ingredients: variant.ingredients.map((ingredient, i) => {
+                  if (i === action.payload.ingredientIndex) {
+                    return {
+                      ...ingredient,
+                      ...action.payload.ingredient,
+                    };
+                  }
+                  return ingredient;
+                }),
+              };
+            }
+            return variant;
+          }),
+        },
+      };
+
+    // Add an add-on to a variant
+    case ACTIONS.ADD_ADDON_TO_VARIANT:
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.index) {
+              return {
+                ...variant,
+                addOns: [...variant.addOns, action.payload.addOn],
+              };
+            }
+            return variant;
+          }),
+        },
+      };
+
+    // Remove an add-on from a variant
+    case ACTIONS.REMOVE_ADDON_FROM_VARIANT:
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.variantIndex) {
+              return {
+                ...variant,
+                addOns: variant.addOns.filter(
+                  (_, i) => i !== action.payload.addOnIndex
+                ),
+              };
+            }
+            return variant;
+          }),
+        },
+      };
+
+    // Mark add-on for deletion without removing from state
+    case ACTIONS.MARK_ADDON_FOR_DELETION:
+      const addOnToMark =
+        state.values.variants[action.payload.variantIndex].addOns[
+          action.payload.addOnIndex
+        ];
+
+      return {
+        ...state,
+        addOnsToDelete: addOnToMark.relationId
+          ? [...state.addOnsToDelete, addOnToMark.relationId]
+          : state.addOnsToDelete,
+      };
+
+    // Update an add-on in a variant
+    case ACTIONS.UPDATE_ADDON_IN_VARIANT:
+      return {
+        ...state,
+        values: {
+          ...state.values,
+          variants: state.values.variants.map((variant, index) => {
+            if (index === action.payload.variantIndex) {
+              return {
+                ...variant,
+                addOns: variant.addOns.map((addOn, i) => {
+                  if (i === action.payload.addOnIndex) {
+                    return {
+                      ...addOn,
+                      ...action.payload.addOn,
+                    };
+                  }
+                  return addOn;
+                }),
+              };
+            }
+            return variant;
+          }),
+        },
+      };
 
     default:
       return state;
@@ -252,28 +365,22 @@ const PastryMaterialDialog = ({
   // Initial state for PastryMaterial
   const initialState: PastryMaterialState = {
     values: {
-      costEstimate: 0,
-      costExactEstimate: 0,
+      variants: pastryMaterial?.variants ?? [],
       otherCost: {
-        additionalCost: pastryMaterial?.otherCost.additionalCost
-          ? pastryMaterial?.otherCost.additionalCost
-          : 0,
-        multiplier: pastryMaterial?.otherCost.multiplier
-          ? pastryMaterial?.otherCost.multiplier
-          : 2,
+        additionalCost: pastryMaterial?.otherCost.additionalCost ?? 0,
+        multiplier: pastryMaterial?.otherCost.multiplier ?? 2,
       },
-      variants: pastryMaterial?.variants ? pastryMaterial?.variants : [],
     },
     variantsToDelete: [],
     ingredientsToDelete: [],
     addOnsToDelete: [],
   };
-  console.log("PM");
-  console.log(pastryMaterial);
+  // console.log("PM::");
+  // console.log(pastryMaterial);
 
   const [pmState, dispatch] = useReducer(reducer, initialState);
-  console.log("STATE");
-  console.log(pmState);
+  // console.log("STATE::");
+  // console.log(pmState);
 
   const [tiers, setTiers] = useState<string[]>([]);
   const [sizeHeart, setSizeHeart] = useState<number>(8);
@@ -320,7 +427,7 @@ const PastryMaterialDialog = ({
     await api.get("add-ons").then((response) => {
       const parsedAddOns: Pick<AddOn, "id" | "name">[] = response.data.map(
         (addOn: any) => ({
-          id: addOn.id,
+          id: String(addOn.id),
           name: addOn.addOnName,
         })
       );
@@ -400,28 +507,161 @@ const PastryMaterialDialog = ({
   // Pricing
   const handleChangeSwitch = (event: ChangeEvent<HTMLInputElement>) => {
     setIsCustomPrice(event.target.checked);
+    if (event.target.checked) {
+      dispatch({
+        type: ACTIONS.UPDATE_PASTRY_MATERIAL,
+        payload: { otherCost: { additionalCost: 0, multiplier: 2 } },
+      });
+    }
   };
 
   // Ingredients
-  const handleAddIngredient = () => {};
+  const handleAddIngredient = (variantIndex: number) => {
+    const availableIngredients = fetchedIngredients.filter(
+      (ingredient) =>
+        !pmState.values.variants[variantIndex].ingredients.some(
+          (variantIngredient: PastryMaterialIngredient) =>
+            variantIngredient.id === ingredient.id
+        )
+    );
 
+    if (availableIngredients.length > 0) {
+      const ingredientToAdd = availableIngredients[0];
+
+      // Determine the default measurement based on the ingredient type
+      let defaultMeasurement = "";
+      if (ingredientToAdd.type === "solid") {
+        defaultMeasurement = "Gram"; // Assign the first valid solid unit
+      } else if (ingredientToAdd.type === "liquid") {
+        defaultMeasurement = "Milliliter"; // Assign the first valid liquid unit
+      } else if (ingredientToAdd.type === "count") {
+        defaultMeasurement = "Piece"; // Assign the first valid count unit
+      }
+
+      dispatch({
+        type: ACTIONS.ADD_INGREDIENT_TO_VARIANT,
+        payload: {
+          index: variantIndex,
+          ingredient: {
+            ...ingredientToAdd,
+            amount: 0,
+            measurement: defaultMeasurement, // Assign based on the type
+            ingredientType: "INV",
+          },
+        },
+      });
+      console.log("NEW::");
+
+      console.log({
+        ...ingredientToAdd,
+        amount: 0,
+        measurement: defaultMeasurement, // Assign based on the type
+        ingredientType: "INV",
+      });
+      console.log("OLD::");
+      console.log(pmState.values.variants[variantIndex].ingredients);
+    }
+  };
   const handleUpdateIngredient = () => {};
 
-  const handleRemoveIngredient = () => {};
+  const handleRemoveIngredient = (
+    variantIndex: number,
+    ingredientIndex: number
+  ) => {
+    const ingredient =
+      pmState.values.variants[variantIndex].ingredients[ingredientIndex];
+
+    dispatch({
+      type: ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT,
+      payload: { variantIndex, ingredientIndex },
+    });
+
+    if (ingredient.relationId) {
+      dispatch({
+        type: ACTIONS.MARK_INGREDIENT_FOR_DELETION,
+        payload: { variantIndex, ingredientIndex },
+      });
+    }
+    console.log(pmState.values.variants[variantIndex].ingredients);
+  };
 
   // Add-Ons
-  const handleAddAddOn = () => {};
+  const handleAddAddOn = (variantIndex: number) => {
+    const availableAddOns = fetchedAddOns.filter(
+      (addOn) =>
+        !pmState.values.variants[variantIndex].addOns.some(
+          (variantAddOn: PastryMaterialAddOn) => variantAddOn.id === addOn.id
+        )
+    );
+
+    if (availableAddOns.length > 0) {
+      dispatch({
+        type: ACTIONS.ADD_ADDON_TO_VARIANT,
+        payload: { index: variantIndex, addOn: availableAddOns[0] },
+      });
+    }
+  };
 
   const handleUpdateAddOn = () => {};
 
-  const handleRemoveAddOn = () => {};
+  const handleRemoveAddOn = (variantIndex: number, addOnIndex: number) => {
+    const addOn = pmState.values.variants[variantIndex].addOns[addOnIndex];
 
-  // SubVariants
-  const handleAddVariant = () => {};
+    dispatch({
+      type: ACTIONS.REMOVE_ADDON_FROM_VARIANT,
+      payload: { variantIndex, addOnIndex },
+    });
 
-  const handleUpdateVariant = () => {};
+    if (addOn.relationId) {
+      dispatch({
+        type: ACTIONS.MARK_ADDON_FOR_DELETION,
+        payload: { variantIndex, addOnIndex },
+      });
+    }
+  };
 
-  const handleRemoveVariant = () => {};
+  // Variants
+  const handleAddVariant = () => {
+    dispatch({
+      type: ACTIONS.ADD_VARIANT,
+      payload: {
+        id: "", // Generate unique ID
+        name: "",
+        costEstimate: 0,
+        costExactEstimate: 0,
+        ingredients: [],
+        addOns: [],
+        inStock: true,
+        created: new Date(),
+        lastModified: new Date(),
+      },
+    });
+  };
+
+  const handleUpdateVariant = (
+    variantIndex: number,
+    updatedData: Partial<PastryMaterialVariant>
+  ) => {
+    dispatch({
+      type: ACTIONS.UPDATE_VARIANT,
+      payload: { index: variantIndex, variant: updatedData },
+    });
+  };
+
+  const handleRemoveVariant = (variantIndex: number) => {
+    const variant = pmState.values.variants[variantIndex];
+    dispatch({
+      type: ACTIONS.REMOVE_VARIANT,
+      payload: variantIndex,
+    });
+
+    if (variant.id) {
+      dispatch({
+        type: ACTIONS.MARK_VARIANT_FOR_DELETION,
+        payload: variantIndex,
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -641,202 +881,245 @@ const PastryMaterialDialog = ({
             )}
 
             {/* Ingredients */}
-            {/* <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Main Ingredients"}</Typography>
               <Button
                 color="primary"
                 variant="contained"
                 size="small"
-                onClick={handleAddIngredient}
+                startIcon={<AddIcon />}
+                onClick={() => handleAddIngredient(0)}
               >
-                <AddIcon />
-                Add
+                {"Add"}
               </Button>
             </Stack>
             <Stack spacing={1}>
-              {ingredients.map((ingredient, index) => {
-                const optionsIngredients = [
-                  ingredient,
-                  ...availableIngredients.filter(
-                    (availableIngredient) =>
-                      availableIngredient.id !== ingredient.id
-                  ),
-                ];
+              {pmState.values.variants[0].ingredients.map(
+                (
+                  ingredient: PastryMaterialIngredient,
+                  ingredientIndex: number
+                ) => {
+                  const optionsIngredients = [
+                    ingredient,
+                    ...fetchedIngredients.filter(
+                      (availableIngredient) =>
+                        !pmState.values.variants[0].ingredients.some(
+                          (variantIngredient: PastryMaterialIngredient) =>
+                            variantIngredient.id === availableIngredient.id
+                        )
+                    ),
+                  ];
 
-                // Find the corresponding fetched ingredient by ID
-                const fetchedIngredient = fetchedIngredients.find(
-                  (fetched) => fetched.id === ingredient.id
-                );
+                  // Find the corresponding fetched ingredient by ID
+                  const fetchedIngredient = fetchedIngredients.find(
+                    (fetched) => fetched.id === ingredient.id
+                  );
 
-                // Get the type from fetchedIngredient if it exists
-                const ingredientType = fetchedIngredient
-                  ? fetchedIngredient.type
-                  : null;
+                  // Get the type from fetchedIngredient if it exists
+                  const ingredientType = fetchedIngredient
+                    ? fetchedIngredient.type
+                    : null;
 
-                // Spread the unitMapping to get the correct measurement options
-                const optionsMeasurements =
-                  ingredientType && unitMapping
-                    ? unitMapping[ingredientType] // Use the type from fetchedIngredient
-                    : [];
+                  // Spread the unitMapping to get the correct measurement options
+                  const optionsMeasurements =
+                    ingredientType && unitMapping
+                      ? unitMapping[ingredientType] // Use the type from fetchedIngredient
+                      : [];
 
-                return (
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    key={`ingredient-stack-${index}`}
-                  >
-                    <FormControl
-                      fullWidth
-                      key={`select-ingredient-form-${index}`}
-                      size="small"
+                  return (
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      key={`ingredient-stack-${ingredientIndex}`}
                     >
-                      <Select
-                        labelId={`select-ingredient-${index}`}
-                        id={`select-ingredient-${index}`}
-                        value={ingredient.id} // Use the current ingredient ID directly
-                        onChange={(e) =>
-                          handleUpdateIngredient(index, { id: e.target.value })
-                        }
+                      <FormControl
+                        fullWidth
+                        key={`select-ingredient-form-${ingredientIndex}`}
+                        size="small"
                       >
-                        {optionsIngredients.map((optionIngredient) => (
-                          <MenuItem
-                            key={optionIngredient.id}
-                            value={optionIngredient.id}
-                          >
-                            {optionIngredient.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                        <Select
+                          labelId={`select-ingredient-${ingredientIndex}`}
+                          id={`select-ingredient-${ingredientIndex}`}
+                          value={ingredient.id} // Use the current ingredient ID directly
+                          onChange={(e) =>
+                            dispatch({
+                              type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                              payload: {
+                                variantIndex: 0,
+                                ingredientIndex: ingredientIndex,
+                                ingredient: { id: e.target.value },
+                              },
+                            })
+                          }
+                        >
+                          {optionsIngredients.map((optionIngredient) => (
+                            <MenuItem
+                              key={optionIngredient.id}
+                              value={optionIngredient.id}
+                            >
+                              {optionIngredient.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
 
-                    <FormControl
-                      fullWidth
-                      key={`select-ingredient-measurement-form-${index}`}
-                      size="small"
-                    >
-                      <Select
-                        labelId={`select-ingredient-measurement-${index}`}
-                        id={`select-ingredient-measurement-${index}`}
-                        value={ingredient.amountMeasurement} // Correct field for measurement
+                      <FormControl
+                        fullWidth
+                        key={`select-ingredient-measurement-form-${ingredientIndex}`}
+                        size="small"
+                      >
+                        <Select
+                          labelId={`select-ingredient-measurement-${ingredientIndex}`}
+                          id={`select-ingredient-measurement-${ingredientIndex}`}
+                          value={ingredient.measurement}
+                          onChange={(e) =>
+                            dispatch({
+                              type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                              payload: {
+                                variantIndex: 0,
+                                ingredientIndex: ingredientIndex,
+                                ingredient: { measurement: e.target.value },
+                              },
+                            })
+                          }
+                        >
+                          {optionsMeasurements.map((measurement) => {
+                            return (
+                              <MenuItem key={measurement} value={measurement}>
+                                {measurement}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        id={`ingredient-amount-${ingredientIndex}`}
+                        label="Amount"
+                        type="number"
+                        value={ingredient.amount} // Make sure you handle this value
                         onChange={(e) =>
-                          handleUpdateIngredient(index, {
-                            amountMeasurement: e.target.value,
+                          dispatch({
+                            type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                            payload: {
+                              variantIndex: 0,
+                              ingredientIndex: ingredientIndex,
+                              ingredient: { amount: Number(e.target.value) },
+                            },
                           })
                         }
+                        slotProps={{ htmlInput: { min: 0 } }}
+                        size="small"
+                      />
+
+                      <IconButton
+                        color="error"
+                        onClick={() =>
+                          handleRemoveIngredient(0, ingredientIndex)
+                        }
                       >
-                        {optionsMeasurements.map((measurement) => {
-                          return (
-                            <MenuItem key={measurement} value={measurement}>
-                              {measurement}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-
-                    <TextField
-                      id={`ingredient-amount-${index}`}
-                      label="Amount"
-                      type="number"
-                      value={ingredient.amount} // Make sure you handle this value
-                      onChange={(e) =>
-                        handleUpdateIngredient(index, {
-                          amount: Number(e.target.value),
-                        })
-                      }
-                      slotProps={{ htmlInput: { min: 0 } }}
-                      size="small"
-                    />
-
-                    <IconButton
-                      color="error"
-                      onClick={() => handleRemoveIngredient(index)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                );
-              })}
-            </Stack> */}
+                        <DeleteIcon />
+                      </IconButton>
+                    </Stack>
+                  );
+                }
+              )}
+            </Stack>
 
             {/* Add-Ons */}
-            {/* <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Main Add-Ons"}</Typography>
               <Button
                 color="primary"
                 variant="contained"
                 size="small"
-                onClick={handleAddAddOn}
+                startIcon={<AddIcon />}
+                onClick={() => handleAddAddOn(0)}
               >
-                <AddIcon />
                 Add
               </Button>
             </Stack>
             <Stack spacing={1}>
-              {addOns.map((addOn, index) => {
-                const optionsAddOns = [
-                  addOn,
-                  ...availableAddOns.filter(
-                    (availableAddOn) => availableAddOn.id !== addOn.id
-                  ),
-                ];
+              {pmState.values.variants[0].addOns.map(
+                (addOn: PastryMaterialAddOn, addOnIndex: number) => {
+                  const optionsAddOns = [
+                    addOn,
+                    ...fetchedAddOns.filter(
+                      (availableAddOn) =>
+                        !pmState.values.variants[0].addOns.some(
+                          (variantAddOn: PastryMaterialAddOn) =>
+                            variantAddOn.id === availableAddOn.id
+                        )
+                    ),
+                  ];
 
-                return (
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    key={`add-on-stack-${index}`}
-                  >
-                    <FormControl
-                      fullWidth
-                      key={`select-add-on-form-${index}`}
-                      size="small"
+                  return (
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      key={`add-on-stack-${addOnIndex}`}
                     >
-                      <Select
-                        labelId={`select-add-on-${index}`}
-                        id={`select-add-on-${index}`}
-                        value={addOn.id} // Use the current ingredient ID directly
+                      <FormControl
+                        fullWidth
+                        key={`select-add-on-form-${addOnIndex}`}
+                        size="small"
+                      >
+                        <Select
+                          labelId={`select-add-on-${addOnIndex}`}
+                          id={`select-add-on-${addOnIndex}`}
+                          value={addOn.id} // Use the current ingredient ID directly
+                          onChange={(e) =>
+                            dispatch({
+                              type: ACTIONS.UPDATE_ADDON_IN_VARIANT,
+                              payload: {
+                                variantIndex: 0,
+                                addOnIndex: addOnIndex,
+                                addOn: { id: e.target.value },
+                              },
+                            })
+                          }
+                        >
+                          {optionsAddOns.map((optionsAddOn) => (
+                            <MenuItem
+                              key={optionsAddOn.id}
+                              value={optionsAddOn.id}
+                            >
+                              {optionsAddOn.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <TextField
+                        id={`ingredient-amount-${addOnIndex}`}
+                        label="Amount"
+                        type="number"
+                        value={addOn.amount} // Make sure you handle this value
                         onChange={(e) =>
-                          handleUpdateAddOn(index, {
-                            id: e.target.value as number,
+                          dispatch({
+                            type: ACTIONS.UPDATE_ADDON_IN_VARIANT,
+                            payload: {
+                              variantIndex: 0,
+                              addOnIndex: addOnIndex,
+                              addOn: { amount: Number(e.target.value) },
+                            },
                           })
                         }
+                        slotProps={{ htmlInput: { min: 0 } }}
+                        size="small"
+                      />
+
+                      <IconButton
+                        color="error"
+                        onClick={() => handleRemoveAddOn(0, addOnIndex)}
                       >
-                        {optionsAddOns.map((optionsAddOn) => (
-                          <MenuItem
-                            key={optionsAddOn.id}
-                            value={optionsAddOn.id}
-                          >
-                            {optionsAddOn.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-
-                    <TextField
-                      id={`ingredient-amount-${index}`}
-                      label="Amount"
-                      type="number"
-                      value={addOn.amount} // Make sure you handle this value
-                      onChange={(e) =>
-                        handleUpdateAddOn(index, {
-                          amount: Number(e.target.value),
-                        })
-                      }
-                      slotProps={{ htmlInput: { min: 0 } }}
-                      size="small"
-                    />
-
-                    <IconButton
-                      color="error"
-                      onClick={() => handleRemoveAddOn(index)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                );
-              })}
-            </Stack> */}
+                        <DeleteIcon />
+                      </IconButton>
+                    </Stack>
+                  );
+                }
+              )}
+            </Stack>
           </Stack>
         </DialogContent>
         <DialogActions>
