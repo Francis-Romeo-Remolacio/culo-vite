@@ -114,6 +114,10 @@ export interface PastryMaterialVariant {
   inStock?: boolean;
   created?: Date;
   lastModified?: Date;
+  sizeHeart?: number; // For heart shape
+  rectangleX?: number; // For rectangle width
+  rectangleY?: number; // For rectangle height
+  tiers?: string[]; // For tiers
 }
 
 export interface PastryMaterialIngredient

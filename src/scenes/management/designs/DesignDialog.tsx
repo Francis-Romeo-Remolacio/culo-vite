@@ -120,6 +120,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 ),
                 ingredientImportance: response.data.ingredientImportance,
                 addOns: response.data.addOns.map((addOn: any) => ({
+                  relationId: addOn.pastryMaterialAddOnId,
                   id: addOn.addOnsId,
                   name: addOn.addOnsName,
                   amount: addOn.amount,
@@ -129,23 +130,25 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 lastModified: new Date(response.data.lastModifiedDate),
               },
               // Sub-Variants
-              ...response.data.subVariants.map((subVariant: any) => ({
+              response.data.subVariants.map((subVariant: any) => ({
                 name: subVariant.subVariantName,
                 costEstimate: subVariant.subVariantCostEstimate,
                 costExactEstimate: subVariant.subVariantExactCostEstimate,
-                ingredients: subVariant.ingredients.map((ingredient: any) => ({
-                  relationId: ingredient.pastryMaterialSubVariantIngredientId,
-                  id: ingredient.itemId,
-                  name: ingredient.itemName,
-                  type: ingredient.type,
-                  amount: ingredient.amount,
-                  amountMeasurement: ingredient.amountMeasurement,
-                  ingredientType: ingredient.ingredientType,
-                  created: new Date(ingredient.dateAdded),
-                  lastModified: new Date(ingredient.lastModifiedDate),
-                })),
-                addOns: subVariant.addOns.map((addOn: any) => ({
-                  relationId: addOn.pastryMaterialAddOnId,
+                ingredients: subVariant.subVariantIngredients.map(
+                  (ingredient: any) => ({
+                    relationId: ingredient.pastryMaterialSubVariantIngredientId,
+                    id: ingredient.itemId,
+                    name: ingredient.itemName,
+                    type: ingredient.type,
+                    amount: ingredient.amount,
+                    amountMeasurement: ingredient.amountMeasurement,
+                    ingredientType: ingredient.ingredientType,
+                    created: new Date(ingredient.dateAdded),
+                    lastModified: new Date(ingredient.lastModifiedDate),
+                  })
+                ),
+                addOns: subVariant.subVariantAddOns.map((addOn: any) => ({
+                  relationId: addOn.pastryMaterialSubVariantAddOnId,
                   id: addOn.addOnsId,
                   name: addOn.addOnsName,
                   amount: addOn.amount,
