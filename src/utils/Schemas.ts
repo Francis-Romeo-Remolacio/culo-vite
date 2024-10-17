@@ -52,15 +52,6 @@ export interface ManagementAddOn extends AddOn {
   measurement: string;
   created: Date;
   lastModified: Date;
-<<<<<<< HEAD
-}
-
-export interface VariantAddOn extends AddOn {
-  pastryMaterialAddOnId?: string;
-  amount: number;
-  stock: number;
-=======
->>>>>>> feature/designManagement
 }
 
 export interface OrderAddOn extends AddOn {
@@ -81,13 +72,10 @@ export interface Design {
   id: string;
   name: string;
   description: string;
-<<<<<<< HEAD
-=======
   pictureUrl?: URL;
   pictureData: string;
   shape: "round" | "heart" | "rectangle" | "custom";
   customShape?: string;
->>>>>>> feature/designManagement
   tags: Tag[];
 }
 
