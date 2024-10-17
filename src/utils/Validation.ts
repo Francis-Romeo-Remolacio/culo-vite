@@ -200,7 +200,82 @@ export const addOnSchema = yup.object().shape({
   size: yup.number().positive().required("Required"),
 });
 
-export const pastryMaterialSchema = yup.object().shape({});
+export const pastryMaterialSchema = yup.object().shape({
+  designId: yup
+    .string()
+    .uuid("Invalid UUID format")
+    .required("Design ID is required"),
+  mainVariantName: yup.string().required("Main Variant Name is required"),
+  ingredients: yup.array().of(
+    yup.object().shape({
+      itemId: yup.string().required("Item ID is required"),
+      ingredientType: yup
+        .string()
+        .oneOf(["INV", "MAT"])
+        .required("Ingredient type is required"),
+      amount: yup
+        .number()
+        .min(0, "Amount must be 0 or greater")
+        .required("Amount is required"),
+      amountMeasurement: yup
+        .string()
+        .required("Amount Measurement is required"),
+    })
+  ),
+  otherCost: yup.object().shape({
+    additionalCost: yup
+      .number()
+      .min(0, "Additional cost must be 0 or greater")
+      .required("Additional cost is required"),
+    ingredientCostMultiplier: yup
+      .number()
+      .min(0, "Ingredient cost multiplier must be 0 or greater")
+      .required("Ingredient cost multiplier is required"),
+  }),
+  ingredientImportance: yup.array().of(
+    yup.object().shape({
+      itemId: yup.string().required("Item ID is required"),
+      ingredientType: yup
+        .string()
+        .oneOf(["INV", "MAT"])
+        .required("Ingredient type is required"),
+      importance: yup.number().min(1).max(5).required("Importance is required"),
+    })
+  ),
+  addOns: yup.array().of(
+    yup.object().shape({
+      addOnsId: yup.number().min(0).required("Add-on ID is required"),
+      amount: yup.number().min(0).required("Amount is required"),
+    })
+  ),
+  subVariants: yup.array().of(
+    yup.object().shape({
+      subVariantName: yup.string().required("Sub Variant Name is required"),
+      subVariantIngredients: yup.array().of(
+        yup.object().shape({
+          itemId: yup.string().required("Item ID is required"),
+          ingredientType: yup
+            .string()
+            .oneOf(["INV", "MAT"])
+            .required("Ingredient type is required"),
+          amount: yup
+            .number()
+            .min(0, "Amount must be 0 or greater")
+            .required("Amount is required"),
+          amountMeasurement: yup
+            .string()
+            .required("Amount Measurement is required"),
+        })
+      ),
+      subVariantAddOns: yup.array().of(
+        yup.object().shape({
+          addOnsId: yup.number().min(0).required("Add-on ID is required"),
+          amount: yup.number().min(0).required("Amount is required"),
+        })
+      ),
+    })
+  ),
+});
 
 export const designSchema = yup.object({
   displayName: yup.string().required("Display Name is required"),

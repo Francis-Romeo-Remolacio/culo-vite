@@ -33,6 +33,14 @@ export interface Ingredient {
   isActive: boolean;
 }
 
+export interface Batch {
+  id?: string;
+  itemId: string;
+  created: Date;
+  lastModified: Date;
+  lastModifiedBy: string;
+}
+
 export interface AddOn {
   id: string;
   name: string;
@@ -44,22 +52,25 @@ export interface ManagementAddOn extends AddOn {
   measurement: string;
   created: Date;
   lastModified: Date;
+<<<<<<< HEAD
 }
 
 export interface VariantAddOn extends AddOn {
   pastryMaterialAddOnId?: string;
   amount: number;
   stock: number;
+=======
+>>>>>>> feature/designManagement
 }
 
 export interface OrderAddOn extends AddOn {
   quantity: number;
 }
 
-export interface Shape {
-  id: string;
-  name: string;
-}
+// export interface Shape {
+//   id: string;
+//   name: string;
+// }
 
 export interface Tag {
   id: string;
@@ -70,8 +81,14 @@ export interface Design {
   id: string;
   name: string;
   description: string;
+<<<<<<< HEAD
+=======
+  pictureUrl?: URL;
+  pictureData: string;
+  shape: "round" | "heart" | "rectangle" | "custom";
+  customShape?: string;
+>>>>>>> feature/designManagement
   tags: Tag[];
-  shapes: Shape[];
 }
 
 export interface Design {
@@ -79,29 +96,56 @@ export interface Design {
   variants: DesignVariant[];
 }
 
-export interface DesignVariant {
-  id: string;
-  name: string;
+export interface DesignVariant
+  extends Omit<PastryMaterialVariant, "ingredients"> {
   cost: number;
   inStock: boolean;
-  addOns: VariantAddOn[];
 }
 
 export interface PastryMaterial {
-  pastryMaterialId: string;
-  designId: string;
-  designName: string;
-  dateAdded: string;
-  lastModifiedDate: string;
-  otherCost: OtherCost;
-  costEstimate: number;
-  ingredients: Array<{ itemName: string }>;
-  subVariants: Array<{ subVariantName: string }>;
-  mainVariantName: string;
+  id?: string;
+  designId?: string;
+  designName?: string;
+  otherCost: {
+    additionalCost: number;
+    multiplier: number;
+  };
+  variants: PastryMaterialVariant[];
+  created?: Date;
+  lastModified?: Date;
 }
-export interface OtherCost {
-  pastryMaterialAdditionalCostId: string;
-  additionalCost: number;
+
+export interface PastryMaterialVariant {
+  id?: string;
+  name: string;
+  costEstimate?: number;
+  costExactEstimate?: number;
+  ingredients: PastryMaterialIngredient[];
+  ingredientImportance?: [];
+  addOns: PastryMaterialAddOn[];
+  inStock?: boolean;
+  created?: Date;
+  lastModified?: Date;
+  sizeHeart?: number; // For heart shape
+  rectangleX?: number; // For rectangle width
+  rectangleY?: number; // For rectangle height
+  tiers?: string[]; // For tiers
+}
+
+export interface PastryMaterialIngredient
+  extends Pick<Ingredient, "id" | "name" | "type" | "measurement"> {
+  relationId?: string;
+  amount: number;
+  ingredientType: "INV";
+  created?: Date;
+  lastModified?: Date;
+}
+
+export interface PastryMaterialAddOn extends Pick<AddOn, "id" | "name"> {
+  relationId?: string;
+  amount: number;
+  created?: Date;
+  lastModified?: Date;
 }
 
 export interface Order {
@@ -145,7 +189,7 @@ export interface Suborder {
 export interface CustomOrder extends Omit<Suborder, "designId" | "pastryId"> {
   tier: string;
   cover: string;
-  picture: Blob;
+  picture: string;
 }
 
 export interface ManagementSuborder extends Required<Suborder> {
@@ -255,36 +299,4 @@ export interface SalesOnMonth extends Sales {
 export interface ChartData {
   id: string | number;
   value: number;
-}
-
-//Pastry Material Input schemas
-export interface PastryMaterialAddForm {
-  designId: string;
-  otherCost: PastryMaterialAddFormOtherCost;
-  ingredients: PastryMaterialAddFormIngredients[];
-  addOns: PastryMaterialAddFormAddOns[];
-  subVariants: PastryMaterialAddFormSubVariants[];
-}
-export interface PastryMaterialAddFormOtherCost {
-  additionalCost: number;
-}
-export interface PastryMaterialAddFormIngredients {
-  ingredientType: string;
-  itemId: string;
-  itemName: string;
-  amountMeasurement: string;
-  amount: number;
-  forInsertion: string;
-}
-export interface PastryMaterialAddFormAddOns {
-  addOnsId: number;
-  addOnsName: string;
-  amount: number;
-  forInsertion: string;
-}
-export interface PastryMaterialAddFormSubVariants {
-  subVariantName?: string;
-  forInsertion?: string;
-  subVariantIngredients?: PastryMaterialAddFormIngredients[];
-  subVariantAddOns?: PastryMaterialAddFormAddOns[];
 }

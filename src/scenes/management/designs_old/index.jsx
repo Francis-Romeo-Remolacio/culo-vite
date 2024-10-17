@@ -6,12 +6,12 @@ import {
   Button,
   Grid2 as Grid,
 } from "@mui/material";
-import { Tokens } from "../../../Theme";
-import Header from "../../../components/Header";
-import DesignCard from "./../../../components/DesignCard.jsx";
-import api from "../../../api/axiosConfig";
-import AddDesignModal from "./addModal";
-import UpdateDesignModal from "./updateModal";
+import { Tokens } from "../../../Theme.js";
+import Header from "../../../components/Header.js";
+import DesignCard from "../../../components/DesignCard.js";
+import api from "../../../api/axiosConfig.js";
+import AddDesignModal from "./addModal.jsx";
+import UpdateDesignModal from "./updateModal.jsx";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddPastryMaterialModal from "./addModalPastryMaterial.jsx";
 import UpdatePastryMaterialModal from "./updateModalPastryMaterial.jsx";

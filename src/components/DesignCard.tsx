@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
@@ -7,70 +7,64 @@ import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
 import { Link as RouterLink } from "react-router-dom";
-import { Link, Skeleton } from "@mui/material";
-import api from "../api/axiosConfig";
+import { Link } from "@mui/material";
 import { getImageType } from "./Base64Image";
 
 type DesignCardProps = {
   design: Design;
   manager?: boolean;
+  onClick?: () => void;
 };
 
-const DesignCard = ({ design, manager }: DesignCardProps) => {
-  const [image, setImage] = useState("");
+const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
   const [imageType, setImageType] = useState("");
 
   useEffect(() => {
-    const fetchImage = async () => {
-      const response = await api.get(
-        `designs/${design.id}/display-picture-data`
-      );
-      setImage(response.data.displayPictureData);
-      console.log(response.data.displayPictureData);
+    const determineImageType = async () => {
+      try {
+        const type = getImageType(design.pictureData);
+        setImageType(type);
+      } catch (err) {
+        console.error("Error determining image type:", err);
+      }
     };
-    fetchImage();
+
+    determineImageType();
   }, []);
-
-  useEffect(() => {
-    try {
-      const type = getImageType(image);
-      setImageType(type);
-    } catch (err) {
-      console.error("Error determining image type:", err);
-    }
-  }, [image]);
-
-  const LoadingImage: React.FC = () => (
-    <Skeleton variant="rectangular" width="100%" height={manager ? 140 : 130} />
-  );
 
   return (
     <Card
       elevation={2}
       sx={
         manager
-          ? { height: 300, display: "inline-block" }
+          ? { width: "100%", height: 360, display: "inline-block" }
           : { width: 160, height: 240, display: "inline-block" }
       }
     >
       <Link
         component={RouterLink}
-        to={`/view-design?q=${encodeURIComponent(design.id)}`}
+        to={!manager ? `/view-design?q=${encodeURIComponent(design.id)}` : ""}
         sx={{ textDecoration: "none", color: "inherit" }}
       >
-        <CardActionArea>
+        <CardActionArea onClick={onClick}>
           <CardMedia
             sx={
               manager
-                ? { height: 140, width: "100%" }
-                : { height: 130, width: "100%" }
+                ? { height: 160, width: "100%" }
+                : { height: 140, width: "100%" }
             }
-            component={image ? "img" : LoadingImage}
-            loading="lazy"
-            image={image ? `data:${imageType};base64,${image}` : ""}
+            image={
+              design.pictureData
+                ? `data:image/${imageType};base64,${design.pictureData}`
+                : design.pictureUrl
+                ? design.pictureUrl.toString()
+                : "design.png"
+            }
           />
           <CardContent>
-            <Typography variant="h5">{design.name}</Typography>
+            <Typography gutterBottom variant="h5" component="div">
+              {design.name}
+            </Typography>
             <Typography
               variant="body2"
               align="left"
@@ -83,9 +77,9 @@ const DesignCard = ({ design, manager }: DesignCardProps) => {
             >
               {manager ? design.description : ""}
             </Typography>
-            <div>
+            <div style={{ marginTop: "8px" }}>
               {design.tags.map((tag: Tag) => (
-                <TagChip id={tag.id} name={tag.name} />
+                <TagChip key={tag.id} id={tag.id} name={tag.name} />
               ))}
             </div>
           </CardContent>
