@@ -20,7 +20,11 @@ import {
 import Header from "../../../components/Header.js";
 import api from "../../../api/axiosConfig.js";
 import DataGridStyler from "../../../components/DataGridStyler.tsx";
-import { Edit, Delete, Restore } from "@mui/icons-material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Restore as RestoreIcon,
+} from "@mui/icons-material";
 import { useFormik } from "formik";
 import { suborderSchema } from "../../../utils/Validation.js";
 import { ManagementSuborder } from "../../../utils/Schemas.js";
@@ -81,10 +85,6 @@ const Suborders = () => {
     onSubmit,
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const response = await api.get("current-user/artist/to-do");
@@ -118,17 +118,17 @@ const Suborders = () => {
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const handleAddNew = () => {
     resetForm();
     setSelectedRow({});
     setOpen(true);
   };
 
-  const handleClickEdit = (row: ManagementSuborder) => {
-    setSelectedRow(row);
-    setValues(row);
-    setOpen(true);
-  };
+  const handleClickDone = (row: ManagementSuborder) => {};
 
   const handleClickDelete = async (id: string) => {
     try {
@@ -161,23 +161,23 @@ const Suborders = () => {
         <>
           <IconButton
             color="primary"
-            onClick={() => handleClickEdit(params.row)}
+            onClick={() => handleClickDone(params.row.id)}
           >
-            <Edit />
+            <EditIcon />
           </IconButton>
           {params.row.isActive ? (
             <IconButton
               color="error"
               onClick={() => handleClickDelete(params.row.id)}
             >
-              <Delete />
+              <DeleteIcon />
             </IconButton>
           ) : (
             <IconButton
               color="success"
               onClick={() => handleClickRestore(params.row.id)}
             >
-              <Restore />
+              <RestoreIcon />
             </IconButton>
           )}
         </>
@@ -196,7 +196,7 @@ const Suborders = () => {
 
   return (
     <>
-      <Header title="SUBORDERS" subtitle="Employee updates" />
+      <Header title="To-Do" subtitle="Employee updates" />
       <DataGridStyler>
         <DataGrid
           rows={rows as GridRowsProp}
