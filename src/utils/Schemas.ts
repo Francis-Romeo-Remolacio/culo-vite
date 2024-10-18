@@ -72,8 +72,6 @@ export interface Design {
   id: string;
   name: string;
   description: string;
-  pictureUrl?: URL;
-  pictureData: string;
   shape: "round" | "heart" | "rectangle" | "custom";
   customShape?: string;
   tags: Tag[];
@@ -142,15 +140,11 @@ export interface Order {
   pickupDateTime: Dayjs | Date;
   payment: "full" | "half";
   price: number;
-  listItems: { suborders: Suborder[]; custom: CustomOrder[] };
+  listItems: { suborders: Suborder[]; customOrders: CustomOrder[] };
 }
 
 export interface ToPayOrder extends Omit<Order, "price"> {
   price: { full: number; half: number };
-}
-
-export interface PreviewOrder extends Order {
-  designId: string;
 }
 
 export interface ManagementOrder extends Order {
@@ -174,10 +168,8 @@ export interface Suborder {
   addOns: OrderAddOn[];
 }
 
-export interface CustomOrder extends Omit<Suborder, "designId" | "pastryId"> {
-  tier: string;
+export interface CustomOrder extends Omit<Suborder, "pastryId"> {
   cover: string;
-  picture: string;
 }
 
 export interface ManagementSuborder extends Required<Suborder> {
