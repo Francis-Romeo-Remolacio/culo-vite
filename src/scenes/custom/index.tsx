@@ -96,10 +96,6 @@ const Custom = () => {
         flavor: values.flavor,
         pictureBase64: values.picture,
         message: values.message,
-        payment: "full",
-        type: "rush B",
-        pickupDate: "1970-01-01",
-        pickupTime: "00:00 AM",
       });
     } catch (error) {
       console.error(error);
