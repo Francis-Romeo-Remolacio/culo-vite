@@ -30,18 +30,19 @@ import {
   Suborder,
   CustomOrder,
   OrderAddOn,
+  Breakdown,
 } from "../../../utils/Schemas.ts";
 import { toCurrency } from "../../../utils/Formatter.ts";
 import { Tokens } from "../../../Theme.ts";
+import CostBreakdownTable from "./CostBreakdownTable.tsx";
 
 const Orders = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
-  const [orderDetails, setOrderDetails] = useState<Omit<
-    ManagementOrder,
-    "customerId" | "customerName" | "isActive"
-  > | null>(null);
+  const [orderDetails, setOrderDetails] = useState<ManagementOrder | null>(
+    null
+  );
   const [rows, setRows] = useState<Partial<ManagementOrder>[]>([]);
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
@@ -54,6 +55,9 @@ const Orders = () => {
   const [selectedOrderItem, setSelectedOrderItem] = useState<
     Suborder | CustomOrder | null
   >(null);
+
+  const [bomDialogOpen, setBomDialogOpen] = useState(false);
+  const [breakdownData, setBreakdownData] = useState<Breakdown[]>([]);
 
   interface Employee {
     userId: string;
@@ -78,9 +82,20 @@ const Orders = () => {
     setAssignOpen(false);
   };
 
-  const formatDate = (date: any, options: any) => {
-    const d = new Date(date);
-    return d.toLocaleDateString(undefined, options);
+  const handleReport = async () => {
+    try {
+      const response = await fetchBreakdownData(); // Fetch breakdown data from API or state
+      if (response) {
+        setBreakdownData(response.data); // Assuming the response is in the format of Breakdown[]
+        setBomDialogOpen(true); // Open the BOM dialog}
+      }
+    } catch (error) {
+      console.error("Failed to generate BOM report", error);
+    }
+  };
+
+  const handleBomDialogClose = () => {
+    setBomDialogOpen(false); // Close the BOM dialog
   };
 
   const fetchData = async () => {
@@ -100,6 +115,16 @@ const Orders = () => {
         );
         setRows(parsedOrders);
       });
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  const fetchBreakdownData = async () => {
+    try {
+      return await api.get(
+        `data-analysis/ingredient-cost-breakdown/by-order-id${orderDetails.id}`
+      );
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -132,7 +157,7 @@ const Orders = () => {
                   quantity: suborder.quantity,
                   price: suborder.price,
                 })),
-                custom: response.data.customItems,
+                customOrders: response.data.customItems,
               },
               status: response.data.status,
             };
@@ -314,7 +339,7 @@ const Orders = () => {
                   </Accordion>
                 );
               })}
-              {orderDetails.listItems.custom.map((customOrder, index) => {
+              {orderDetails.listItems.customOrders.map((customOrder, index) => {
                 // Dynamically get key-value pairs except 'id'
                 const customOrderDetails = Object.entries(customOrder).filter(
                   ([key, _]) => key !== "id"
@@ -354,12 +379,31 @@ const Orders = () => {
                   </Accordion>
                 );
               })}
+              <Dialog
+                open={bomDialogOpen}
+                onClose={handleBomDialogClose}
+                maxWidth="md"
+                fullWidth
+              >
+                <DialogTitle>BOM Report</DialogTitle>
+                <DialogContent>
+                  {breakdownData.length > 0 ? (
+                    <CostBreakdownTable data={breakdownData} />
+                  ) : (
+                    <Typography>No breakdown data available</Typography>
+                  )}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleBomDialogClose}>Close</Button>
+                </DialogActions>
+              </Dialog>
             </Box>
           ) : (
             <CircularProgress />
           )}
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleReport}>Generate BOM Report</Button>
           <Button onClick={handleClose}>Close</Button>
         </DialogActions>
       </Dialog>

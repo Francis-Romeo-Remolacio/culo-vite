@@ -198,6 +198,43 @@ export interface Units {
   Count: readonly string[];
 }
 
+// BOM
+
+export interface BreakdownIngredient extends Ingredient {
+  itemId: string;
+  itemName: string;
+  inventoryPrice: number;
+  inventoryQuantity: number;
+  inventoryAmountUnit: string;
+  amountQuantityType: string;
+  amount: number;
+  amountUnit: string;
+  calculatedPrice: number;
+}
+
+export interface Breakdown {
+  totalIngredientPrice: number;
+  totalIngredientPriceWithOtherCostIncluded: number;
+  totalIngredientPriceWithOtherCostIncludedRounded: number;
+  ingredientCostBreakdown: [
+    {
+      itemId: string;
+      itemName: string;
+      inventoryPrice: number;
+      inventoryQuantity: number;
+      inventoryAmountUnit: string;
+      amountQuantityType: string;
+      amount: number;
+      amountUnit: string;
+      calculatedPrice: number;
+    }
+  ];
+  otherCostBreakdown: {
+    additionalCost: number;
+    ingredientCostMultiplier: number;
+  };
+}
+
 // Live Chat
 export interface DirectMessage {
   id?: string;
