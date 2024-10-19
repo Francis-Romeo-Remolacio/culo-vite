@@ -40,9 +40,10 @@ const Orders = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
-  const [orderDetails, setOrderDetails] = useState<ManagementOrder | null>(
-    null
-  );
+  const [orderDetails, setOrderDetails] = useState<Omit<
+    ManagementOrder,
+    "customerId" | "customerName" | "isActive"
+  > | null>(null);
   const [rows, setRows] = useState<Partial<ManagementOrder>[]>([]);
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
@@ -121,12 +122,14 @@ const Orders = () => {
   };
 
   const fetchBreakdownData = async () => {
-    try {
-      return await api.get(
-        `data-analysis/ingredient-cost-breakdown/by-order-id${orderDetails.id}`
-      );
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+    if (orderDetails) {
+      try {
+        return await api.get(
+          `data-analysis/ingredient-cost-breakdown/by-order-id${orderDetails.id}`
+        );
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
     }
   };
 
