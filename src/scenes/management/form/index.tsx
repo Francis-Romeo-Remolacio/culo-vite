@@ -14,6 +14,7 @@ import api from "../../../api/axiosConfig";
 import { registerAdminSchema } from "../../../utils/Validation.js";
 import { useFormik } from "formik";
 import { useAlert } from "../../../components/CuloAlert.js";
+import Header from "../../../components/Header.js";
 
 const Form = () => {
   const { makeAlert } = useAlert();
@@ -25,7 +26,7 @@ const Form = () => {
       resetForm();
     } catch (error) {
       console.error(error);
-      makeAlert("error", `Unknown error: ${error.message}`);
+      makeAlert("error", `Unknown error: ${error}`);
     }
   };
 
@@ -53,8 +54,9 @@ const Form = () => {
 
   return (
     <Container maxWidth={"sm"}>
+      <Header title="REGISTER USER" />
       <form onSubmit={handleSubmit}>
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ mt: 2 }}>
           <TextField
             label="Username"
             id="username"
