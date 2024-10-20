@@ -161,6 +161,7 @@ export const customOrderSchema = yup.object().shape({
   customFlavor: yup.string(),
   picture: yup.string().required("Required"),
   message: yup.string().required("Required"),
+  agree: yup.boolean().required("Required"),
 });
 
 export const managementOrderSchema = yup.object({

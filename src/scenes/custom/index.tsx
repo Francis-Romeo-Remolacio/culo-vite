@@ -29,6 +29,8 @@ import {
 import { ChangeEvent, useState } from "react";
 import Header from "../../components/Header.js";
 import api from "../../api/axiosConfig.js";
+import { useAlert } from "../../components/CuloAlert.js";
+import TermsDialog from "../../components/TermsDialog.js";
 
 const availableTiers = [
   '5"x4" (round)',
@@ -65,11 +67,20 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 const Custom = () => {
+  const { makeAlert } = useAlert();
+
   const [tiers, setTiers] = useState<string[]>([]);
   const [sizeHeart, setSizeHeart] = useState<number>(8);
   const [rectangleX, setRectangleX] = useState(12);
   const [rectangleY, setRectangleY] = useState(8);
   const minDate = dayjs().add(7, "day");
+
+  const [imageType, setImageType] = useState("");
+
+  const [open, setOpen] = useState(false);
+  const onClose = () => {
+    setOpen(false);
+  };
 
   const onSubmit = async () => {
     let sizeOut = "";
@@ -97,8 +108,13 @@ const Custom = () => {
         pictureBase64: values.picture,
         message: values.message,
       });
+      makeAlert(
+        "success",
+        "Order successfully placed. You can view it in your cart."
+      );
     } catch (error) {
       console.error(error);
+      makeAlert("error", "Error placing order, please try again.");
     }
   };
 
@@ -189,6 +205,7 @@ const Custom = () => {
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
+      setImageType(file.type);
       // Check file size limit (1MB)
       if (file.size > 1024 * 1024) {
         return;
@@ -273,7 +290,7 @@ const Custom = () => {
           ) : null}
           {values.shape === "heart" ? (
             <>
-              <Typography variant="h4">{`Size: ${values.sizeHeart}`}</Typography>
+              <Typography variant="h4">{`Size: ${sizeHeart}"`}</Typography>
               <Slider
                 id="sizeHeart"
                 name="sizeHeart"
@@ -291,8 +308,7 @@ const Custom = () => {
           ) : null}
           {values.shape === "rectangle" ? (
             <>
-              <Typography variant="h4">{"Size"}</Typography>
-              <Typography variant="h5">{values.sizeRectangle}</Typography>
+              <Typography variant="h4">{`Size: ${rectangleX}\"x${rectangleY}\"x2.5"`}</Typography>
               <Slider
                 value={rectangleX}
                 onChange={(event, value) =>
@@ -391,6 +407,9 @@ const Custom = () => {
             multiline
             rows={4}
           />
+          {values.picture ? (
+            <img src={`data:${imageType};base64,${values.picture}`} />
+          ) : null}
           <Button
             component="label"
             role={undefined}
@@ -399,90 +418,42 @@ const Custom = () => {
             startIcon={<UploadIcon />}
           >
             {"Upload File"}
-            <VisuallyHiddenInput type="file" onChange={handleFileUpload} />
+            <VisuallyHiddenInput
+              type="file"
+              onChange={handleFileUpload}
+              accept="image/*"
+            />
           </Button>
 
-          <Header title="Terms & Conditions" subtitle="Please READ!" />
-          <Typography variant="h5">
-            {"DEPOSITS, PAYMENTS, CANCELLATIONS"}
-          </Typography>
-          <Typography variant="body1">
-            {
-              "A deposit of 50% is required to consider this an order. The remaining balance is DUE five (5) business days prior to the pick-up date."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "*Any changes to this order must be made no later than five (5) business days prior to pick-up date. Any changes requested after confirmation of order cannot be guaranteed and may be subject to additional charges."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "All deposits are non-refundable. There will be no credit given for orders canceled inside of five (5) business days before the date of event."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "For cancellations with more than five (5) business days' notice, credit may be given for a future order, less the fair market value of items that cannot be re-used. This offer is subject to the date being available."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "If full payment is not received on the due date, the order may be canceled."
-            }
-          </Typography>
-          <Typography variant="h5">{"DELIVERY TERMS"}</Typography>
-          <Typography variant="body1">
-            {"The pick-up time will be confirmed upon placing your order."}
-          </Typography>
-          <Typography variant="body1">
-            {
-              "The Client must disclose any adverse road hazards and/or obstacles that may hamper the delivery and quality of finished products. In the case of an unavoidable occurence, such as an act of God, a car accident, poor road conditions, or dropping of cake during delivery - out of The Pink Butter Cake Studio cannot be held liable for more than the price of the cake described in this order."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "The Client should provide the screenshot of LALAMOVE CAR or GRAB CAR for pick up."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {"The Client should be the one to book their own pick-up."}
-          </Typography>
-          <Typography variant="h5">{"OUR GUARANTEE"}</Typography>
-          <Typography variant="body1">
-            {
-              "The Pink Butter Cake Studio will provide a professionally decorated dessert in a timely manner as specified in the order form. We are honored that you have chosen us for your special celebration. We guarantee that the flavors, size and general design elements will be met as outlined. If you are not satisfied with our product(s) please let us know at the time you receive your order."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "Although we make every attempt to provide an exact design and to match colors, custom cakes are a work of art and hand-made, it may not be possible to match an exact shade of a color, or design but we will come as close as possible. The final product may be subject to slight variations."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "We do not offer discounts or refunds if the exact shade of a color or design is not achieved or if variation occurs. In the event that a major variation needs to be made, The Pink Butter will communicate this to the customer and seek re-design approval, 5 days before the event."
-            }
-          </Typography>
-          <Typography variant="h5">{"DESIGN VARIATIONS"}</Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="agree"
-                value={values.agree}
-                onChange={handleChange}
-              />
-            }
-            label="I have read and agreed to the Terms and Conditions"
-            required
+          <TermsDialog
+            open={open}
+            onClose={onClose}
+            agree={values.agree}
+            handleChange={handleChange}
           />
+
           <Button
             variant="contained"
             type="submit"
-            onClick={() => {
-              console.log(errors);
+            onClick={(e) => {
+              e.preventDefault();
+
+              if (Object.keys(errors).length > 0) {
+                // Check if there are any errors
+                if (errors.agree) {
+                  setOpen(true); // Open modal if `errors.agree` exists
+                } else {
+                  makeAlert(
+                    "error",
+                    Object.entries(errors)
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")
+                  );
+                }
+              } else {
+                handleSubmit(); // Submit the form if no errors
+              }
             }}
-            disabled={!values.agree}
           >
             Submit
           </Button>

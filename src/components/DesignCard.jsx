@@ -72,9 +72,7 @@ const DesignCard = ({
                 : { height: 200, width: "100%" }
             }
             image={
-              picture
-                ? `data:image/${imageType};base64,${picture}`
-                : "design.png"
+              picture ? `data:${imageType};base64,${picture}` : "design.png"
             }
             title={name}
             onError={(e) => {
