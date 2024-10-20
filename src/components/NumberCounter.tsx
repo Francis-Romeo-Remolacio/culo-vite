@@ -6,19 +6,28 @@ import {
 
 type NumberCounterProps = {
   value: number;
-  handleChange: (method: string) => void;
+  onChange: (method: string) => void;
+  key?: string;
+  label?: string;
+  small?: boolean;
 };
 
-const NumberCounter = ({ value, handleChange }: NumberCounterProps) => {
+const NumberCounter = ({
+  value,
+  onChange,
+  key,
+  label,
+  small,
+}: NumberCounterProps) => {
   return (
     <Stack direction="row">
-      <IconButton onClick={() => handleChange("decrement")}>
+      <IconButton onClick={() => onChange("decrement")}>
         <DecreaseIcon />
       </IconButton>
       <TextField
-        label="Quantity"
-        id="quantity"
-        name="quantity"
+        label={label ?? "Quantity"}
+        id={key ?? "quantity"}
+        name={key ?? "quantity"}
         value={value}
         slotProps={{
           htmlInput: {
@@ -27,8 +36,9 @@ const NumberCounter = ({ value, handleChange }: NumberCounterProps) => {
             max: 10,
           },
         }}
+        size={small ? "small" : "medium"}
       />
-      <IconButton onClick={() => handleChange("increment")}>
+      <IconButton onClick={() => onChange("increment")}>
         <IncreaseIcon />
       </IconButton>
     </Stack>

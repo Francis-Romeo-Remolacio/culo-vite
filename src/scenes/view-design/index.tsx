@@ -581,7 +581,7 @@ const ViewDesign = () => {
                 </Stack>
                 <NumberCounter
                   value={values.quantity}
-                  handleChange={handleChangeQuantity}
+                  onChange={handleChangeQuantity}
                 ></NumberCounter>
                 <TextField
                   label="Dedication / Message"
@@ -636,7 +636,7 @@ const ViewDesign = () => {
                                 (existing) => existing.id === addOn.id
                               )?.quantity ?? 1 // Default to 1 if not found
                             }
-                            handleChange={(method) => {
+                            onChange={(method) => {
                               if (method === "increment") {
                                 handleChangeAddOnQuantity(
                                   addOn.id,
@@ -670,7 +670,7 @@ const ViewDesign = () => {
                                   (existing) => existing.id === addOn.id
                                 )?.quantity ?? 1 // Default to 1 if not found
                               }
-                              handleChange={(method) => {
+                              onChange={(method) => {
                                 if (method === "increment") {
                                   handleChangeAddOnQuantity(
                                     addOn.id,

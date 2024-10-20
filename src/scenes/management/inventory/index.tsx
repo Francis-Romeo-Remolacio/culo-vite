@@ -1,5 +1,21 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Chip, Drawer, Stack } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Drawer,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -23,12 +39,21 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   Refresh as RefreshIcon,
-  Add as AddIcon,
+  AddCircle as AddIcon,
   Warehouse as WarehouseIcon,
+  ArrowDropDown,
 } from "@mui/icons-material";
-import { Ingredient } from "../../../utils/Schemas.js";
+import { Batch, Ingredient } from "../../../utils/Schemas.js";
+import { Tokens } from "../../../Theme.ts";
+import { useAlert } from "../../../components/CuloAlert.tsx";
+import { useFormik } from "formik";
+import NumberCounter from "../../../components/NumberCounter.tsx";
 
 const Inventory = () => {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
+  const { makeAlert } = useAlert();
   const apiRef = useGridApiRef();
   const [tempRows, setTempRows] = useState<Ingredient[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -36,6 +61,25 @@ const Inventory = () => {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const [unitMapping, setUnitMapping] = useState<Record<string, string[]>>();
   const [iterator, setIterator] = useState(0);
+
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [open, setOpen] = useState(false);
+  const handleOpenBatchDialog = (
+    id: string,
+    name: string,
+    price: number,
+    measurement: string
+  ) => {
+    setValues({ id, name, price, measurement, quantity: 0 });
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setTimeout(function () {
+      resetForm();
+    }, 50);
+  };
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -75,7 +119,23 @@ const Inventory = () => {
 
   useEffect(() => {
     fetchData();
+    fetchBatches();
   }, []);
+
+  const fetchBatches = async () => {
+    await api.get("ingredients/batches").then((response) => {
+      const parsedBatches: Batch[] = response.data.map((batch: any) => ({
+        id: batch.id,
+        itemId: batch.itemId,
+        price: batch.price,
+        quantity: batch.quantity,
+        created: batch.created,
+        lastModified: batch.lastModified,
+        lastModifiedBy: batch.lastModifiedBy,
+      }));
+      setBatches(parsedBatches);
+    });
+  };
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -173,12 +233,15 @@ const Inventory = () => {
           prevRows.filter((row) => row.id !== updatedRow.id)
         );
         await api.post("ingredients", updatedRow); // For new items, send the entire updatedRow
+        makeAlert("success", "Added new ingredient");
       } else {
         await api.patch(`ingredients/${updatedRow.id}`, changedFields); // Send only changed fields
+        makeAlert("success", "Updated ingredient");
       }
       fetchData(); // Refresh data after update
     } catch (error) {
       console.error("Error updating ingredient:", error);
+      makeAlert("error", "Error updating ingredient");
       // You might want to handle the error accordingly
     }
 
@@ -206,9 +269,11 @@ const Inventory = () => {
     } else {
       try {
         await api.delete(`ingredients/${id}`);
+        makeAlert("success", "Deleted ingredient");
         fetchData(); // Refresh data after archive
       } catch (error) {
         console.error("Error deleting ingredient:", error);
+        makeAlert("error", "Failed to delete ingredient");
       }
     }
   };
@@ -217,12 +282,43 @@ const Inventory = () => {
     {
       try {
         await api.patch("ingredients", null, { params: { restore: id } });
+        makeAlert("success", "Restored ingredient");
         fetchData(); // Refresh data after restore
       } catch (error) {
         console.error("Error restoring ingredient:", error);
+        makeAlert("error", "Failed to restore ingredient");
       }
     }
   };
+
+  // Batches
+
+  const onSubmit = async () => {
+    try {
+      api.post(`ingredients/${values.id}/batches`, {
+        price: values.price,
+        quantity: values.quantity,
+      });
+      makeAlert("success", "Successfully added batch");
+    } catch (error) {
+      console.error(error);
+      makeAlert("error", "Failed to add batch");
+    } finally {
+      handleClose();
+    }
+  };
+
+  const { values, errors, setValues, isSubmitting, handleChange, resetForm } =
+    useFormik({
+      initialValues: {
+        id: "",
+        name: "",
+        price: 0,
+        quantity: 0,
+        measurement: "",
+      },
+      onSubmit,
+    });
 
   const columns: GridColDef[] = [
     {
@@ -258,6 +354,19 @@ const Inventory = () => {
 
         if (params.row.isActive) {
           return [
+            <GridActionsCellItem
+              icon={<AddIcon />}
+              label="Add"
+              onClick={() =>
+                handleOpenBatchDialog(
+                  params.row.id,
+                  params.row.name,
+                  params.row.price,
+                  params.row.measurement
+                )
+              }
+              color="success"
+            />,
             <GridActionsCellItem
               icon={<EditIcon />}
               label="Edit"
@@ -440,7 +549,46 @@ const Inventory = () => {
           {"View Batches"}
         </Button>
         <Drawer open={batchesOpen} onClose={toggleDrawer(false)} anchor="right">
-          <Box sx={{ minWidth: 400 }}></Box>
+          <Box sx={{ minWidth: 400, mt: 8, p: 2 }}>
+            <Header title="Batches" />
+            <Box sx={{ mb: 2 }}>
+              {batches.map((batch) => {
+                const matchedIngredient = ingredients.find(
+                  (ingredient) => ingredient.id === batch.itemId
+                );
+
+                const details = Object.entries(batch).filter(
+                  ([key, _]) => key !== "id"
+                );
+
+                return (
+                  <Accordion
+                    key={batch.id}
+                    sx={{ backgroundColor: colors.primary[100] }}
+                  >
+                    <AccordionSummary expandIcon={<ArrowDropDown />}>
+                      {matchedIngredient
+                        ? `${
+                            matchedIngredient.name
+                          }: ${batch.created.toLocaleString("en-PH", {
+                            timeZone: "UTC",
+                          })}`
+                        : `Unknown Ingredient (${batch.itemId})`}
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {details.map(([key, value]) => (
+                        <Box key={key} sx={{ marginBottom: 1 }}>
+                          <Typography variant="body1">
+                            <strong>{key}:</strong> {String(value)}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
+            </Box>
+          </Box>
         </Drawer>
       </Stack>
       <DataGridStyler>
@@ -472,6 +620,57 @@ const Inventory = () => {
           }}
         />
       </DataGridStyler>
+
+      {/* Batch Dialog */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{`Add Batch: ${values.name}`}</DialogTitle>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+        >
+          <DialogContent>
+            <Stack spacing={2}>
+              <TextField
+                label="Price"
+                id="price"
+                name="price"
+                value={values.price}
+                onChange={handleChange}
+                slotProps={{
+                  htmlInput: {
+                    type: "number",
+                    min: 0,
+                  },
+                }}
+                size="small"
+              />
+              <TextField
+                label={`${values.measurement}s bought`}
+                id="quantity"
+                name="quantity"
+                value={values.quantity}
+                onChange={handleChange}
+                slotProps={{
+                  htmlInput: {
+                    type: "number",
+                    step: ".01",
+                    min: 0,
+                  },
+                }}
+                size="small"
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={isSubmitting}>
+              OK
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </>
   );
 };
