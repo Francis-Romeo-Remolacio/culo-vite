@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent } from "react";
+import React, { useState, useEffect, MouseEvent } from "react";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
@@ -7,8 +7,9 @@ import Typography from "@mui/material/Typography";
 import TagChip from "./TagChip";
 import { Design, Tag } from "../utils/Schemas";
 import { Link as RouterLink } from "react-router-dom";
-import { Link } from "@mui/material";
+import { Link, Skeleton } from "@mui/material";
 import { getImageType } from "./Base64Image";
+import api from "../api/axiosConfig";
 
 type DesignCardProps = {
   design: Design;
@@ -17,20 +18,32 @@ type DesignCardProps = {
 };
 
 const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
+  const [picture, setPicture] = useState();
   const [imageType, setImageType] = useState("");
 
+  const fetchImage = async () => {
+    const response = await api.get(`designs/${design.id}/display-picture-data`);
+    setPicture(response.data.displayPictureData);
+  };
   useEffect(() => {
-    const determineImageType = async () => {
-      try {
-        const type = getImageType(design.pictureData);
-        setImageType(type);
-      } catch (err) {
-        console.error("Error determining image type:", err);
-      }
-    };
-
-    determineImageType();
+    fetchImage();
   }, []);
+
+  useEffect(() => {
+    if (picture) {
+      setImageType(getImageType(picture));
+    }
+  }, [picture]);
+
+  const PictureSkeleton: React.FC = () => {
+    return (
+      <Skeleton
+        variant="rectangular"
+        width="100%"
+        height={manager ? 160 : 140}
+      />
+    );
+  };
 
   return (
     <Card
@@ -53,12 +66,9 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
                 ? { height: 160, width: "100%" }
                 : { height: 140, width: "100%" }
             }
+            component={picture ? "img" : PictureSkeleton}
             image={
-              design.pictureData
-                ? `data:image/${imageType};base64,${design.pictureData}`
-                : design.pictureUrl
-                ? design.pictureUrl.toString()
-                : "design.png"
+              picture ? `data:${imageType};base64,${picture}` : "design.png"
             }
           />
           <CardContent>
