@@ -35,23 +35,17 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
     }
   }, [picture]);
 
-  const PictureSkeleton: React.FC = () => {
-    return (
-      <Skeleton
-        variant="rectangular"
-        width="100%"
-        height={manager ? 160 : 140}
-      />
-    );
-  };
+  const PictureSkeleton: React.FC = () => (
+    <Skeleton variant="rectangular" width="100%" height={manager ? 200 : 130} />
+  );
 
   return (
     <Card
       elevation={2}
       sx={
         manager
-          ? { width: "100%", height: 360, display: "inline-block" }
-          : { width: 160, height: 240, display: "inline-block" }
+          ? { height: 360, display: "inline-block" }
+          : { width: 160, height: 260, display: "inline-block" }
       }
     >
       <Link
@@ -63,8 +57,8 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
           <CardMedia
             sx={
               manager
-                ? { height: 160, width: "100%" }
-                : { height: 140, width: "100%" }
+                ? { height: 200, width: "100%" }
+                : { height: 130, width: "100%" }
             }
             component={picture ? "img" : PictureSkeleton}
             image={
@@ -87,11 +81,9 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
             >
               {manager ? design.description : ""}
             </Typography>
-            <div style={{ marginTop: "8px" }}>
-              {design.tags.map((tag: Tag) => (
-                <TagChip key={tag.id} id={tag.id} name={tag.name} />
-              ))}
-            </div>
+            {design.tags.map((tag: Tag) => (
+              <TagChip key={tag.id} id={tag.id} name={tag.name} />
+            ))}
           </CardContent>
         </CardActionArea>
       </Link>
