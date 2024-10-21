@@ -258,18 +258,22 @@ export const ThemeSettings = (mode: PaletteMode) => {
       h1: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 40,
+        fontWeight: "bold",
       },
       h2: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 32,
+        fontWeight: "bold",
       },
       h3: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 24,
+        fontWeight: "bold",
       },
       h4: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 20,
+        fontWeight: "bold",
       },
       h5: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
