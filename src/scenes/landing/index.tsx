@@ -63,66 +63,42 @@ const Landing = () => {
         </Stack>
 
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Grid size={{ xs: 12 }}>
+            {/* Section 3: Premade Designs */}
+            <Grid container justifyContent="center">
+              <Grid sx={{ maxWidth: "lg" }}>
+                <Paper sx={{ p: 2, height: "100%" }}>
+                  <Typography variant="h4" gutterBottom>
+                    Browse Our Premade Cake Designs
+                  </Typography>
+
+                  <Typography variant="body1" paragraph>
+                    <DesignGallery />
+                  </Typography>
+                  {/*<Button variant="contained">View More Designs</Button>*/}
+                </Paper>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             {/* Section 2: About */}
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 About The Pink Butter Cake Studio
               </Typography>
-              <Typography variant="body1">
-                The Pink Butter Cake Studio, established in 2017, has quickly
-                become a beloved destination for cake enthusiasts in Quezon
-                City, Philippines. Specializing in custom orders, the studio
-                prides itself on creating exquisite cakes tailored to suit any
-                theme or occasion, from birthdays and weddings to corporate
-                events. With a commitment to quality and creativity, each cake
-                is meticulously crafted to ensure not only a visually stunning
-                presentation but also exceptional flavor. The team at The Pink
-                Butter Cake Studio works closely with clients to understand
-                their vision, allowing for personalized touches that make every
-                cake a unique centerpiece for any celebration.
-              </Typography>
-              <Typography variant="body1">
-                In addition to custom creations, The Pink Butter Cake Studio
-                offers a selection of premade designs that reflect the latest
-                trends and seasonal themes. These beautifully designed cakes are
-                perfect for those who want the same level of artistry and taste
-                without the wait for a custom order. With a convenient location
-                on Masbate Street in Brgy. Nayong Kanluran, the studio has
-                established itself as a go-to spot for cake lovers looking for
-                high-quality, handcrafted desserts. The Pink Butter Cake Studio
-                continues to delight customers with its innovative designs and
-                delicious flavors, ensuring that every occasion is celebrated
-                with a slice of sweetness.
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 6 }}>
-            {/* Section 3: Premade Designs */}
-            <Paper sx={{ p: 2, height: "100%" }}>
-              <Typography variant="h4" gutterBottom>
-                Browse Our Premade Cake Designs
-              </Typography>
-
               <Typography variant="body1" paragraph>
-                <DesignGallery />
+                Established in 2017, The Pink Butter Cake Studio has been
+                crafting stunning and delicious cakes for all occasions.
               </Typography>
-              {/*<Button variant="contained">View More Designs</Button>*/}
+              <Typography variant="body1" paragraph>
+                Located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon City,
+                Philippines.
+              </Typography>
             </Paper>
           </Grid>
-          {/* Section 4: Custom Order */}
-          {/*
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Panel>
-            <Typography variant="h4" gutterBottom>
-              Request a Custom Cake
-            </Typography>
-            <Typography variant="body1" paragraph></Typography>
-          </Panel>
-        </Grid>*/}
 
-          {/* Section 5: Testimonials */}
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          {/* Section 2: Testimonials */}
+          {/* <Grid size={{ xs: 12, md: 6, lg: 3.333333333 }}>
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
                 What Our Customers Say
@@ -160,41 +136,89 @@ const Landing = () => {
                 </ListItem>
               </List>
             </Paper>
-          </Grid>
+          </Grid> */}
+
+          {/* Section 3: Contact Information */}
           <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-            {/* Section 6: Contact  */}
             <Paper sx={{ p: 2, height: "100%" }}>
               <Typography variant="h4" gutterBottom>
-                Get in Touch
+                {"Contact Us"}
               </Typography>
               <Typography variant="body1" paragraph>
-                Address: 5 Masbate St. Brgy. Nayong Kanluran, Quezon City,
-                Philippines
+                {"Viber: +63 968 228 1963"}
               </Typography>
               <Typography variant="body1" paragraph>
-                Phone: 0968-228-1963
+                {"Facebook: TBP Cake Studio"}
               </Typography>
               <Typography variant="body1" paragraph>
-                <MuiLink href="https://www.facebook.com/TPBcakestudio/">
-                  Facebook
-                </MuiLink>
+                {"Instagram: @thepinkbutter"}
               </Typography>
               <Typography variant="body1" paragraph>
-                <MuiLink href="https://www.tiktok.com/@thepinkbutter">
-                  Tiktok
-                </MuiLink>
-              </Typography>
-              <Typography variant="body1" paragraph>
-                <MuiLink href="https://www.instagram.com/thepinkbutter/p/C40NUobK4VW/">
-                  Instagram
-                </MuiLink>
-              </Typography>
-              <Typography variant="body1" paragraph>
-                <MuiLink href="https://ph.pinterest.com/thepinkbutter/">
-                  Pinterest
-                </MuiLink>
+                {"Operating Hours: 8 AM - 5 PM (Mon-Sat)"}
               </Typography>
             </Paper>
+          </Grid>
+
+          {/* Section 4: Quick Links */}
+          <Grid size={{ xs: 12, md: 2, lg: 4 }}>
+            <Paper sx={{ p: 2, height: "100%" }}>
+              <Typography variant="h4" gutterBottom>
+                Quick Links
+              </Typography>
+              <MuiLink
+                href="/about"
+                color="inherit"
+                underline="hover"
+                display="block"
+              >
+                About Us
+              </MuiLink>
+              <MuiLink
+                href="/menu"
+                color="inherit"
+                underline="hover"
+                display="block"
+              >
+                Menu
+              </MuiLink>
+              <MuiLink
+                href="/order"
+                color="inherit"
+                underline="hover"
+                display="block"
+              >
+                Order Now
+              </MuiLink>
+              <MuiLink
+                href="/contact"
+                color="inherit"
+                underline="hover"
+                display="block"
+              >
+                Contact Us
+              </MuiLink>
+              <MuiLink
+                href="/faqs"
+                color="inherit"
+                underline="hover"
+                display="block"
+              >
+                FAQs
+              </MuiLink>
+            </Paper>
+          </Grid>
+
+          {/* Footer: Rights Info */}
+          <Grid size={{ xs: 12 }}>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              align="center"
+              sx={{ mt: 4 }}
+            >
+              © {new Date().getFullYear()} The Pink Butter Cake Studio. All
+              rights reserved.
+            </Typography>
           </Grid>
         </Grid>
       </Stack>
