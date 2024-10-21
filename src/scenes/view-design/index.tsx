@@ -59,14 +59,7 @@ const ViewDesign = () => {
 
   const [design, setDesign] = useState<Design>();
   const [stockStatus, setStockStatus] = useState(false);
-  const availableFlavors = [
-    "Dark Chocolate",
-    "Funfetti (vanilla with sprinkles)",
-    "Vanilla Caramel",
-    "Mocha",
-    "Red Velvet",
-    "Banana",
-  ];
+  const [availableFlavors, setAvailableFlavors] = useState([]);
   const [openAddOn, setOpenAddOn] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<DesignVariant>();
   const [fetchedAddOns, setFetchedAddOns] = useState<AddOn[]>([]);
@@ -290,7 +283,7 @@ const ViewDesign = () => {
     handleCloseAddOn();
   };
 
-  const fetchAddOns = async (variant: DesignVariant) => {
+  const fetchAddOns = async () => {
     try {
       await api.get("add-ons").then((response) => {
         const parsedAddOns: AddOn[] = response.data.map((addOn: any) => ({
@@ -308,6 +301,16 @@ const ViewDesign = () => {
       console.error("Failed to fetch add-ons: ", error);
     }
   };
+
+  const fetchFlavors = async () => {
+    api.get("ui-helpers/valid-design-flavors").then((response) => {
+      setAvailableFlavors(response.data);
+    });
+  };
+
+  useEffect(() => {
+    fetchFlavors()
+  }, []);
 
   const filterAddOns = () => {
     if (selectedVariant) {
@@ -442,7 +445,7 @@ const ViewDesign = () => {
 
         setSelectedAddOns(updatedAddOns);
         setStockStatus(variant.inStock);
-        fetchAddOns(variant);
+        fetchAddOns();
       }
     }
   }, [values.size, design?.variants]);
