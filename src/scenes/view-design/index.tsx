@@ -445,7 +445,7 @@ const ViewDesign = () => {
         fetchAddOns(variant);
       }
     }
-  }, [values.size, design?.variants, fetchedAddOns]);
+  }, [values.size, design?.variants]);
 
   useEffect(() => {
     if (values.size && selectedVariant) {
@@ -785,12 +785,17 @@ const ViewDesign = () => {
                 ) : (
                   ""
                 )}
+                <Typography variant="body2" color="textSecondary">
+                  {
+                    "All orders require the store's approval. You will be able to pay once your order is approved."
+                  }
+                </Typography>
                 <Stack
                   direction="row"
                   spacing={2}
                   justifyContent="space-evenly"
                 >
-                  {!isSubmitting ? (
+                  {!isSubmitting && design ? (
                     <Button
                       color="primary"
                       variant="outlined"
