@@ -41,7 +41,7 @@ import {
   Design,
   DesignVariant,
   OrderAddOn,
-  VariantAddOn,
+  PastryMaterialAddOn,
 } from "../../utils/Schemas.ts";
 import { getImageType } from "../../components/Base64Image.tsx";
 import NumberCounter from "../../components/NumberCounter.tsx";
@@ -69,6 +69,7 @@ const ViewDesign = () => {
   ];
   const [openAddOn, setOpenAddOn] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<DesignVariant>();
+  const [fetchedAddOns, setFetchedAddOns] = useState<AddOn[]>([]);
   const [availableAddOns, setAvailableAddOns] = useState<AddOn[]>([]);
   const [filteredAddOns, setFilteredAddOns] = useState<AddOn[]>([]);
   const [selectedAddOns, setSelectedAddOns] = useState<OrderAddOn[]>([]);
@@ -299,6 +300,7 @@ const ViewDesign = () => {
           price: addOn.price,
           size: addOn.size,
         }));
+        setFetchedAddOns(parsedAddOns);
         setAvailableAddOns(parsedAddOns);
         filterAddOns();
       });
@@ -313,16 +315,28 @@ const ViewDesign = () => {
       let filteredAddOns = availableAddOns.filter(
         (addOn: AddOn) =>
           !selectedVariant.addOns.some(
-            (variantAddOn: AddOn) => variantAddOn.id === addOn.id
+            (variantAddOn: PastryMaterialAddOn) => variantAddOn.id === addOn.id
           )
       );
 
       // Further filter to remove add-ons already in `userAddOns`
       filteredAddOns = filteredAddOns.filter(
         (addOn: AddOn) =>
-          !userAddOns.some((userAddOn: AddOn) => userAddOn.id === addOn.id)
+          !userAddOns.some((userAddOn: OrderAddOn) => userAddOn.id === addOn.id)
       );
-      setFilteredAddOns(filteredAddOns);
+
+      // Map the filteredAddOns to include the price from fetchedAddOns
+      const updatedFilteredAddOns = filteredAddOns.map((addOn: AddOn) => {
+        const fetchedAddOn = fetchedAddOns.find(
+          (fetched: AddOn) => fetched.id === addOn.id
+        );
+        return {
+          ...addOn,
+          price: fetchedAddOn?.price || 0, // Use price from fetchedAddOns if available
+        };
+      });
+
+      setFilteredAddOns(updatedFilteredAddOns);
     }
   };
 
@@ -364,10 +378,7 @@ const ViewDesign = () => {
               id: tag.designTagId,
               name: tag.designTagName,
             })),
-            shapes: designDataResponse.data.designShapes.map((shape: any) => ({
-              id: shape.designShapeId,
-              name: shape.shapeName,
-            })),
+            shape: designDataResponse.data.designShape,
           };
 
           // Parse the design info
@@ -411,20 +422,30 @@ const ViewDesign = () => {
         (variant) => variant.name === values.size
       );
       setSelectedVariant(variant);
+
       if (variant) {
-        setSelectedAddOns(
-          variant.addOns.map((addOn: VariantAddOn) => ({
-            id: addOn.id,
-            name: addOn.name,
-            price: addOn.price,
-            quantity: addOn.amount,
-          }))
+        // Map over the variant's addOns and find the corresponding addOn from fetchedAddOns by id
+        const updatedAddOns = variant.addOns.map(
+          (variantAddOn: PastryMaterialAddOn) => {
+            const fetchedAddOn = fetchedAddOns.find(
+              (addOn: AddOn) => addOn.id === variantAddOn.id
+            );
+
+            return {
+              id: variantAddOn.id,
+              name: variantAddOn.name,
+              price: fetchedAddOn?.price || 0, // Use the price from fetchedAddOns if available
+              quantity: variantAddOn.amount,
+            };
+          }
         );
+
+        setSelectedAddOns(updatedAddOns);
         setStockStatus(variant.inStock);
         fetchAddOns(variant);
       }
     }
-  }, [values.size]);
+  }, [values.size, design?.variants, fetchedAddOns]);
 
   useEffect(() => {
     if (values.size && selectedVariant) {
@@ -611,49 +632,56 @@ const ViewDesign = () => {
                       {`Size ${values.size} includes:`}
                     </Typography>
                     <List dense>
-                      {selectedVariant.addOns.map((addOn) => (
-                        <ListItem key={addOn.id}>
-                          <Checkbox
-                            edge="start"
-                            checked={
-                              !!selectedAddOns.find(
-                                (existing) => existing.id === addOn.id
-                              )
-                            }
-                            onClick={() =>
-                              handleToggleAddOn(addOn.id, "variant")
-                            }
-                            tabIndex={-1}
-                            disableRipple
-                          />
-                          <ListItemText
-                            primary={addOn.name}
-                            secondary={`₱${addOn.price}`}
-                          />
-                          <NumberCounter
-                            value={
-                              selectedAddOns.find(
-                                (existing) => existing.id === addOn.id
-                              )?.quantity ?? 1 // Default to 1 if not found
-                            }
-                            onChange={(method) => {
-                              if (method === "increment") {
-                                handleChangeAddOnQuantity(
-                                  addOn.id,
-                                  1,
-                                  "variant"
-                                ); // Increment by 1
-                              } else {
-                                handleChangeAddOnQuantity(
-                                  addOn.id,
-                                  -1,
-                                  "variant"
-                                ); // Decrement by 1
+                      {selectedVariant.addOns.map((addOn) => {
+                        // Find the corresponding fetched add-on to get the price
+                        const fetchedAddOn = fetchedAddOns.find(
+                          (fetched) => fetched.id === addOn.id
+                        );
+
+                        return (
+                          <ListItem key={addOn.id}>
+                            <Checkbox
+                              edge="start"
+                              checked={
+                                !!selectedAddOns.find(
+                                  (existing) => existing.id === addOn.id
+                                )
                               }
-                            }}
-                          />
-                        </ListItem>
-                      ))}
+                              onClick={() =>
+                                handleToggleAddOn(addOn.id, "variant")
+                              }
+                              tabIndex={-1}
+                              disableRipple
+                            />
+                            <ListItemText
+                              primary={addOn.name}
+                              secondary={`₱${fetchedAddOn?.price ?? 0}`} // Use price from fetchedAddOns or default to 0
+                            />
+                            <NumberCounter
+                              value={
+                                selectedAddOns.find(
+                                  (existing) => existing.id === addOn.id
+                                )?.quantity ?? 1 // Default to 1 if not found
+                              }
+                              onChange={(method) => {
+                                if (method === "increment") {
+                                  handleChangeAddOnQuantity(
+                                    addOn.id,
+                                    1,
+                                    "variant"
+                                  ); // Increment by 1
+                                } else {
+                                  handleChangeAddOnQuantity(
+                                    addOn.id,
+                                    -1,
+                                    "variant"
+                                  ); // Decrement by 1
+                                }
+                              }}
+                            />
+                          </ListItem>
+                        );
+                      })}
                     </List>
 
                     <Typography variant="body1" style={{ marginTop: 16 }}>

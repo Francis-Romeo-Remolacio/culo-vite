@@ -2,6 +2,7 @@
 
 import { Dayjs } from "dayjs";
 import * as TimePeriods from "./TimePeriods";
+import { number } from "yup";
 
 export interface User {
   id: string;
@@ -56,7 +57,7 @@ export interface ManagementAddOn extends AddOn {
   lastModified: Date;
 }
 
-export interface OrderAddOn extends AddOn {
+export interface OrderAddOn extends Omit<AddOn, "price"> {
   quantity: number;
 }
 
