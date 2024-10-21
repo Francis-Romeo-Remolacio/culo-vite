@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { Helmet } from "react-helmet-async";
-import DesignGallery from "./../../components/DesignGallery.jsx";
+import DesignGallery from "./../../components/DesignGallery.tsx";
 import { Tokens } from "../../Theme.ts";
 
 const Landing = () => {
@@ -54,7 +54,7 @@ const Landing = () => {
           </Typography>
           <Stack direction="row" spacing={1}>
             <Link to="shop">
-              <Button variant="contained">Browse Designs</Button>
+              <Button variant="contained">Design Collection</Button>
             </Link>
             <Link to="custom">
               <Button variant="outlined">Custom Order</Button>
@@ -73,7 +73,7 @@ const Landing = () => {
                   </Typography>
 
                   <Typography variant="body1" paragraph>
-                    <DesignGallery />
+                    <DesignGallery landing />
                   </Typography>
                   {/*<Button variant="contained">View More Designs</Button>*/}
                 </Paper>

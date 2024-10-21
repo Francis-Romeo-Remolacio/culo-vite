@@ -16,6 +16,7 @@ type DesignGalleryProps = {
   selectedTags?: string[];
   searchQuery?: string;
   setIsRefreshing?: React.Dispatch<SetStateAction<boolean>>;
+  landing?: boolean;
 };
 
 const DesignGallery = ({
@@ -23,6 +24,7 @@ const DesignGallery = ({
   selectedTags,
   searchQuery,
   setIsRefreshing,
+  landing,
 }: DesignGalleryProps) => {
   const [fetchedDesigns, setFetchedDesigns] = useState<Design[]>([]);
   const [outputDesigns, setOutputDesigns] = useState<Design[]>([]);
@@ -56,39 +58,40 @@ const DesignGallery = ({
       }
       if (searchQuery) {
         try {
-          api
-            .get("designs/search/by-name", {
-              params: {
-                name: searchQuery,
-              },
-            })
-            .then((response) => {
-              const parsedDesigns: Design[] = parseDesigns(response);
-              setFetchedDesigns(parsedDesigns);
-              setOutputDesigns(parsedDesigns);
-            });
+          const response = await api.get("designs/search/by-name", {
+            params: {
+              name: searchQuery,
+            },
+          });
+          const parsedDesigns: Design[] = parseDesigns(response);
+          const limitedDesigns = parsedDesigns.slice(0, 6); // Limit to 6 designs
+          setFetchedDesigns(limitedDesigns);
+          setOutputDesigns(limitedDesigns);
+        } catch (error) {
+          console.error(error);
+        } finally {
           if (setIsRefreshing) {
             setIsRefreshing(false);
           }
-        } catch (error) {
-          console.error(error);
         }
       } else {
         try {
           const tagsQuery = tagFilter?.length
             ? `/designs/with-tags/${tagFilter.join(",")}`
-            : `/designs?page=${page}&record_per_page=18`;
-          await api.get(tagsQuery).then((response) => {
-            const parsedDesigns: Design[] = parseDesigns(response);
-            setFetchedDesigns(parsedDesigns);
-            setOutputDesigns(parsedDesigns);
-            setMaxPages(response.headers["X-Number-Of-Pages"]);
-          });
+            : `/designs?page=${page}&record_per_page=${landing ? 4 : 18}`;
+
+          const response = await api.get(tagsQuery);
+          const parsedDesigns: Design[] = parseDesigns(response);
+          const limitedDesigns = parsedDesigns.slice(0, 6); // Limit to 6 designs
+          setFetchedDesigns(limitedDesigns);
+          setOutputDesigns(limitedDesigns);
+          setMaxPages(response.headers["X-Number-Of-Pages"]);
+        } catch (error) {
+          console.error("Error fetching designs:", error);
+        } finally {
           if (setIsRefreshing) {
             setIsRefreshing(false);
           }
-        } catch (error) {
-          console.error("Error fetching designs:", error);
         }
       }
     };
@@ -130,7 +133,9 @@ const DesignGallery = ({
           </Grid>
         ))}
       </Grid>
-      <Pagination count={maxPages} page={page} onChange={handleChangePage} />
+      {!landing ? (
+        <Pagination count={maxPages} page={page} onChange={handleChangePage} />
+      ) : null}
     </Stack>
   );
 };
