@@ -223,8 +223,9 @@ const Custom = () => {
 
   return (
     <Container sx={{ pb: 10 }}>
+      <Header title="Custom Order Form" />
       <form onSubmit={handleSubmit}>
-        <Stack maxWidth="sm" spacing={2}>
+        <Stack maxWidth="sm" spacing={2} sx={{ mt: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="select-shape-label">Select Shape</InputLabel>
             <Select
