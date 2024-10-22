@@ -35,6 +35,7 @@ import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
 import ConfirmEmail from "./scenes/confirm-email/index.js";
 import Chat from "./scenes/chat/index.js";
+import Transactions from "./scenes/transactions";
 
 function App() {
   return (
@@ -86,7 +87,7 @@ function App() {
               //<Route path="/purchases" element={<Purchases />} />
             }
             <Route path="/profile" element={<Profile />} />
-            <Route path="/confirm-email" element={<ConfirmEmail />} />
+            <Route path="/transaction-history" element={<Transactions />} />
             <Route path="/not-found" element={<NotFound />} />
             {/* <Route path="/chat" element={<Chat />} /> */}
           </Routes>

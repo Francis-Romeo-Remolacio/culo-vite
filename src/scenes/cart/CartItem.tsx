@@ -58,10 +58,7 @@ const CartItem = ({
               id: tag.designTagId,
               name: tag.designTagName,
             })),
-            shapes: designDataResponse.data.designShapes.map((shape: any) => ({
-              id: shape.designShapeId,
-              name: shape.shapeName,
-            })),
+            shape: designDataResponse.data.designShape,
           };
 
           // Parse the design info

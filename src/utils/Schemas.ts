@@ -188,6 +188,15 @@ export interface ManagementSuborder extends Required<Suborder> {
   isActive: boolean;
 }
 
+export interface Transaction {
+  id: string;
+  orderId: string;
+  status: string;
+  totalPrice: number;
+  totalPaid: number;
+  date: Date;
+}
+
 export interface Notification {
   id: string;
   created: Date;

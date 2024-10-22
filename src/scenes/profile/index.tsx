@@ -18,6 +18,7 @@ import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import { getImageType } from "../../components/Base64Image";
 import { useAlert } from "../../components/CuloAlert";
+import { useNavigate } from "react-router-dom";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -33,6 +34,7 @@ const VisuallyHiddenInput = styled("input")({
 
 const Profile = () => {
   const { makeAlert } = useAlert();
+  const navigate = useNavigate();
 
   const [userData, setUserData] = useState<User>();
   const [userPicture, setUserPicture] = useState("");
@@ -236,6 +238,13 @@ const Profile = () => {
         <Typography variant="body1">
           {`Join Date: ${String(userData?.joinDate)}`}
         </Typography>
+        <Button
+          variant="contained"
+          onClick={() => navigate("/transaction-history")}
+          href="/"
+        >
+          Transaction History
+        </Button>
         <Button variant="contained" onClick={handleLogout} href="/">
           Log out
         </Button>
