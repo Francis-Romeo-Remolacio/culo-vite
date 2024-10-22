@@ -92,7 +92,6 @@ const Dashboard = () => {
   useEffect(() => {
     setLoading(true);
     const currentDate = new Date();
-    console.log(currentDate.getFullYear() + " " + currentDate.getMonth());
 
     const getTotalSales = async () => {
       try {

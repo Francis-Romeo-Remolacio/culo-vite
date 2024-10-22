@@ -109,10 +109,7 @@ const AddOns = () => {
       originalRow.price !== updatedRow.price ||
       originalRow.measurement !== updatedRow.measurement;
 
-    console.log("Has Changed:", hasChanged);
-
     if (!hasChanged) {
-      console.log("No changes detected. Skipping API call.");
       return updatedRow; // Return the original row since no changes are made
     }
 

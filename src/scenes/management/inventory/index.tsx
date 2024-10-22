@@ -200,10 +200,7 @@ const Inventory = () => {
       originalRow.price !== updatedRow.price ||
       originalRow.type !== updatedRow.type;
 
-    console.log("Has Changed:", hasChanged);
-
     if (!hasChanged) {
-      console.log("No changes detected. Skipping API call.");
       return updatedRow; // Return the original row since no changes are made
     }
 

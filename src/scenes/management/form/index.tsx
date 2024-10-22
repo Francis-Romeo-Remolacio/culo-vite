@@ -157,9 +157,7 @@ const Form = () => {
           <Button
             type="submit"
             variant="contained"
-            onClick={() => {
-              console.log(errors);
-            }}
+            onClick={(e) => e.preventDefault}
           >
             {!isSubmitting ? "Register" : <CircularProgress size={21} />}
           </Button>

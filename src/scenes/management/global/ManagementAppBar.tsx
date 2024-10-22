@@ -207,7 +207,6 @@ export default function ManagementAppBar({
     try {
       const response = await api.get("current-user/notifications");
       setNotifications(response.data);
-      console.log(response);
     } catch (error) {
       console.error(error);
     }

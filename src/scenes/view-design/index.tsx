@@ -98,7 +98,6 @@ const ViewDesign = () => {
           `designs/${design.id}/display-picture-data`
         );
         setImage(response.data.displayPictureData);
-        console.log(response.data.displayPictureData);
       };
       fetchImage();
     }
@@ -128,9 +127,6 @@ const ViewDesign = () => {
               ? `Custom: ${values.customColor}`
               : values.color,
         });
-        if (cartResponse.status === 200) {
-          console.log("Cart item added successfully");
-        }
         makeAlert("success", "Successfully added to cart!");
       } catch (error) {
         console.error("There was an error adding the order:", error);
@@ -812,7 +808,6 @@ const ViewDesign = () => {
                       type="submit"
                       startIcon={!isSubmitting ? <AddShoppingCartIcon /> : ""}
                       onClick={() => {
-                        console.log(errors);
                         if (!loggedIn) {
                           gotoLogin();
                         }

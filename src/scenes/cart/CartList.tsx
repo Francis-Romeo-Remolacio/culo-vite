@@ -65,7 +65,6 @@ const CartList = () => {
     }
 
     setChecked(newChecked);
-    console.log(checked);
   };
 
   const handleClear = async () => {

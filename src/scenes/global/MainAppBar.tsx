@@ -154,7 +154,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
     event: ChangeEvent<HTMLInputElement>
   ) => {
     setSearch(event.target.value);
-    console.log(search);
   };
 
   const handleSearch = () => {

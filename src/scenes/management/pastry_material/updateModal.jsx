@@ -39,7 +39,7 @@ const UpdatePastryMaterialModal = ({
   const [formData, setFormData] = useState({
     designId: "",
     otherCost: {
-      additionalCost : 0.0
+      additionalCost: 0.0,
     },
     ingredients: [],
     addOns: [],
@@ -121,7 +121,6 @@ const UpdatePastryMaterialModal = ({
     }
   }, [material]);
   //useEffect(() => {console.log(formData)}, [formData])
-  
 
   const fetchValidItemTypes = async () => {
     try {
@@ -155,9 +154,7 @@ const UpdatePastryMaterialModal = ({
   };
   const fetchValidMeasurements = async () => {
     try {
-      const response = await api.get(
-        "/ui-helpers/valid-measurement-values"
-      );
+      const response = await api.get("/ui-helpers/valid-measurement-values");
       setValidMeasurements(response.data);
     } catch (error) {
       setError("Failed to fetch valid measurement units");
@@ -183,7 +180,6 @@ const UpdatePastryMaterialModal = ({
     }
   };
 
-
   const handleSubmit = async (e) => {
     //First Step : Check if Design Exists in db
     var designExists = false;
@@ -198,7 +194,7 @@ const UpdatePastryMaterialModal = ({
         handleClose();
         await handleUpdate(material.pastryMaterialId, formData);
       } else {
-        console.log("INVALID DESIGN ID");
+        console.error("INVALID DESIGN ID");
         return;
       }
     } catch (error) {
@@ -280,16 +276,14 @@ const UpdatePastryMaterialModal = ({
       var newSubIng = [];
       setFormData((prevData) => {
         newSubIng = prevData.subVariants;
-        newSubIng[index].subVariantIngredients[ingredientIndex][name] =
-          value;
+        newSubIng[index].subVariantIngredients[ingredientIndex][name] = value;
         if (
           newSubIng[index].subVariantIngredients[ingredientIndex][
             "forInsertion"
           ] === "off"
         ) {
-          newSubIng[index].subVariantIngredients[ingredientIndex][
-            "changed"
-          ] = "on";
+          newSubIng[index].subVariantIngredients[ingredientIndex]["changed"] =
+            "on";
         }
         return { ...prevData, subVariants: newSubIng };
       });
@@ -304,9 +298,8 @@ const UpdatePastryMaterialModal = ({
             (item) => item.id == encodedId
           );
           if (selectedInventoryItem !== undefined) {
-            newSubIng[index].subVariantIngredients[
-              ingredientIndex
-            ].itemName = selectedInventoryItem.itemName;
+            newSubIng[index].subVariantIngredients[ingredientIndex].itemName =
+              selectedInventoryItem.itemName;
             newSubIng[index].subVariantIngredients[
               ingredientIndex
             ].amountMeasurement = selectedInventoryItem.measurements;
@@ -377,7 +370,8 @@ const UpdatePastryMaterialModal = ({
         );
 
         if (selectedAddOn !== undefined) {
-          newSubVariants[index].subVariantAddOns[subvarAddOnIndex].addOnsName = selectedAddOn.addOnName;
+          newSubVariants[index].subVariantAddOns[subvarAddOnIndex].addOnsName =
+            selectedAddOn.addOnName;
         }
       }
       return { ...prevData, subVariants: newSubVariants };
@@ -387,11 +381,11 @@ const UpdatePastryMaterialModal = ({
     const { name, value } = e.target;
     setFormData((prevData) => {
       var newOtherCost = prevData.otherCost;
-      newOtherCost[name] = value
+      newOtherCost[name] = value;
 
-      return {...prevData, otherCost: newOtherCost}
-    })
-  }
+      return { ...prevData, otherCost: newOtherCost };
+    });
+  };
 
   const handleAddIngredientFormRow = () => {
     const newIngredient = {
@@ -538,12 +532,15 @@ const UpdatePastryMaterialModal = ({
                   </MenuItem>
                 ))}
             </Select>
-            
+
             <Typography variant="h4" p={2}>
-            Other Costs
+              Other Costs
               <Typography variant="caption" display={"block"}>
-              Contains other costs that will be included in the final calculation of the price for all of the sizes.<br />
-              This could include fees such as labor, utilities, and other miscellaneous fees. <br />
+                Contains other costs that will be included in the final
+                calculation of the price for all of the sizes.
+                <br />
+                This could include fees such as labor, utilities, and other
+                miscellaneous fees. <br />
               </Typography>
             </Typography>
             <TextField
@@ -558,9 +555,9 @@ const UpdatePastryMaterialModal = ({
             />
 
             <Typography variant="h2" p={2}>
-            Smallest Size
+              Smallest Size
               <Typography variant="caption" display={"block"}>
-              Contains the base ingredients and add-ons, when any other size's
+                Contains the base ingredients and add-ons, when any other size's
                 ingredient is subtracted to the inventory, the base ingredients
                 also gets subtracted. <br />
                 It is recommended to put the smallest size of the design in
@@ -576,7 +573,6 @@ const UpdatePastryMaterialModal = ({
               value={formData.mainVariantName}
               onChange={(e) => handleChange(e)}
             />
-
 
             <Stack spacing={1}>
               <Typography variant="h4" p={2}>
@@ -626,8 +622,7 @@ const UpdatePastryMaterialModal = ({
                       {ingredient.ingredientType == "INV" &&
                         validInventoryItems.map((inventoryItem, idx) => (
                           <MenuItem key={idx} value={String(inventoryItem.id)}>
-                            ID:{String(inventoryItem.id)} /{" "}
-                            {inventoryItem.name}
+                            ID:{String(inventoryItem.id)} / {inventoryItem.name}
                           </MenuItem>
                         ))}
                     </Select>
@@ -780,7 +775,7 @@ const UpdatePastryMaterialModal = ({
               <Box key={"subvar" + index} mb={2}>
                 <Stack spacing={0.1} direction="row" mt={1}>
                   <Typography variant="h4" p={2}>
-                  Other Size #{index + 1} <br /> Name:{" "}
+                    Other Size #{index + 1} <br /> Name:{" "}
                     {subVariant.subVariantName}
                   </Typography>
                   {subVariant.forInsertion === "off" && (
@@ -812,7 +807,7 @@ const UpdatePastryMaterialModal = ({
                 />
                 <Stack>
                   <Typography variant="h5" p={2}>
-                  Other Size #{index + 1} Ingredients
+                    Other Size #{index + 1} Ingredients
                   </Typography>
                   <Button
                     variant="contained"
@@ -952,7 +947,7 @@ const UpdatePastryMaterialModal = ({
 
                 <Stack>
                   <Typography variant="h5" p={2}>
-                  Other Size #{index + 1} Add Ons
+                    Other Size #{index + 1} Add Ons
                   </Typography>
                   <Button
                     variant="contained"
@@ -963,9 +958,7 @@ const UpdatePastryMaterialModal = ({
                 </Stack>
                 {subVariant.subVariantAddOns.map(
                   (subvarAddOn, subvarAddOnIndex) => (
-                    <Box
-                      key={"subvarAddOn" + index + "_" + subvarAddOnIndex}
-                    >
+                    <Box key={"subvarAddOn" + index + "_" + subvarAddOnIndex}>
                       <Stack spacing={0.1} direction="row" mt={1}>
                         <Select
                           sx={{ width: "30%" }}

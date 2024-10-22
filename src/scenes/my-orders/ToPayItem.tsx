@@ -87,8 +87,6 @@ const OrderListItem = ({
   };
 
   const handleClickPay = async () => {
-    console.log(order);
-
     // setisSubmitting(true);
     try {
       const response: any = await api.post(`${order.id}/payment`, {
