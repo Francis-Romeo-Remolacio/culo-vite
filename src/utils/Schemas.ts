@@ -161,7 +161,8 @@ export interface Suborder {
   id: string;
   orderId?: string;
   designId: string;
-  pastryId: string;
+  designName?: string;
+  pastryMaterialId: string;
   description: string;
   size: string;
   color: string;
@@ -181,7 +182,7 @@ export interface ManagementSuborder extends Required<Suborder> {
   employeeName: string;
   customerName: string;
   designName: string;
-  pastryId: string;
+  pastryMaterialId: string;
   created: Date;
   lastModified: Date;
   lastModifiedBy: string;

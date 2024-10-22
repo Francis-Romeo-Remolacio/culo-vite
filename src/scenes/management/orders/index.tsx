@@ -21,7 +21,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import { Handshake, Visibility, ArrowDropDown } from "@mui/icons-material";
+import {
+  Handshake as ApproveIcon,
+  Visibility as ViewIcon,
+  ArrowDropDown,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import Header from "../../../components/Header";
@@ -40,10 +45,10 @@ import { getImageType } from "../../../components/Base64Image.tsx";
 type SuborderItemProps = {
   suborder: Suborder;
   index: number;
-  handleAssignClickOpen: (item: Suborder | CustomOrder) => void;
+  handleAssignClickOpen?: (item: Suborder | CustomOrder) => void;
 };
 
-const SuborderItem = ({
+export const SuborderItem = ({
   suborder,
   index,
   handleAssignClickOpen,
@@ -90,15 +95,17 @@ const SuborderItem = ({
           justifyContent="space-between"
         >
           <Typography>{`Suborder ID: ${suborder.id}`}</Typography>
-          <Button
-            size="small"
-            onClick={(event) => {
-              event.stopPropagation(); // Prevent the accordion from expanding/collapsing
-              handleAssignClickOpen(suborder);
-            }}
-          >
-            Assign
-          </Button>
+          {handleAssignClickOpen ? (
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                handleAssignClickOpen(suborder);
+              }}
+            >
+              Assign
+            </Button>
+          ) : null}
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
@@ -315,14 +322,14 @@ const Orders = () => {
               color="success"
               onClick={() => handleApproveOrder(params.row.id)}
             >
-              <Handshake />
+              <ApproveIcon />
             </IconButton>
           ) : null}
           <IconButton
             color="info"
             onClick={() => handleViewOrderClickOpen(params.row)}
           >
-            <Visibility />
+            <ViewIcon />
           </IconButton>
         </>
       ),
@@ -339,6 +346,13 @@ const Orders = () => {
   return (
     <>
       <Header title="ORDERS" subtitle="Order Management and Tracking" />
+      <Button
+        variant="contained"
+        startIcon={<RefreshIcon />}
+        onClick={fetchData}
+      >
+        {"Refresh"}
+      </Button>
       <DataGridStyler>
         <DataGrid
           rows={rows}
@@ -352,9 +366,9 @@ const Orders = () => {
               },
             },
             filter: {
-              filterModel: {
-                items: [{ field: "isActive", operator: "is", value: true }],
-              },
+              // filterModel: {
+              //   items: [{ field: "isActive", operator: "is", value: true }],
+              // },
             },
           }}
         />
@@ -389,7 +403,7 @@ const Orders = () => {
               ))}
               {orderDetails.listItems.customOrders.map((customOrder, index) => (
                 <SuborderItem
-                  suborder={suborder}
+                  suborder={customOrder}
                   index={index}
                   handleAssignClickOpen={handleAssignClickOpen}
                 />

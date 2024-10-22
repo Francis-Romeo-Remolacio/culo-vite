@@ -15,6 +15,8 @@ import OrderListItem from "./ToPayItem";
 import api from "../../api/axiosConfig.js";
 import dayjs from "dayjs";
 import { Order } from "../../utils/Schemas.js";
+import { toCurrency } from "../../utils/Formatter.js";
+import { SuborderItem } from "../management/orders/index.js";
 
 const ToPay = () => {
   const [orderData, setOrderData] = useState<Order[]>([]);
@@ -35,7 +37,19 @@ const ToPay = () => {
             payment: order.payment ? order.payment : "half",
             price: order.price,
             listItems: {
-              suborders: order.orderItems,
+              suborders: order.orderItems.map((suborder: any) => ({
+                id: suborder.id,
+                designId: suborder.designId,
+                designName: suborder.designName,
+                pastryMaterialId: suborder.pastryId,
+                description: suborder.description,
+                size: suborder.size,
+                color: suborder.color,
+                flavor: suborder.flavor,
+                quantity: suborder.quantity,
+                price: suborder.price,
+                addOns: suborder.orderAddons,
+              })),
               customOrders: order.customItems,
             },
           };
@@ -69,6 +83,7 @@ const ToPay = () => {
                   order={order}
                   fetchOrders={fetchOrders}
                   handleOpen={handleOpen}
+                  status="to-pay"
                 />
                 <Divider />
               </React.Fragment>
@@ -91,7 +106,7 @@ const ToPay = () => {
           <DialogContent>
             {selectedOrder &&
               Object.entries(selectedOrder)
-                .filter(([key]) => key !== "id")
+                .filter(([key]) => key !== "id" && key !== "listItems") // Exclude "listItems"
                 .map(([key, value]) => (
                   <Box key={key} sx={{ marginBottom: 1 }}>
                     <Typography variant="body1">
@@ -99,11 +114,23 @@ const ToPay = () => {
                       {key === "price" &&
                       typeof value === "object" &&
                       value.full
-                        ? String(value.full)
+                        ? toCurrency(value.full) // Format the price as currency
+                        : key === "PickupDate" && value // Check for PickupDate
+                        ? new Intl.DateTimeFormat("en-PH", {
+                            timeZone: "Asia/Manila",
+                            dateStyle: "long",
+                            timeStyle: "short",
+                          }).format(new Date(value)) // Convert and format the date
                         : String(value)}
                     </Typography>
                   </Box>
                 ))}
+            {selectedOrder.listItems.suborders.map((suborder, index) => (
+              <SuborderItem suborder={suborder} index={index} />
+            ))}
+            {selectedOrder.listItems.customOrders.map((customOrder, index) => (
+              <SuborderItem suborder={customOrder} index={index} />
+            ))}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Close</Button>
