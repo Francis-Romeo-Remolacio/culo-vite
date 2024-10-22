@@ -22,7 +22,7 @@ import { Design, PastryMaterial, Tag } from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
-import { Add, Delete as DeleteIcon } from "@mui/icons-material";
+import { Add, Delete as DeleteIcon, X } from "@mui/icons-material";
 import PastryMaterialDialog from "./PastryMaterialDialog";
 
 type DesignDialogProps = {
@@ -36,6 +36,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   console.log("DESIGN::");
   console.log(design);
 
+  const [picture, setPicture] = useState("");
   const [imageType, setImageType] = useState("");
   const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
@@ -56,6 +57,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     name: "",
     description: "",
     shape: "round",
+    customShape: "",
     tags: [],
     pastryMaterialId: "",
     variants: [],
@@ -178,10 +180,25 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
   // Form Setup on Edit Mode
   useEffect(() => {
-    if (design?.pictureData) {
-      setImageType(getImageType(design.pictureData));
-      setValues(design);
-    }
+    // if (design?.pictureData) {
+    //   setImageType(getImageType(design.pictureData));
+    //   setValues(design);
+    // }
+
+    //Fetch image
+    const fetchDesignImage = async () => {
+      const response = await api.get(
+        `designs/${design?.id}/display-picture-data`
+      );
+      setPicture(response.data.displayPictureData);
+      setImageType(getImageType(response.data.displayPictureData));
+    };
+    fetchDesignImage();
+
+    //Set form data to selected design
+    // if (design !== undefined) {
+    //   setValues(design);
+    // }
   }, [design]);
 
   // Filter tags to exclude already chosen ones
@@ -224,7 +241,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               {design ? (
                 <img
-                  src={`data:image/${imageType};base64,${design?.pictureData}`}
+                  src={`data:image/${imageType};base64,${picture}`}
                   alt={design?.name}
                   style={{
                     width: "50%",

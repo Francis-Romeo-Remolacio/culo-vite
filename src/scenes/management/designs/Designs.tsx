@@ -6,7 +6,7 @@ import { Design, Tag } from "../../../utils/Schemas";
 import { AxiosResponse } from "axios";
 import DesignCard from "../../../components/DesignCard.tsx";
 import DesignDialog from "./DesignDialog.tsx";
-import { Add } from "@mui/icons-material";
+import { Add, ShapeLine } from "@mui/icons-material";
 
 const Designs = () => {
   const [designs, setDesigns] = useState<Design[]>([]);
@@ -22,7 +22,6 @@ const Designs = () => {
         id: "",
         name: "",
         description: "",
-        pictureData: "",
         shape: "round",
         tags: [],
         pastryMaterialId: "",
@@ -38,6 +37,46 @@ const Designs = () => {
   };
 
   function parseDesigns(response: AxiosResponse): Design[] {
+    const parseShape = (shapeList: any) => {
+      if (
+        shapeList !== undefined &&
+        shapeList !== null &&
+        shapeList[0] !== undefined &&
+        shapeList[0] !== null
+      ) {
+        const selectedShape = shapeList[0];
+        if (
+          selectedShape.shapeName !== "round" ||
+          selectedShape.shapeName !== "heart" ||
+          selectedShape.shapeName !== "rectangle"
+        ) {
+          return "custom";
+        } else {
+          return selectedShape.shapeName;
+        }
+      }
+      return "custom";
+    };
+    const parseCustomShape = (shapeList: any) => {
+      if (
+        shapeList !== undefined &&
+        shapeList !== null &&
+        shapeList[0] !== undefined &&
+        shapeList[0] !== null
+      ) {
+        const selectedShape = shapeList[0];
+        if (
+          selectedShape.shapeName !== "round" ||
+          selectedShape.shapeName !== "heart" ||
+          selectedShape.shapeName !== "rectangle"
+        ) {
+          return selectedShape.shapeName;
+        } else {
+          return "";
+        }
+      }
+    };
+
     return response.data.map((design: any) => ({
       id: design.designId,
       name: design.displayName,
@@ -48,10 +87,13 @@ const Designs = () => {
         id: tag.designTagId,
         name: tag.designTagName,
       })),
-      shapes: design.designShapes.map((shape: any) => ({
-        id: shape.designShapeId,
-        name: shape.shapeName,
-      })),
+      shapes: parseShape(design.designShapes),
+      customShape: parseCustomShape(design.designShapes),
+
+      // shapes: design.designShapes.map((shape: any) => ({
+      //   id: shape.designShapeId,
+      //   name: shape.shapeName,
+      // })),
     }));
   }
 
