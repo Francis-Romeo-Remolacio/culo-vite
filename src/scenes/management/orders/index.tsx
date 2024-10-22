@@ -35,11 +35,94 @@ import {
 import { toCurrency } from "../../../utils/Formatter.ts";
 import { Tokens } from "../../../Theme.ts";
 import CostBreakdownTable from "./CostBreakdownTable.tsx";
+import { getImageType } from "../../../components/Base64Image.tsx";
 
-const Orders = () => {
+type SuborderItemProps = {
+  suborder: Suborder;
+  index: number;
+  handleAssignClickOpen: (item: Suborder | CustomOrder) => void;
+};
+
+const SuborderItem = ({
+  suborder,
+  index,
+  handleAssignClickOpen,
+}: SuborderItemProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
+  // Dynamically get key-value pairs except 'id'
+  const suborderDetails = Object.entries(suborder).filter(
+    ([key, _]) => key !== "id" && key !== "designId" && key !== "designName"
+  );
+
+  // State to store the image
+  const [image, setImage] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<string | null>(null);
+
+  // Fetch the image asynchronously after render
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const response = await api.get(
+          `designs/${suborder.designId}/display-picture-data`
+        );
+        setImage(response.data.displayPictureData); // Assuming the response contains `displayPictureData`
+        setImageType(getImageType(String(response.data.displayPictureData)));
+      } catch (error) {
+        console.error("Error fetching image", error);
+      }
+    };
+
+    fetchImage();
+  }, [suborder.designId]); // Only run when suborder.designId changes
+
+  return (
+    <Accordion key={index} sx={{ backgroundColor: colors.primary[100] }}>
+      <AccordionSummary
+        expandIcon={<ArrowDropDown />}
+        aria-controls={`panel${index}-content`}
+        id={`panel${index}-header`}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography>{`Suborder ID: ${suborder.id}`}</Typography>
+          <Button
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+              handleAssignClickOpen(suborder);
+            }}
+          >
+            Assign
+          </Button>
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails>
+        {image && imageType ? (
+          <img
+            src={`data:${imageType};base64,${image}`}
+            style={{
+              width: 400,
+            }}
+          />
+        ) : null}
+        {suborderDetails.map(([key, value]) => (
+          <Box key={key} sx={{ marginBottom: 1 }}>
+            <Typography variant="body1">
+              <strong>{key}:</strong> {String(value)}
+            </Typography>
+          </Box>
+        ))}
+      </AccordionDetails>
+    </Accordion>
+  );
+};
+
+const Orders = () => {
   const [orderDetails, setOrderDetails] = useState<Omit<
     ManagementOrder,
     "customerId" | "customerName" | "isActive"
@@ -297,91 +380,20 @@ const Orders = () => {
               </Typography>
 
               <Typography variant="h6">Order Items:</Typography>
-              {orderDetails.listItems.suborders.map((suborder, index) => {
-                // Dynamically get key-value pairs except 'id'
-                const suborderDetails = Object.entries(suborder).filter(
-                  ([key, _]) => key !== "id"
-                );
-
-                return (
-                  <Accordion
-                    key={index}
-                    sx={{ backgroundColor: colors.primary[100] }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ArrowDropDown />}
-                      aria-controls={`panel${index}-content`}
-                      id={`panel${index}-header`}
-                    >
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Typography>{`Suborder ID: ${suborder.id}`}</Typography>
-                        <Button
-                          size="small"
-                          onClick={(event) => {
-                            event.stopPropagation(); // Prevent the accordion from expanding/collapsing
-                            handleAssignClickOpen(suborder);
-                          }}
-                        >
-                          Assign
-                        </Button>
-                      </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {suborderDetails.map(([key, value]) => (
-                        <Box key={key} sx={{ marginBottom: 1 }}>
-                          <Typography variant="body1">
-                            <strong>{key}:</strong> {String(value)}
-                          </Typography>
-                        </Box>
-                      ))}
-                    </AccordionDetails>
-                  </Accordion>
-                );
-              })}
-              {orderDetails.listItems.customOrders.map((customOrder, index) => {
-                // Dynamically get key-value pairs except 'id'
-                const customOrderDetails = Object.entries(customOrder).filter(
-                  ([key, _]) => key !== "id"
-                );
-
-                return (
-                  <Accordion key={index}>
-                    <AccordionSummary
-                      expandIcon={<ArrowDropDown />}
-                      aria-controls={`custom-panel${index}-content`}
-                      id={`custom-panel${index}-header`}
-                    >
-                      <Stack direction="row" justifyContent="space-between">
-                        <Typography>
-                          {`Custom Order ID: ${customOrder.id}`}
-                        </Typography>
-                        <Button
-                          size="small"
-                          onClick={(event) => {
-                            event.stopPropagation(); // Prevent the accordion from expanding/collapsing
-                            handleAssignClickOpen(customOrder);
-                          }}
-                        >
-                          Assign
-                        </Button>
-                      </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {customOrderDetails.map(([key, value]) => (
-                        <Box key={key} sx={{ marginBottom: 1 }}>
-                          <Typography variant="body1">
-                            <strong>{key}:</strong> {String(value)}
-                          </Typography>
-                        </Box>
-                      ))}
-                    </AccordionDetails>
-                  </Accordion>
-                );
-              })}
+              {orderDetails.listItems.suborders.map((suborder, index) => (
+                <SuborderItem
+                  suborder={suborder}
+                  index={index}
+                  handleAssignClickOpen={handleAssignClickOpen}
+                />
+              ))}
+              {orderDetails.listItems.customOrders.map((customOrder, index) => (
+                <SuborderItem
+                  suborder={suborder}
+                  index={index}
+                  handleAssignClickOpen={handleAssignClickOpen}
+                />
+              ))}
               <Dialog
                 open={bomDialogOpen}
                 onClose={handleBomDialogClose}
