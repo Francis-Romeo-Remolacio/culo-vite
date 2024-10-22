@@ -34,7 +34,7 @@ const ToPay = () => {
             id: order.orderId,
             type: order.type,
             pickupDateTime: order.pickup ? dayjs(order.pickup) : null,
-            payment: order.payment ? order.payment : "half",
+            payment: order.payment,
             price: order.price,
             listItems: {
               suborders: order.orderItems.map((suborder: any) => ({
@@ -96,7 +96,7 @@ const ToPay = () => {
             alignItems="center"
             justifyContent="center"
           >
-            <Typography variant="body1">No orders to pay for.</Typography>
+            <Typography variant="body1">No orders to pay.</Typography>
           </Box>
         )}
       </Stack>

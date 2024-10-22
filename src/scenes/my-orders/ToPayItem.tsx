@@ -54,7 +54,6 @@ const OrderListItem = ({
         order.listItems.suborders.length > 0 &&
         order.listItems.suborders[0].pastryMaterialId
       ) {
-        console.log("treu");
         setImage(
           await api
             .get(
@@ -69,8 +68,6 @@ const OrderListItem = ({
 
   useEffect(() => {
     if (image) {
-      console.log(image);
-
       try {
         const type = getImageType(image);
         setImageType(type);
@@ -129,18 +126,25 @@ const OrderListItem = ({
         <ListItemButton onClick={() => handleOpen(order)}>
           <ListItemAvatar sx={{ height: "160px" }}>
             {image ? (
-              <img
-                src={`data:${imageType};base64,${image}`}
-                style={{
-                  width: "100%",
-                  maxWidth: 200,
-                  borderRadius: "4px",
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "200px",
+                  height: "100%",
                 }}
-              />
+              >
+                <img
+                  src={`data:${imageType};base64,${image}`}
+                  style={{
+                    borderRadius: "4px",
+                  }}
+                />
+              </Box>
             ) : (
               <Skeleton
                 variant="rounded"
-                sx={{ width: "200px", height: "160px" }}
+                sx={{ width: "200px", height: "100%" }}
               />
             )}
           </ListItemAvatar>
@@ -159,12 +163,21 @@ const OrderListItem = ({
             sx={{ pl: 2 }}
           />
         </ListItemButton>
-        <Stack direction="row">
-          <Box flexGrow={1} />
-          <Button variant="contained" size="large" onClick={handleClickPay}>
-            {"Pay Order"}
-          </Button>
-        </Stack>
+        {status === "to-pay" ? (
+          <Stack direction="row">
+            <Box flexGrow={1} />
+            <Button variant="contained" size="large" onClick={handleClickPay}>
+              {"Pay Order"}
+            </Button>
+          </Stack>
+        ) : status === "to-receive" ? (
+          <Stack direction="row">
+            <Box flexGrow={1} />
+            <Button variant="contained" size="large">
+              {"Complete Order"}
+            </Button>
+          </Stack>
+        ) : null}
       </Stack>
     </ListItem>
   );

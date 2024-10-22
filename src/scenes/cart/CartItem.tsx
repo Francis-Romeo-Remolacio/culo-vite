@@ -104,7 +104,6 @@ const CartItem = ({
           `designs/${design.id}/display-picture-data`
         );
         setImage(response.data.displayPictureData);
-        console.log(response.data.displayPictureData);
       };
       fetchImage();
     }

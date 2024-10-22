@@ -8,6 +8,7 @@ type NumberCounterProps = {
   value: number;
   onChange: (method: string) => void;
   key?: string;
+  disabled?: boolean;
   label?: string;
   small?: boolean;
 };
@@ -16,12 +17,13 @@ const NumberCounter = ({
   value,
   onChange,
   key,
+  disabled,
   label,
   small,
 }: NumberCounterProps) => {
   return (
     <Stack direction="row">
-      <IconButton onClick={() => onChange("decrement")}>
+      <IconButton onClick={() => onChange("decrement")} disabled={disabled}>
         <DecreaseIcon />
       </IconButton>
       <TextField
@@ -37,8 +39,9 @@ const NumberCounter = ({
           },
         }}
         size={small ? "small" : "medium"}
+        disabled={disabled}
       />
-      <IconButton onClick={() => onChange("increment")}>
+      <IconButton onClick={() => onChange("increment")} disabled={disabled}>
         <IncreaseIcon />
       </IconButton>
     </Stack>

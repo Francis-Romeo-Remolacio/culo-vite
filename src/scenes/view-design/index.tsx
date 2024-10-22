@@ -309,7 +309,7 @@ const ViewDesign = () => {
   };
 
   useEffect(() => {
-    fetchFlavors()
+    fetchFlavors();
   }, []);
 
   const filterAddOns = () => {
@@ -544,6 +544,7 @@ const ViewDesign = () => {
                     label="Size"
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    disabled={!design}
                     error={touched.size && Boolean(errors.size)}
                   >
                     {design?.variants.map((variant) => (
@@ -563,6 +564,7 @@ const ViewDesign = () => {
                     label="Flavor"
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    disabled={!design || !availableFlavors}
                     error={touched.flavor && Boolean(errors.flavor)}
                   >
                     {availableFlavors.map((flavor) => (
@@ -583,6 +585,7 @@ const ViewDesign = () => {
                       label="Color"
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      disabled={!design}
                       error={touched.color && Boolean(errors.color)}
                     >
                       <MenuItem key="default" value="default">
@@ -606,6 +609,7 @@ const ViewDesign = () => {
                 <NumberCounter
                   value={values.quantity}
                   onChange={handleChangeQuantity}
+                  disabled={!design}
                 ></NumberCounter>
                 <TextField
                   label="Dedication / Message"
@@ -613,6 +617,7 @@ const ViewDesign = () => {
                   name="dedication"
                   value={values.dedication}
                   onChange={handleChange}
+                  disabled={!design}
                   multiline
                   rows={4}
                   inputProps={{ maxLength: 50 }}
@@ -624,6 +629,7 @@ const ViewDesign = () => {
                   name="requests"
                   value={values.requests}
                   onChange={handleChange}
+                  disabled={!design}
                   multiline
                   rows={4}
                   inputProps={{ maxLength: 50 }}
