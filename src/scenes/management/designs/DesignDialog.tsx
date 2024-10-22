@@ -14,7 +14,9 @@ import {
   Stack,
   TextField,
   Typography,
+  styled,
 } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useFormik } from "formik";
 import api from "../../../api/axiosConfig";
 import { designSchema } from "../../../utils/Validation";
@@ -212,6 +214,17 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     }
   }, [design]);
 
+  const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+  });
   // Filter tags to exclude already chosen ones
   const filterTags = () => {
     if (values.tags) {
@@ -242,6 +255,22 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       setFieldValue("tags", updatedTags);
     }
   };
+  const handleImageUpload = (e : React.ChangeEvent<HTMLInputElement>) => {
+    if (e === null) return;
+    if (e.target === null) return;
+    if (e.target.files === null) return;
+
+    const file = e.target.files[0];
+    const reader : FileReader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
+      const base64String = reader.result?.toString().split(",")[1];
+
+      setPicture(base64String as string);
+      setImageType(file.type);
+    };
+  };
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -262,6 +291,24 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 />
               ) : null}
             </Box>
+            <Button
+              component="label"
+              role={undefined}
+              variant={
+                picture ? "contained" : "outlined"
+              }
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload image
+              <VisuallyHiddenInput
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  handleImageUpload(e);
+                }}
+              />
+            </Button>
             <TextField
               label="Name"
               id="name"

@@ -7,6 +7,10 @@ import {
   Select,
   SelectChangeEvent,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowsProp, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header.js";
@@ -19,6 +23,8 @@ const Suborders = () => {
   const [rows, setRows] = useState<ManagementSuborder[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(""); // State for dropdown value
   const [error, setError] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false); // State for dialog
+  const [selectedDescription, setSelectedDescription] = useState(""); // State for selected description
 
   const fetchData = async () => {
     try {
@@ -46,6 +52,7 @@ const Suborders = () => {
         created: new Date(suborder.createdAt),
         lastModified: new Date(suborder.lastUpdatedAt),
         lastUpdatedBy: suborder.lastUpdatedBy,
+        pickupDate: new Date(suborder.pickupDate),
       }));
       setRows(suborderData);
     } catch (error) {
@@ -57,14 +64,13 @@ const Suborders = () => {
     fetchData();
   }, []);
 
-  // Function to handle dropdown status change and update status
   const handleStatusChange = async (event: SelectChangeEvent, id: string) => {
     const newStatus = event.target.value;
     setSelectedStatus(newStatus);
 
     try {
       await api.patch(`orders/suborders/${id}/update-status`, null, {
-        params: { action: newStatus }, // Passing the new status as a query parameter
+        params: { action: newStatus },
       });
       fetchData(); // Refetch data after status update
     } catch (error) {
@@ -73,7 +79,6 @@ const Suborders = () => {
     }
   };
 
-  // Delete suborder function
   const handleClickDelete = async (id: string) => {
     try {
       await api.delete(`suborders/${id}`);
@@ -83,7 +88,6 @@ const Suborders = () => {
     }
   };
 
-  // Restore suborder function
   const handleClickRestore = async (id: string) => {
     try {
       await api.put("suborders", null, { params: { restore: id } });
@@ -93,6 +97,18 @@ const Suborders = () => {
     }
   };
 
+  // Open dialog with the selected description
+  const handleDescriptionClick = (description: string) => {
+    setSelectedDescription(description);
+    setOpenDialog(true);
+  };
+
+  // Close dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedDescription("");
+  };
+
   const columns: GridColDef[] = [
     {
       field: "action",
@@ -100,19 +116,17 @@ const Suborders = () => {
       minWidth: 200,
       renderCell: (params: any) => (
         <>
-          {/* Dropdown for status update */}
           <FormControl variant="outlined" size="small" fullWidth>
             <InputLabel>Status</InputLabel>
             <Select
-              value={selectedStatus[params.row.id] || params.row.status} // Display current status or selected status
-              onChange={(event) => handleStatusChange(event, params.row.id)} // Handle status change
+              value={selectedStatus[params.row.id] || params.row.status}
+              onChange={(event) => handleStatusChange(event, params.row.id)}
               label="Status"
             >
               <MenuItem value="send">Send</MenuItem>
               <MenuItem value="done">Done</MenuItem>
             </Select>
           </FormControl>
-          {/* Delete and Restore Icons */}
           {params.row.isActive ? (
             <IconButton color="error" onClick={() => handleClickDelete(params.row.id)}>
               <DeleteIcon />
@@ -126,13 +140,23 @@ const Suborders = () => {
       ),
     },
     { field: "id", headerName: "ID" },
-    { field: "description", headerName: "Description", minWidth: 200 },
+    {
+      field: "description",
+      headerName: "Description",
+      minWidth: 200,
+      renderCell: (params) => (
+        <Button onClick={() => handleDescriptionClick(params.row.description)} color="primary">
+          View Description
+        </Button>
+      ),
+    },
     { field: "quantity", headerName: "Quantity" },
     { field: "designName", headerName: "Design", minWidth: 200 },
     { field: "size", headerName: "Size" },
-    { field: "flavor", headerName: "Flavor" },
+    { field: "flavor", headerName: "Flavor", minWidth: 180 },
     { field: "color", headerName: "Color" },
     { field: "status", headerName: "Status" },
+    { field: "pickupDate", headerName: "Pickup Date", minWidth: 380 },
     { field: "isActive", headerName: "Active", type: "boolean" },
   ];
 
@@ -153,6 +177,19 @@ const Suborders = () => {
           }}
         />
       </DataGridStyler>
+
+      {/* Dialog to show the full description */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Description</DialogTitle>
+        <DialogContent>
+          <div>{selectedDescription}</div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
