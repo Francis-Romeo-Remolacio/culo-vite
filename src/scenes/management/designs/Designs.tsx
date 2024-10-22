@@ -131,7 +131,7 @@ const Designs = () => {
           <Grid size={{ xs: 12, sm: 3, md: 2, lg: 1.5 }}>
             <Button
               variant="contained"
-              onClick={() => handleOpenDialog}
+              onClick={() => handleOpenDialog(undefined)}
               sx={{ width: "100%", height: 360 }}
             >
               <Add />

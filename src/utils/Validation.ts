@@ -279,24 +279,22 @@ export const pastryMaterialSchema = yup.object().shape({
 });
 
 export const designSchema = yup.object({
-  displayName: yup.string().required("Display Name is required"),
-  cakeDescription: yup.string().required("Description is required"),
-  designTagIds: yup.array().of(yup.string().required("Tag is required")),
-  designShapeNames: yup
-    .array()
-    .of(yup.string().required("Shape name is required")),
-  design_add_ons: yup.array().of(
+  id: yup.string().optional(),
+  name: yup.string().required("Display Name is required"),
+  description: yup.string().required("Description is required"),
+  shape: yup
+    .string()
+    .oneOf(["round", "heart", "rectangle", "custom"])
+    .required("Shape is required"),
+  customShape: yup.string().when("shape", {
+    is: (val: string) => val == "custom",
+    then: (schema) => schema.required("Custom Shape is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  tags: yup.array().of(
     yup.object().shape({
-      add_on_name: yup.string().required("Add-on name is required"),
-      quantity: yup
-        .number()
-        .min(1, "Quantity must be at least 1")
-        .required("Quantity is required"),
-      price: yup
-        .number()
-        .min(0, "Price must be at least 0")
-        .required("Price is required"),
+      id: yup.string().required("Tag id required"),
+      name: yup.string().notRequired(),
     })
   ),
-  displayPictureDataEncoded: yup.string().required("Image is required"),
 });

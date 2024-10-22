@@ -24,6 +24,7 @@ import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
 import { Add, Delete as DeleteIcon, X } from "@mui/icons-material";
 import PastryMaterialDialog from "./PastryMaterialDialog";
+import { parseDesignDataForSubmission } from "../../../utils/Parser";
 
 type DesignDialogProps = {
   design?: Design;
@@ -64,11 +65,14 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   };
 
   const onSubmit = async () => {
+    const parsedDesignBody = parseDesignDataForSubmission(values as Design, picture);
+    
     if (design?.id) {
-      await api.patch(`designs/${design.id}`, values);
+      await api.patch(`designs/${design.id}`, parsedDesignBody);
     } else {
-      await api.post("designs", values);
+      await api.post("designs", parsedDesignBody);
     }
+    onClose();
   };
 
   const {
@@ -168,10 +172,14 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       setFetchingPastryMaterial(false);
     }
   };
-
-  useEffect(() => {
-    fetchPastryMaterial();
-  }, [design]);
+  //Fetch design image using the id property in the design prop
+  const fetchDesignImage = async () => {
+    const response = await api.get(
+      `designs/${design?.id}/display-picture-data`
+    );
+    setPicture(response.data.displayPictureData);
+    setImageType(getImageType(response.data.displayPictureData));
+  };
 
   // Filter available tags when values.tags changes
   useEffect(() => {
@@ -184,19 +192,21 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     //   setImageType(getImageType(design.pictureData));
     //   setValues(design);
     // }
-
-    //Fetch image
-    const fetchDesignImage = async () => {
-      const response = await api.get(
-        `designs/${design?.id}/display-picture-data`
-      );
-      setPicture(response.data.displayPictureData);
-      setImageType(getImageType(response.data.displayPictureData));
-    };
-    fetchDesignImage();
+    setPicture("");
 
     //Set form data to selected design
     if (design !== undefined) {
+      if (design.id !== undefined && design.id !== ""){
+
+        //Set the image in the form to the selected design's image if the id of design object has a value
+        //Else, change the picture in the form to nothing
+        fetchDesignImage();
+
+        //Fetch the design's pastry material as well if design id exists
+        fetchPastryMaterial();
+      }
+
+      //Set the form data to selected design
       setValues(design);
       console.log(design);
     }
@@ -387,7 +397,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
           >
             Reset
           </Button>
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+          <Button onClick={() => handleSubmit()} type="submit" variant="contained" disabled={isSubmitting}>
             {!isSubmitting ? "Save" : <CircularProgress size={21} />}
           </Button>
         </DialogActions>
