@@ -1,89 +1,24 @@
 import { useState, useEffect } from "react";
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Stack,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   IconButton,
-  Typography,
-  CircularProgress,
 } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridRowsProp,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowsProp, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../../components/Header.js";
 import api from "../../../api/axiosConfig.js";
 import DataGridStyler from "../../../components/DataGridStyler.tsx";
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Restore as RestoreIcon,
-} from "@mui/icons-material";
-import { useFormik } from "formik";
-import { suborderSchema } from "../../../utils/Validation.js";
+import { Edit as EditIcon, Delete as DeleteIcon, Restore as RestoreIcon } from "@mui/icons-material";
 import { ManagementSuborder } from "../../../utils/Schemas.js";
 
 const Suborders = () => {
-  const [mode, setMode] = useState<"add" | "edit">("add");
-  const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<ManagementSuborder[]>([]);
-  const [selectedRow, setSelectedRow] = useState<Partial<ManagementSuborder>>(
-    {}
-  );
+  const [selectedStatus, setSelectedStatus] = useState<string>(""); // State for dropdown value
   const [error, setError] = useState<string | null>(null);
-
-  const onSubmit = async () => {
-    try {
-      switch (mode) {
-        case "add":
-          await api.post(`suborder`, values);
-          break;
-        case "edit":
-          await api.patch(`suborder/${values.id}`, values);
-          break;
-      }
-      setOpen(false);
-      fetchData();
-    } catch (error) {
-      console.error("Error while submitting suborder:", error);
-    }
-  };
-
-  const {
-    values,
-    isSubmitting,
-    handleChange,
-    setValues,
-    setFieldValue,
-    resetForm,
-  } = useFormik({
-    initialValues: {
-      id: "",
-      description: "",
-      quantity: 1,
-      size: "",
-      flavor: "",
-      color: "",
-      designId: "",
-      pastryId: "",
-      customerId: "",
-      employeeId: "",
-      employeeName: "",
-      customerName: "",
-      created: new Date(),
-      lastModified: new Date(),
-      lastModifiedBy: "",
-      isActive: true,
-    },
-    validationSchema: suborderSchema,
-    onSubmit,
-  });
 
   const fetchData = async () => {
     try {
@@ -122,14 +57,23 @@ const Suborders = () => {
     fetchData();
   }, []);
 
-  const handleAddNew = () => {
-    resetForm();
-    setSelectedRow({});
-    setOpen(true);
+  // Function to handle dropdown status change and update status
+  const handleStatusChange = async (event: SelectChangeEvent, id: string) => {
+    const newStatus = event.target.value;
+    setSelectedStatus(newStatus);
+
+    try {
+      await api.patch(`orders/suborders/${id}/update-status`, null, {
+        params: { action: newStatus }, // Passing the new status as a query parameter
+      });
+      fetchData(); // Refetch data after status update
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setError("Failed to update status.");
+    }
   };
 
-  const handleClickDone = (row: ManagementSuborder) => {};
-
+  // Delete suborder function
   const handleClickDelete = async (id: string) => {
     try {
       await api.delete(`suborders/${id}`);
@@ -139,6 +83,7 @@ const Suborders = () => {
     }
   };
 
+  // Restore suborder function
   const handleClickRestore = async (id: string) => {
     try {
       await api.put("suborders", null, { params: { restore: id } });
@@ -148,35 +93,32 @@ const Suborders = () => {
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const columns: GridColDef[] = [
     {
       field: "action",
       type: "actions",
-      minWidth: 100,
+      minWidth: 200,
       renderCell: (params: any) => (
         <>
-          <IconButton
-            color="primary"
-            onClick={() => handleClickDone(params.row.id)}
-          >
-            <EditIcon />
-          </IconButton>
-          {params.row.isActive ? (
-            <IconButton
-              color="error"
-              onClick={() => handleClickDelete(params.row.id)}
+          {/* Dropdown for status update */}
+          <FormControl variant="outlined" size="small" fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={selectedStatus[params.row.id] || params.row.status} // Display current status or selected status
+              onChange={(event) => handleStatusChange(event, params.row.id)} // Handle status change
+              label="Status"
             >
+              <MenuItem value="send">Send</MenuItem>
+              <MenuItem value="done">Done</MenuItem>
+            </Select>
+          </FormControl>
+          {/* Delete and Restore Icons */}
+          {params.row.isActive ? (
+            <IconButton color="error" onClick={() => handleClickDelete(params.row.id)}>
               <DeleteIcon />
             </IconButton>
           ) : (
-            <IconButton
-              color="success"
-              onClick={() => handleClickRestore(params.row.id)}
-            >
+            <IconButton color="success" onClick={() => handleClickRestore(params.row.id)}>
               <RestoreIcon />
             </IconButton>
           )}
@@ -190,6 +132,7 @@ const Suborders = () => {
     { field: "size", headerName: "Size" },
     { field: "flavor", headerName: "Flavor" },
     { field: "color", headerName: "Color" },
+    { field: "status", headerName: "Status" },
     { field: "isActive", headerName: "Active", type: "boolean" },
   ];
 
