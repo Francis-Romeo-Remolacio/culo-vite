@@ -6,11 +6,10 @@ import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 const columns = [
-  { field: "id", headerName: "ID", flex: 0.5, hide: true },
   { field: "name", headerName: "Product", flex: 1 },
-  { field: "contact", headerName: "Contact", flex: 1 },
+  { field: "number", headerName: "Contact", flex: 1 },
   { field: "email", headerName: "Email", flex: 1 },
-  { field: "cost", headerName: "Cost", flex: 0.5 },
+  { field: "price", headerName: "Cost", flex: 0.5 },
   { field: "total", headerName: "Total", flex: 0.5 },
   { field: "date", headerName: "Date", flex: 1 },
 ];
