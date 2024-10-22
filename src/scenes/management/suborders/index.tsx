@@ -186,11 +186,10 @@ const Suborders = () => {
     { field: "id", headerName: "ID" },
     { field: "description", headerName: "Description", minWidth: 200 },
     { field: "quantity", headerName: "Quantity" },
+    { field: "designName", headerName: "Design", minWidth: 200 },
     { field: "size", headerName: "Size" },
     { field: "flavor", headerName: "Flavor" },
     { field: "color", headerName: "Color" },
-    { field: "created", headerName: "Created", type: "date" },
-    { field: "lastModified", headerName: "Last Modified", type: "date" },
     { field: "isActive", headerName: "Active", type: "boolean" },
   ];
 
@@ -206,11 +205,6 @@ const Suborders = () => {
             columns: {
               columnVisibilityModel: {
                 id: false,
-              },
-            },
-            filter: {
-              filterModel: {
-                items: [{ field: "isActive", operator: "is", value: true }],
               },
             },
           }}
