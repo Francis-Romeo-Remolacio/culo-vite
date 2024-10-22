@@ -34,6 +34,7 @@ const Designs = () => {
 
   const handleCloseDesignDialog = () => {
     setDesignOpen(false);
+    fetchDesigns();
   };
 
   function parseDesigns(response: AxiosResponse): Design[] {
