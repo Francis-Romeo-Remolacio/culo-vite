@@ -241,7 +241,6 @@ const Profile = () => {
         <Button
           variant="contained"
           onClick={() => navigate("/transaction-history")}
-          href="/"
         >
           Transaction History
         </Button>
