@@ -46,8 +46,8 @@ const Designs = () => {
       ) {
         const selectedShape = shapeList[0];
         if (
-          selectedShape.shapeName !== "round" ||
-          selectedShape.shapeName !== "heart" ||
+          selectedShape.shapeName !== "round" &&
+          selectedShape.shapeName !== "heart" &&
           selectedShape.shapeName !== "rectangle"
         ) {
           return "custom";
@@ -87,7 +87,7 @@ const Designs = () => {
         id: tag.designTagId,
         name: tag.designTagName,
       })),
-      shapes: parseShape(design.designShapes),
+      shape: parseShape(design.designShapes),
       customShape: parseCustomShape(design.designShapes),
 
       // shapes: design.designShapes.map((shape: any) => ({

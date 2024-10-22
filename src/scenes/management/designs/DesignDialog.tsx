@@ -196,9 +196,10 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     fetchDesignImage();
 
     //Set form data to selected design
-    // if (design !== undefined) {
-    //   setValues(design);
-    // }
+    if (design !== undefined) {
+      setValues(design);
+      console.log(design);
+    }
   }, [design]);
 
   // Filter tags to exclude already chosen ones
