@@ -47,6 +47,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     useState<Partial<PastryMaterial>>();
   const [fetchingPastryMaterial, setFetchingPastryMaterial] = useState(true);
   const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleTogglePastryMaterial = () => {
     setPastryMaterialOpen(!pastryMaterialOpen);
@@ -77,17 +78,35 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       //Copy the design tags
       const designTagsCopy = design?.tags.map((x) => x.id);
       //Get all tags that was not included in the parsed design request body
-      const deletedTags : string[] = designTagsCopy?.filter(
+      const deletedTags: string[] = designTagsCopy?.filter(
         (x) => parsedDesignBody.designTagIds.includes(x) == false
       );
       //Delete all found tags not included
       if (deletedTags !== undefined) {
-        await api.delete(`designs/${design.id}/tags`, {data: deletedTags});
+        await api.delete(`designs/${design.id}/tags`, { data: deletedTags });
       }
     } else {
       await api.post("designs", parsedDesignBody);
     }
     onClose();
+  };
+
+  const handleDelete = async () => {
+    if (design?.id == undefined) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await api.delete(
+        `/designs/${encodeURIComponent(design?.id)}`
+      );
+      onClose();
+    } catch {
+      console.error("Failed delete design: " + design?.id);
+    }
+    setIsDeleting(false);
   };
 
   const {
@@ -449,6 +468,18 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
+          {design?.id !== undefined &&
+            design?.id !== null &&
+            design?.id !== "" && (
+              <Button
+                onClick={() => handleDelete()}
+                color="error"
+                variant="contained"
+                disabled={isSubmitting || isDeleting}
+              >
+                {!isSubmitting || !isDeleting ? "Delete" : <CircularProgress size={21} />}
+              </Button>
+            )}
           <Button
             onClick={() => resetForm({ values: design || initialValues })}
           >
@@ -458,9 +489,9 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
             onClick={() => handleSubmit()}
             type="submit"
             variant="contained"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
           >
-            {!isSubmitting ? "Save" : <CircularProgress size={21} />}
+            {!isSubmitting || !isDeleting ? "Save" : <CircularProgress size={21} />}
           </Button>
         </DialogActions>
       </form>
