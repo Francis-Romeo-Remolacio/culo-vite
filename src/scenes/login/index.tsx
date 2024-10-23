@@ -67,7 +67,7 @@ const Login = () => {
         .post("users/login", values)
         .catch(function (error) {
           if (error.status === 401) {
-            setErrorMessage("Invalid login credentials. Please try again.");
+            setErrorMessage(`Error: ${error.response.data.message}`);
           } else if (error.status >= 500) {
             setErrorMessage(
               "Server-side error occurred. Please try again later."

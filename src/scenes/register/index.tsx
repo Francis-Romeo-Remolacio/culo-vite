@@ -25,8 +25,13 @@ import { useFormik } from "formik";
 import { registerSchema } from "../../utils/Validation.js";
 import { MouseEvent, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useAlert } from "../../components/CuloAlert.js";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { makeAlert } = useAlert();
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -41,61 +46,22 @@ const Register = () => {
     const trimmedContactNumber = values.contactNumber.replace(/^0+/, "");
 
     try {
-      const response = await api.post("users/register-customer", {
+      await api.post("users/register-customer", {
         username: values.username,
         email: values.email,
         contactNumber: trimmedContactNumber,
         password: values.password,
       });
-
-      if (response.status === 200) {
-        try {
-          const response = await api.post("users/login", values);
-
-          if (response.status === 200) {
-            const { token, expiration } = response.data;
-
-            // Save token as a cookie
-            Cookies.set("token", token, { expires: new Date(expiration) });
-
-            // Fetch user data
-            const userResponse = await api.get("current-user");
-
-            if (userResponse.status === 200) {
-              await api.post("current-user/send-confirmation-email");
-              const userData = userResponse.data;
-
-              // Save user data in local storage
-              localStorage.setItem("currentUser", JSON.stringify(userData));
-
-              navigate("/");
-            }
-          }
-        } catch (error) {
-          console.error("Login error: ", error);
-        }
-      }
+      makeAlert(
+        "success",
+        "Registration successful! Please check your email for verification."
+      );
+      navigate("/login");
     } catch (error) {
       console.error("Registration error: ", error);
+      makeAlert("error", "Registration failed! Please try again.");
     }
   };
-
-  function navigate(destination: string, subdomain = "") {
-    const { protocol, hostname, port } = window.location;
-
-    // Construct the base URL with protocol, subdomain (if provided), hostname, and port (if present)
-    const baseURL = subdomain
-      ? `${protocol}//${subdomain}.${hostname}`
-      : `${protocol}//${hostname}`;
-
-    // Include the port if it's not the default port (80 for HTTP, 443 for HTTPS)
-    const fullURL =
-      port && port !== "80" && port !== "443"
-        ? `${baseURL}:${port}${destination}`
-        : `${baseURL}${destination}`;
-
-    window.location.href = fullURL;
-  }
 
   const { values, errors, touched, isSubmitting, handleChange, handleSubmit } =
     useFormik({
