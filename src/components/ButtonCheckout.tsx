@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import {
   Button,
   Dialog,
@@ -16,6 +16,7 @@ import {
   AccordionDetails,
   Typography,
   useTheme,
+  SelectChangeEvent,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
@@ -101,12 +102,12 @@ const ButtonCheckout = ({
           pickupDate: formattedDate,
           pickupTime: formattedTime,
           payment: values.payment,
-          quantity: suborders[0].designId,
+          quantity: suborders[0].quantity,
           designId: suborders[0].designId,
-          description: suborders[0].designId,
-          flavor: suborders[0].designId,
-          size: suborders[0].designId,
-          color: suborders[0].designId,
+          description: suborders[0].description,
+          flavor: suborders[0].flavor,
+          size: suborders[0].size,
+          color: suborders[0].color,
           addonItem: buyNowAddOns,
         });
       } else {
@@ -138,8 +139,27 @@ const ButtonCheckout = ({
       onSubmit,
     });
 
-  // Set rush-specific behavior
+  const normalMinDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
+  const rushMinDate = dayjs().add(1, "day").set("hour", 9).set("minute", 0);
+
   const isRushOrder = values.type === "rush";
+
+  // Function to handle date adjustment when switching between rush and normal
+  const handleTypeChange = (e: SelectChangeEvent) => {
+    const selectedType = e.target.value as string;
+    handleChange(e);
+
+    if (selectedType === "rush") {
+      // Set minimum date to 1 day for rush orders
+      setFieldValue("pickupDateTime", rushMinDate);
+      setFieldValue("payment", "full");
+    } else if (selectedType === "normal") {
+      // When switching back to normal, check if current date is less than the normal min date
+      if (dayjs(values.pickupDateTime).isBefore(normalMinDate)) {
+        setFieldValue("pickupDateTime", normalMinDate);
+      }
+    }
+  };
 
   return (
     <>
@@ -176,7 +196,7 @@ const ButtonCheckout = ({
                   key={suborder.id}
                   suborder={suborder}
                   designName={buyNowDesignName}
-                ></SuborderAccordion>
+                />
               ))}
               <FormControl fullWidth variant="filled">
                 <InputLabel id="select-type-label">Type</InputLabel>
@@ -186,18 +206,7 @@ const ButtonCheckout = ({
                   name="type"
                   value={values.type}
                   label="Type"
-                  onChange={(e) => {
-                    handleChange(e);
-                    if (e.target.value === "rush") {
-                      // Set minimum date to 1 day for rush orders
-                      setFieldValue(
-                        "pickupDateTime",
-                        dayjs().add(1, "day").set("hour", 9).set("minute", 0)
-                      );
-                      // Set payment to full for rush orders
-                      setFieldValue("payment", "full");
-                    }
-                  }}
+                  onChange={handleTypeChange}
                 >
                   <MenuItem value="normal">Normal</MenuItem>
                   <MenuItem value="rush">Rush</MenuItem>
@@ -207,9 +216,7 @@ const ButtonCheckout = ({
                 label="Pickup Date & Time"
                 name="pickupDateTime"
                 value={values.pickupDateTime}
-                minDate={
-                  isRushOrder ? dayjs().add(1, "day") : dayjs().add(7, "day")
-                }
+                minDate={isRushOrder ? rushMinDate : normalMinDate}
                 minTime={dayjs("2018-01-01T09:00")}
                 maxTime={dayjs("2018-01-01T16:00")}
                 onChange={(date) => setFieldValue("pickupDateTime", date)}
@@ -229,7 +236,7 @@ const ButtonCheckout = ({
                   value={values.payment}
                   label="Payment"
                   onChange={handleChange}
-                  disabled={isRushOrder} // Disable if type is "rush"
+                  disabled={isRushOrder} // Disable payment change for rush orders
                 >
                   <MenuItem value="full">Full</MenuItem>
                   <MenuItem value="half" disabled={isRushOrder}>

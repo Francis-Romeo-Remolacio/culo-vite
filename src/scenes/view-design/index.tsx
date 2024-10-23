@@ -838,6 +838,7 @@ const ViewDesign = () => {
                               : values.color,
                         },
                       ]}
+                      buyNow
                       buyNowAddOns={[...selectedAddOns, ...userAddOns]}
                       buyNowDesignName={design?.name}
                     />
