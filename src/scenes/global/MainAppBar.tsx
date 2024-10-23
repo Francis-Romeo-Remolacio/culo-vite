@@ -42,6 +42,22 @@ import { Popper } from "@mui/material";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
 
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(3),
+    width: "auto",
+  },
+}));
+
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
@@ -313,7 +329,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 </Typography>
               </Stack>
             </Link>
-            <SearchIcon>
+            <Search>
               <form onSubmit={handleSearch}>
                 <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
                   <IconButton type="submit">
@@ -327,7 +343,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   />
                 </Stack>
               </form>
-            </SearchIcon>
+            </Search>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "flex", md: "flex" }, pr: 2 }}>
               <Link to="/">
