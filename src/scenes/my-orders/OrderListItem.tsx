@@ -13,15 +13,16 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
-import { Order } from "../../utils/Schemas";
+import { Order, ToPayOrder } from "../../utils/Schemas";
 import { getImageType } from "../../components/Base64Image";
 import { useNavigate } from "react-router-dom";
 import { useAlert } from "../../components/CuloAlert";
+import { toCurrency } from "../../utils/Formatter";
 
 type OrderListItemProps = {
-  order: Order;
+  order: ToPayOrder;
   fetchOrders: () => Promise<void>;
-  handleOpen: (order: Order) => void;
+  handleOpen: (order: Order | ToPayOrder) => void;
   status: "to-approve" | "to-pay" | "to-receive";
 };
 
@@ -87,6 +88,7 @@ const OrderListItem = ({
       console.error(error);
       makeAlert("error", "Failed to canceled order.");
     } finally {
+      fetchOrders();
       setIsSubmitting(false);
     }
   };
@@ -104,6 +106,7 @@ const OrderListItem = ({
       console.error(error);
       makeAlert("error", "Failed to process payment.");
     } finally {
+      fetchOrders();
       setIsSubmitting(false);
     }
   };
@@ -122,6 +125,7 @@ const OrderListItem = ({
         console.error(error);
         makeAlert("error", "Failed to process payment.");
       } finally {
+        fetchOrders();
         setIsSubmitting(false);
       }
   };
@@ -181,7 +185,7 @@ const OrderListItem = ({
                 ? `Name: ${order.listItems.suborders[0].designName}`
                 : `Name: Custom Order`
             }
-            // secondary={`Price: ${formatToCurrency(itemData.price)}`}
+            secondary={`Price: ${toCurrency(order.price.full)}`}
             sx={{ pl: 2 }}
           />
         </ListItemButton>
