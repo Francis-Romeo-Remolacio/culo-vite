@@ -13,9 +13,8 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
-import { Design, Order } from "../../utils/Schemas";
+import { Order } from "../../utils/Schemas";
 import { getImageType } from "../../components/Base64Image";
-import { PointOfSale } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 type OrderListItemProps = {
@@ -29,7 +28,10 @@ const OrderListItem = ({
   order,
   fetchOrders,
   handleOpen,
+  status,
 }: OrderListItemProps) => {
+  console.log(status);
+
   const labelId = `checkbox-list-label-${order.id}`;
 
   const navigate = useNavigate();
@@ -161,7 +163,14 @@ const OrderListItem = ({
             sx={{ pl: 2 }}
           />
         </ListItemButton>
-        {status === "to-pay" ? (
+        {status === "to-approve" ? (
+          <Stack direction="row">
+            <Box flexGrow={1} />
+            <Button variant="contained" size="large">
+              {"Cancel Order"}
+            </Button>
+          </Stack>
+        ) : status === "to-pay" ? (
           <Stack direction="row">
             <Box flexGrow={1} />
             <Button variant="contained" size="large" onClick={handleClickPay}>

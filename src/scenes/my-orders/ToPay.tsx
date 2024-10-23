@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import OrderListItem from "./ToPayItem";
 import api from "../../api/axiosConfig.js";
-import dayjs from "dayjs";
 import { Order } from "../../utils/Schemas.js";
 import { toCurrency } from "../../utils/Formatter.js";
 import { SuborderItem } from "../management/orders/index.js";
@@ -33,7 +32,7 @@ const ToPay = () => {
           const parsedOrder = {
             id: order.orderId,
             type: order.type,
-            pickupDateTime: order.pickup ? dayjs(order.pickup) : null,
+            pickupDateTime: order.pickup ? new Date(order.pickup) : null,
             payment: order.payment,
             price: order.price,
             listItems: {
