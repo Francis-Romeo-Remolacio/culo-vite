@@ -7,9 +7,8 @@ import {
   Box,
   Grid,
   useTheme,
-  Fade
+  Fade,
 } from "@mui/material";
-import { Helmet } from "react-helmet-async";
 import DesignGallery from "./../../components/DesignGallery.tsx";
 import { Tokens } from "../../Theme.ts";
 import { useEffect, useState } from "react";
@@ -19,7 +18,6 @@ const Landing = () => {
   const colors = Tokens(theme.palette.mode);
 
   // Scroll-triggered reveal sections
-  const [showPremade, setShowPremade] = useState(true); // Premade section is always shown
   const [showAbout, setShowAbout] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [scrollY, setScrollY] = useState(0);
@@ -96,7 +94,10 @@ const Landing = () => {
               </Button>
             </Link>
             <Link to="/custom">
-              <Button variant="outlined" sx={{ color: "#fff", borderColor: "#fff" }}>
+              <Button
+                variant="outlined"
+                sx={{ color: "#fff", borderColor: "#fff" }}
+              >
                 Custom Order
               </Button>
             </Link>
@@ -119,13 +120,17 @@ const Landing = () => {
             }}
           >
             <Grid item xs={12}>
-              <Typography variant="h4" gutterBottom sx={{ color: "white", mt: 4 }}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{ color: "white", mt: 4 }}
+              >
                 Browse Our Premade Cake Designs
               </Typography>
               <Typography variant="body1" paragraph sx={{ color: "white" }}>
                 Check out our range of beautiful premade designs available for
                 quick orders.
-              </Typography >
+              </Typography>
               <DesignGallery landing />
             </Grid>
           </Grid>
@@ -137,7 +142,7 @@ const Landing = () => {
           textAlign: "center",
           backgroundColor: colors.primary[100],
           width: "100vw",
-          ml: -2
+          ml: -2,
         }}
       >
         {/* About Us Section */}
@@ -176,7 +181,7 @@ const Landing = () => {
           textAlign: "center",
           backgroundColor: colors.primary[200],
           width: "100vw",
-          ml: -2
+          ml: -2,
         }}
       >
         {/* Contact Us Section */}
@@ -186,12 +191,12 @@ const Landing = () => {
           sx={{
             opacity: getOpacity(200),
             transition: "opacity 1s ease-in-out",
-            width: "100vw", 
+            width: "100vw",
           }}
         >
           <Grid item xs={12}>
             <Fade in={showContact}>
-              <Paper sx={{ padding: 3, textAlign: 'center' }}>
+              <Paper sx={{ padding: 3, textAlign: "center" }}>
                 <Typography variant="h4" gutterBottom>
                   Contact Us
                 </Typography>
@@ -235,9 +240,18 @@ const Landing = () => {
         </Grid>
       </Box>
 
-      <Box sx={{ textAlign: "center", py: 4, backgroundColor: colors.primary[300] ,width: "100vw", ml: -2}}>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 4,
+          backgroundColor: colors.primary[300],
+          width: "100vw",
+          ml: -2,
+        }}
+      >
         <Typography variant="body2" sx={{ color: "white" }}>
-          © {new Date().getFullYear()} The Pink Butter Cake Studio. All rights reserved.
+          © {new Date().getFullYear()} The Pink Butter Cake Studio. All rights
+          reserved.
         </Typography>
       </Box>
     </>

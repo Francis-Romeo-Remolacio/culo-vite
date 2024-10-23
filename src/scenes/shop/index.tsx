@@ -6,7 +6,6 @@ import Header from "./../../components/Header.jsx";
 import TagsCheckboxList from "./../../components/TagsCheckboxList.jsx";
 import DesignGallery from "./../../components/DesignGallery.jsx";
 import { Tag } from "../../utils/Schemas.js";
-import { createContext } from "react";
 
 const Shop = () => {
   const [tags, setTags] = useState<Tag[]>([]);

@@ -1,10 +1,8 @@
 import {
   Box,
   Button,
-  Checkbox,
   Container,
   FormControl,
-  FormControlLabel,
   FormHelperText,
   IconButton,
   InputLabel,
@@ -170,7 +168,7 @@ const Custom = () => {
     });
   };
 
-  const handleChangeHeart = (event: Event, value: number | number[]) => {
+  const handleChangeHeart = (_: Event, value: number | number[]) => {
     setSizeHeart(value as number);
     setFieldValue("mainVariantName", String(value));
   };
@@ -330,7 +328,7 @@ const Custom = () => {
                 <Typography variant="h4">{`Size: ${rectangleX}\"x${rectangleY}\"x2.5"`}</Typography>
                 <Slider
                   value={rectangleX}
-                  onChange={(event, value) =>
+                  onChange={(_, value) =>
                     handleChangeRectangle("x", value as number)
                   }
                   defaultValue={12}
@@ -343,7 +341,7 @@ const Custom = () => {
                 />
                 <Slider
                   value={rectangleY}
-                  onChange={(event, value) =>
+                  onChange={(_, value) =>
                     handleChangeRectangle("y", value as number)
                   }
                   defaultValue={12}

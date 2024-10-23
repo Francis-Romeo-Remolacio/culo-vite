@@ -25,7 +25,6 @@ import ButtonBack from "../../components/ButtonBack.jsx";
 import { useFormik } from "formik";
 import { loginSchema } from "../../utils/Validation.js";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { AxiosError } from "axios";
 
 const Login = () => {
   const location = useLocation();

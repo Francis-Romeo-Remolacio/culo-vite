@@ -115,7 +115,7 @@ const ViewDesign = () => {
   const onSubmit = async () => {
     if (loggedIn) {
       try {
-        const cartResponse = await api.post("current-user/cart", {
+        await api.post("current-user/cart", {
           quantity: values.quantity,
           designId: design?.id,
           description: `Dedication: ${values.dedication}\nRequests:${values.requests}`,
@@ -767,7 +767,7 @@ const ViewDesign = () => {
                             id="autocomplete-add-on"
                             options={filteredAddOns}
                             getOptionLabel={(option) => option.name}
-                            onChange={(event, newValue) => {
+                            onChange={(_, newValue) => {
                               if (newValue) {
                                 setSelectedOption(newValue);
                               }

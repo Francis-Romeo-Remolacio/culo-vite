@@ -40,7 +40,6 @@ const Profile = () => {
   const [userPicture, setUserPicture] = useState("");
   const [imageType, setImageType] = useState("png");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [isSubmittingVerify, setIsSubmittingVerify] = useState(false);
 
   const fetchUserPicture = async () => {
@@ -55,7 +54,6 @@ const Profile = () => {
       try {
         const token = Cookies.get("token");
         if (!token) {
-          setError("No token found. Please log in.");
           setLoading(false);
           return;
         }
@@ -74,7 +72,7 @@ const Profile = () => {
           fetchUserPicture();
         });
       } catch (err) {
-        setError("Failed to fetch user data. Please try again.");
+        console.error("Failed to fetch user data.", err);
       } finally {
         setLoading(false);
       }
@@ -108,20 +106,13 @@ const Profile = () => {
 
       // Check file size limit (1MB)
       if (file.size > 1024 * 1024) {
-        setError("File size exceeds the limit of 1MB.");
+        makeAlert("error", "File size exceeds the limit of 1MB.");
         return;
       }
 
       try {
         // Convert the file to base64 string (without header)
         const base64String = await convertImageToBase64(file);
-
-        // Get the auth token from cookies
-        const token = Cookies.get("token");
-        if (!token) {
-          setError("No token found. Please log in.");
-          return;
-        }
 
         // Submit the base64 string to the API endpoint
         if (userPicture) {

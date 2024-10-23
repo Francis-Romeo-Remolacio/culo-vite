@@ -1,13 +1,12 @@
 import {
   ChangeEvent,
   ChangeEventHandler,
-  FormEvent,
   MouseEvent,
   ReactNode,
   useEffect,
   useState,
 } from "react";
-import { createSearchParams, Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { styled, alpha, useTheme } from "@mui/material/styles";
 import {
   AppBar,
@@ -26,48 +25,22 @@ import {
   Paper,
   Skeleton,
   Stack,
-  TextField,
   Button,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import CartIcon from "@mui/icons-material/ShoppingCart";
-import OrderIcon from "@mui/icons-material/Redeem";
-import MoreIcon from "@mui/icons-material/MoreVert";
+import {
+  AccountCircle,
+  Login as LoginIcon,
+  Notifications as NotificationsIcon,
+  Search as SearchIcon,
+  ShoppingCart as CartIcon,
+  Redeem as OrderIcon,
+  Check as CheckIcon,
+} from "@mui/icons-material";
 import Cookies from "js-cookie";
 import api from "./../../api/axiosConfig.js";
 import { Popper } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
-import { Login as LoginIcon } from "@mui/icons-material";
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
@@ -138,15 +111,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
       setCartData(response.data);
     } catch (error) {
       console.error("Error fetching cart data:", error);
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const response = await api.get(`current-user/orders-count`);
-      setOrderData(response.data);
-    } catch (error) {
-      console.error("Error fetching order data:", error);
     }
   };
 
@@ -227,12 +191,6 @@ export default function MainAppBar({ children }: MainAppBarProps) {
 
   const handleOrders = () => {
     navigate("/my-orders");
-  };
-
-  const handleLogout = () => {
-    Cookies.remove("token");
-    localStorage.removeItem("currentUser");
-    window.location.href = "/";
   };
 
   const menuId = "primary-search-account-menu";
@@ -355,7 +313,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 </Typography>
               </Stack>
             </Link>
-            <Search>
+            <SearchIcon>
               <form onSubmit={handleSearch}>
                 <Stack direction="row" spacing={0.25} sx={{ p: 0.25 }}>
                   <IconButton type="submit">
@@ -369,7 +327,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   />
                 </Stack>
               </form>
-            </Search>
+            </SearchIcon>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "flex", md: "flex" }, pr: 2 }}>
               <Link to="/">

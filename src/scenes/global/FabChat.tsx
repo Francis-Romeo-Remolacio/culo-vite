@@ -22,15 +22,8 @@ import { Tokens } from "../../Theme";
 import ChatIcon from "@mui/icons-material/Chat";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  DefaultHttpClient,
-  HttpRequest,
-  HttpResponse,
-  HubConnectionBuilder,
-  LogLevel,
-} from "@microsoft/signalr";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 import Cookies from "js-cookie";
-import { ConsoleLogger } from "@microsoft/signalr/dist/esm/Utils";
 import { DirectMessage, User } from "../../utils/Schemas";
 import api from "../../api/axiosConfig";
 
@@ -58,18 +51,6 @@ import api from "../../api/axiosConfig";
 //     return await super.send(request);
 //   }
 // }
-
-class CustomHttpClient extends DefaultHttpClient {
-  cookieToken = Cookies.get("token");
-
-  public send(request: HttpRequest): Promise<HttpResponse> {
-    request.headers = {
-      ...request.headers,
-      Authorization: `Basic MTExOTY5MTM6NjAtZGF5ZnJlZXRyaWFs, Bearer ${this.cookieToken}`,
-    };
-    return super.send(request);
-  }
-}
 
 interface OnlineUser {
   connection_id: string;

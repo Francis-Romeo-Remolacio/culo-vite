@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Chip from "@mui/material/Chip";
 import api from "../api/axiosConfig";
 import { useNavigate } from "react-router-dom";

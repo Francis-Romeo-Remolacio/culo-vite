@@ -17,7 +17,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import api from "../../api/axiosConfig";
-import Cookies from "js-cookie";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import ButtonBack from "./../../components/ButtonBack.jsx";

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -128,16 +128,15 @@ const ButtonCheckout = ({
     }
   };
 
-  const { values, errors, isSubmitting, handleChange, setFieldValue } =
-    useFormik({
-      initialValues: {
-        type: "normal",
-        pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
-        payment: "full",
-      },
-      validationSchema: orderSchema,
-      onSubmit,
-    });
+  const { values, isSubmitting, handleChange, setFieldValue } = useFormik({
+    initialValues: {
+      type: "normal",
+      pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
+      payment: "full",
+    },
+    validationSchema: orderSchema,
+    onSubmit,
+  });
 
   const normalMinDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
   const rushMinDate = dayjs().add(1, "day").set("hour", 9).set("minute", 0);
