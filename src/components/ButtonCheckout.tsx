@@ -230,7 +230,6 @@ const ButtonCheckout = ({
             <Button
               type="submit"
               variant="contained"
-              onClick={(e) => e.preventDefault()}
               endIcon={!isSubmitting ? <CheckoutIcon /> : ""}
               disabled={isSubmitting}
             >
