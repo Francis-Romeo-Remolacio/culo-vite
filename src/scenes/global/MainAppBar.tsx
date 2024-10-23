@@ -41,7 +41,7 @@ import { Popper } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import { Notification } from "../../utils/Schemas.js";
 import { Tokens } from "../../Theme.js";
-import { Login, Style } from "@mui/icons-material";
+import { Login as LoginIcon } from "@mui/icons-material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -375,6 +375,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
               <Link to="/">
                 <Button
                   sx={{
+                    display: { xs: "none", md: "inline-flex" },
                     color: colors.background,
                     fontWeight: "bold",
                     fontSize: 16,
@@ -386,6 +387,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
               <Link to="/shop">
                 <Button
                   sx={{
+                    display: { xs: "none", md: "inline-flex" },
                     color: colors.background,
                     fontWeight: "bold",
                     fontSize: 16,
@@ -406,9 +408,9 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                 </Button>
               </Link>
             </Box>
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Box>
               {loggedIn ? (
-                <>
+                <Stack direction="row">
                   <IconButton
                     size="large"
                     onClick={handleClick}
@@ -446,34 +448,34 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   >
                     <AccountCircle sx={{ color: colors.background }} />
                   </IconButton>
-                </>
+                </Stack>
               ) : (
                 <>
                   <IconButton
                     size="large"
                     edge="end"
                     onClick={() => {
-                      navigate("login");
+                      navigate("/login");
                     }}
                     color="inherit"
                   >
-                    <Login sx={{ color: colors.background }} />
+                    <LoginIcon sx={{ color: colors.background }} />
                   </IconButton>
                 </>
               )}
             </Box>
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            {/* <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="show more"
                 aria-controls={mobileMenuId}
                 aria-haspopup="true"
-                onClick={() => navigate("/login")}
+                onClick={handleMobileMenuOpen}
                 color="inherit"
               >
-                <Login sx={{ color: colors.background }} />
+                <MoreIcon sx={{ color: colors.background }} />
               </IconButton>
-            </Box>
+            </Box> */}
           </Toolbar>
         </AppBar>
         {renderMobileMenu}
