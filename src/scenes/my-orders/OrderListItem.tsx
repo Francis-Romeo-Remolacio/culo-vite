@@ -16,6 +16,7 @@ import api from "../../api/axiosConfig";
 import { Order } from "../../utils/Schemas";
 import { getImageType } from "../../components/Base64Image";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../components/CuloAlert";
 
 type OrderListItemProps = {
   order: Order;
@@ -30,12 +31,12 @@ const OrderListItem = ({
   handleOpen,
   status,
 }: OrderListItemProps) => {
-  const labelId = `checkbox-list-label-${order.id}`;
-
+  const { makeAlert } = useAlert();
   const navigate = useNavigate();
 
   const [image, setImage] = useState("");
   const [imageType, setImageType] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -78,16 +79,20 @@ const OrderListItem = ({
   }, [image]);
 
   const handleClickCancel = async () => {
+    setIsSubmitting(true);
     try {
-      await api.delete(`current-user/to-pay/${order.id}`);
-      fetchOrders();
+      await api.post(`current-user/${order.id}/cancel`);
+      makeAlert("success", "Successfully canceled order.");
     } catch (error) {
-      console.error("Error deleting order item:", error);
+      console.error(error);
+      makeAlert("error", "Failed to canceled order.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleClickPay = async () => {
-    // setisSubmitting(true);
+    setIsSubmitting(true);
     try {
       const response: any = await api.post(`${order.id}/payment`, {
         option: order.payment,
@@ -97,9 +102,28 @@ const OrderListItem = ({
       navigate(`/post-payment?order=${order.id}`);
     } catch (error) {
       console.error(error);
+      makeAlert("error", "Failed to process payment.");
     } finally {
-      // setisSubmitting(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const handleClickReceive = async () => {
+    setIsSubmitting(true);
+    if (order.payment === "full")
+      try {
+        const response: any = await api.post(`${order.id}/payment`, {
+          option: order.payment,
+        });
+
+        window.open(response.data.data.attributes.checkout_url);
+        navigate(`/post-payment?order=${order.id}`);
+      } catch (error) {
+        console.error(error);
+        makeAlert("error", "Failed to process payment.");
+      } finally {
+        setIsSubmitting(false);
+      }
   };
 
   return (
@@ -147,7 +171,7 @@ const OrderListItem = ({
             )}
           </ListItemAvatar>
           <ListItemText
-            id={labelId}
+            id={`label-${order.id}`}
             primary={
               order.listItems.customOrders.length > 0 &&
               order.listItems.customOrders[0].designName
@@ -164,21 +188,36 @@ const OrderListItem = ({
         {status === "to-approve" ? (
           <Stack direction="row">
             <Box flexGrow={1} />
-            <Button variant="contained" size="large">
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleClickCancel}
+              disabled={isSubmitting}
+            >
               {"Cancel Order"}
             </Button>
           </Stack>
         ) : status === "to-pay" ? (
           <Stack direction="row">
             <Box flexGrow={1} />
-            <Button variant="contained" size="large" onClick={handleClickPay}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleClickPay}
+              disabled={isSubmitting}
+            >
               {"Pay Order"}
             </Button>
           </Stack>
         ) : status === "to-receive" ? (
           <Stack direction="row">
             <Box flexGrow={1} />
-            <Button variant="contained" size="large">
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleClickReceive}
+              disabled={isSubmitting}
+            >
               {"Complete Order"}
             </Button>
           </Stack>
