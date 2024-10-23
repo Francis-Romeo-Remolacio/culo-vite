@@ -67,10 +67,23 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   };
 
   const onSubmit = async () => {
-    const parsedDesignBody = parseDesignDataForSubmission(values as Design, picture);
-    
+    const parsedDesignBody = parseDesignDataForSubmission(
+      values as Design,
+      picture
+    );
+
     if (design?.id) {
       await api.patch(`designs/${design.id}`, parsedDesignBody);
+      //Copy the design tags
+      const designTagsCopy = design?.tags.map((x) => x.id);
+      //Get all tags that was not included in the parsed design request body
+      const deletedTags : string[] = designTagsCopy?.filter(
+        (x) => parsedDesignBody.designTagIds.includes(x) == false
+      );
+      //Delete all found tags not included
+      if (deletedTags !== undefined) {
+        await api.delete(`designs/${design.id}/tags`, {data: deletedTags});
+      }
     } else {
       await api.post("designs", parsedDesignBody);
     }
@@ -198,8 +211,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
     //Set form data to selected design
     if (design !== undefined) {
-      if (design.id !== undefined && design.id !== ""){
-
+      if (design.id !== undefined && design.id !== "") {
         //Set the image in the form to the selected design's image if the id of design object has a value
         //Else, change the picture in the form to nothing
         fetchDesignImage();
@@ -255,13 +267,13 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       setFieldValue("tags", updatedTags);
     }
   };
-  const handleImageUpload = (e : React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e === null) return;
     if (e.target === null) return;
     if (e.target.files === null) return;
 
     const file = e.target.files[0];
-    const reader : FileReader = new FileReader();
+    const reader: FileReader = new FileReader();
     reader.readAsDataURL(file);
 
     reader.onload = async () => {
@@ -294,9 +306,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
             <Button
               component="label"
               role={undefined}
-              variant={
-                picture ? "contained" : "outlined"
-              }
+              variant={picture ? "contained" : "outlined"}
               tabIndex={-1}
               startIcon={<CloudUploadIcon />}
             >
@@ -444,7 +454,12 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
           >
             Reset
           </Button>
-          <Button onClick={() => handleSubmit()} type="submit" variant="contained" disabled={isSubmitting}>
+          <Button
+            onClick={() => handleSubmit()}
+            type="submit"
+            variant="contained"
+            disabled={isSubmitting}
+          >
             {!isSubmitting ? "Save" : <CircularProgress size={21} />}
           </Button>
         </DialogActions>
