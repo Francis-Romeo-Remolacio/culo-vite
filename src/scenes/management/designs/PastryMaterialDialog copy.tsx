@@ -734,8 +734,6 @@ const PastryMaterialDialog = ({
     }
   };
 
-  useEffect(() => {console.log("HEHEHEHEHEHEH"); console.log(pmState)}, [pmState]);
-
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>{`${
@@ -1206,7 +1204,7 @@ const PastryMaterialDialog = ({
                 {"Add"}
               </Button>
             </Stack>
-            {pmState.values.variants.length > 0 && pmState.values.variants[1].map(
+            {pmState.values.variants.map(
               (variant: PastryMaterialVariant, variantIndex: number) => {
                 <Accordion sx={{ backgroundColor: colors.primary[100] }}>
                   <AccordionSummary>{variant.name}</AccordionSummary>
@@ -1216,7 +1214,7 @@ const PastryMaterialDialog = ({
                     {shape === "round" ? (
                       <>
                         <List>
-                          {pmState.values.variants[1][variantIndex].tiers?.map(
+                          {pmState.values.variants[variantIndex].tiers?.map(
                             (tier: string, tierIndex: number) => (
                               <ListItem key={`tier-${tierIndex}`}>
                                 <FormControl fullWidth>
@@ -1255,9 +1253,9 @@ const PastryMaterialDialog = ({
                               </ListItem>
                             )
                           )}
-                          {pmState.values.variants[1][variantIndex].tiers?.length <
+                          {pmState.values.variants[variantIndex].tiers?.length <
                             6 ||
-                          !pmState.values.variants[1][variantIndex].tiers ? (
+                          !pmState.values.variants[variantIndex].tiers ? (
                             <ListItem key="insertTier">
                               <IconButton onClick={() => handleAddTier(0)}>
                                 <AddIcon />
@@ -1275,7 +1273,7 @@ const PastryMaterialDialog = ({
                           id="sizeHeart"
                           name="sizeHeart"
                           value={
-                            pmState.values.variants[1][variantIndex].sizeHeart
+                            pmState.values.variants[variantIndex].sizeHeart
                           }
                           onChange={(event, value) =>
                             handleChangeHeart(variantIndex, value)
@@ -1294,7 +1292,7 @@ const PastryMaterialDialog = ({
                         <Typography variant="h4">{`Size: ${pmState.values.variants[variantIndex].name}`}</Typography>
                         <Slider
                           value={
-                            pmState.values.variants[1][variantIndex].rectangleX
+                            pmState.values.variants[variantIndex].rectangleX
                           }
                           onChange={(event, value) =>
                             handleChangeRectangle(variantIndex, "x", value)
@@ -1308,7 +1306,7 @@ const PastryMaterialDialog = ({
                         />
                         <Slider
                           value={
-                            pmState.values.variants[1][variantIndex].rectangleY
+                            pmState.values.variants[variantIndex].rectangleY
                           }
                           onChange={(event, value) =>
                             handleChangeRectangle(variantIndex, "y", value)
@@ -1327,7 +1325,7 @@ const PastryMaterialDialog = ({
                         label="Size"
                         id="size"
                         name="size"
-                        value={pmState.values.variants[1][variantIndex].name}
+                        value={pmState.values.variants[variantIndex].name}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => {
                           dispatch({
                             type: ACTIONS.UPDATE_VARIANT,
