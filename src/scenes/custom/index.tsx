@@ -32,6 +32,7 @@ import Header from "../../components/Header.js";
 import api from "../../api/axiosConfig.js";
 import { useAlert } from "../../components/CuloAlert.js";
 import TermsDialog from "../../components/TermsDialog.js";
+import { MuiColorInput } from "mui-color-input";
 
 const availableTiers = [
   '5"x4" (round)',
@@ -352,12 +353,14 @@ const Custom = () => {
                 />
               </>
             ) : null}
-            <TextField
+            <MuiColorInput
+              format="rgb"
               label="Color"
               id="color"
               name="color"
               value={values.color}
-              onChange={handleChange}
+              onChange={(value) => setFieldValue("color", value)}
+              isAlphaHidden
             />
             <FormControl fullWidth>
               <InputLabel id="select-flavor-label">Flavor</InputLabel>
@@ -439,14 +442,12 @@ const Custom = () => {
                 accept="image/*"
               />
             </Button>
-
             <TermsDialog
               open={open}
               onClose={onClose}
               agree={values.agree}
               handleChange={handleChange}
             />
-
             <Button
               variant="contained"
               type="submit"

@@ -27,7 +27,6 @@ import {
   Autocomplete,
   ListItemButton,
 } from "@mui/material";
-
 import api from "../../api/axiosConfig.js";
 import { Helmet } from "react-helmet-async";
 import TagChip from "../../components/TagChip.js";
@@ -47,6 +46,7 @@ import { getImageType } from "../../components/Base64Image.tsx";
 import NumberCounter from "../../components/NumberCounter.tsx";
 import ButtonCheckout from "../../components/ButtonCheckout.tsx";
 import { useAlert } from "../../components/CuloAlert.tsx";
+import { MuiColorInput } from "mui-color-input";
 
 const ViewDesign = () => {
   const { makeAlert } = useAlert();
@@ -593,11 +593,14 @@ const ViewDesign = () => {
                     </Select>
                   </FormControl>
                   {values.color === "custom" ? (
-                    <TextField
+                    <MuiColorInput
+                      format="rgb"
                       label="Custom Color"
+                      id="customColor"
                       name="customColor"
                       value={values.customColor}
-                      onChange={handleChange}
+                      onChange={(value) => setFieldValue("customColor", value)}
+                      isAlphaHidden
                       fullWidth
                     />
                   ) : null}
