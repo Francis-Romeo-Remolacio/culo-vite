@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Container,
@@ -222,244 +223,258 @@ const Custom = () => {
   };
 
   return (
-    <Container sx={{ pb: 10 }}>
+    <Container
+      maxWidth="sm"
+      sx={{
+        pt: 3,
+      }}
+    >
       <Header title="Custom Order Form" />
-      <form onSubmit={handleSubmit}>
-        <Stack maxWidth="sm" spacing={2} sx={{ mt: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="select-shape-label">Select Shape</InputLabel>
-            <Select
-              labelId="select-shape"
-              label="Select Shape"
-              id="shape"
-              name="shape"
-              value={values.shape}
-              onChange={handleChange}
-            >
-              <MenuItem value={"round"}>{"Round"}</MenuItem>
-              <MenuItem value={"heart"}>{"Heart"}</MenuItem>
-              <MenuItem value={"rectangle"}>{"Rectangle"}</MenuItem>
-            </Select>
-          </FormControl>
-          {values.shape === "round" ? (
-            <>
-              <Typography variant="h4">{"Tiers"}</Typography>
-              <List>
-                {tiers.map((tier, index) => (
-                  <ListItem key={`tier-${index}`}>
-                    <FormControl fullWidth>
-                      <InputLabel id={`tier-select-label-${index}`}>
-                        Select Tier
-                      </InputLabel>
-                      <Select
-                        labelId={`tier-select-label-${index}`}
-                        label="Select Tier"
-                        value={tier}
-                        onChange={(e) =>
-                          handleChangeTier(index, e.target.value)
-                        }
+      <Box
+        sx={{
+          display: "inline-block",
+          "& form": {
+            display: "flex",
+          },
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <Stack maxWidth="sm" spacing={2} sx={{ mt: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel id="select-shape-label">Select Shape</InputLabel>
+              <Select
+                labelId="select-shape"
+                label="Select Shape"
+                id="shape"
+                name="shape"
+                value={values.shape}
+                onChange={handleChange}
+              >
+                <MenuItem value={"round"}>{"Round"}</MenuItem>
+                <MenuItem value={"heart"}>{"Heart"}</MenuItem>
+                <MenuItem value={"rectangle"}>{"Rectangle"}</MenuItem>
+              </Select>
+            </FormControl>
+            {values.shape === "round" ? (
+              <>
+                <Typography variant="h4">{"Tiers"}</Typography>
+                <List>
+                  {tiers.map((tier, index) => (
+                    <ListItem key={`tier-${index}`}>
+                      <FormControl fullWidth>
+                        <InputLabel id={`tier-select-label-${index}`}>
+                          Select Tier
+                        </InputLabel>
+                        <Select
+                          labelId={`tier-select-label-${index}`}
+                          label="Select Tier"
+                          value={tier}
+                          onChange={(e) =>
+                            handleChangeTier(index, e.target.value)
+                          }
+                        >
+                          {availableTiers.map((availableTier, i) => (
+                            <MenuItem key={i} value={availableTier}>
+                              {availableTier}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          setTiers((prevTiers) =>
+                            prevTiers.filter((_, i) => i !== index)
+                          );
+                        }}
                       >
-                        {availableTiers.map((availableTier, i) => (
-                          <MenuItem key={i} value={availableTier}>
-                            {availableTier}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <IconButton
-                      color="error"
-                      onClick={() => {
-                        setTiers((prevTiers) =>
-                          prevTiers.filter((_, i) => i !== index)
-                        );
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItem>
-                ))}
-                {tiers.length < 6 ? (
-                  <ListItem key="insertTier" onClick={handleAddTier}>
-                    <IconButton>
-                      <AddIcon />
-                    </IconButton>
-                    <ListItemText primary="Insert Tier" />
-                  </ListItem>
-                ) : null}
-              </List>
-            </>
-          ) : null}
-          {values.shape === "heart" ? (
-            <>
-              <Typography variant="h4">{`Size: ${sizeHeart}"`}</Typography>
-              <Slider
-                id="sizeHeart"
-                name="sizeHeart"
-                value={sizeHeart}
-                onChange={handleChangeHeart}
-                defaultValue={8}
-                valueLabelDisplay="auto"
-                shiftStep={5}
-                step={1}
-                marks
-                min={6}
-                max={10}
-              />
-            </>
-          ) : null}
-          {values.shape === "rectangle" ? (
-            <>
-              <Typography variant="h4">{`Size: ${rectangleX}\"x${rectangleY}\"x2.5"`}</Typography>
-              <Slider
-                value={rectangleX}
-                onChange={(event, value) =>
-                  handleChangeRectangle("x", value as number)
-                }
-                defaultValue={12}
-                valueLabelDisplay="auto"
-                shiftStep={5}
-                step={1}
-                marks
-                min={9}
-                max={16}
-              />
-              <Slider
-                value={rectangleY}
-                onChange={(event, value) =>
-                  handleChangeRectangle("y", value as number)
-                }
-                defaultValue={12}
-                valueLabelDisplay="auto"
-                shiftStep={5}
-                step={1}
-                marks
-                min={5}
-                max={12}
-              />
-            </>
-          ) : null}
-          <TextField
-            label="Color"
-            id="color"
-            name="color"
-            value={values.color}
-            onChange={handleChange}
-          />
-          <FormControl fullWidth>
-            <InputLabel id="select-flavor-label">Flavor</InputLabel>
-            <Select
-              labelId="select-flavor-label"
-              id="select-flavor"
-              name="flavor"
-              value={values.flavor}
-              label="Flavor"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.flavor && Boolean(errors.flavor)}
-            >
-              {availableFlavors.map((flavor) => (
-                <MenuItem key={flavor} value={flavor}>
-                  {flavor}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="select-cover-label">Cover</InputLabel>
-            <Select
-              labelId="select-cover-label"
-              id="select-cover"
-              name="cover"
-              value={values.cover}
-              label="Cover"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.cover && Boolean(errors.cover)}
-            >
-              <MenuItem key="fondant" value="fondant">
-                Fondant
-              </MenuItem>
-              <MenuItem key="buttercream" value="buttercream">
-                Buttercream
-              </MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl>
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItem>
+                  ))}
+                  {tiers.length < 6 ? (
+                    <ListItem key="insertTier" onClick={handleAddTier}>
+                      <IconButton>
+                        <AddIcon />
+                      </IconButton>
+                      <ListItemText primary="Insert Tier" />
+                    </ListItem>
+                  ) : null}
+                </List>
+              </>
+            ) : null}
+            {values.shape === "heart" ? (
+              <>
+                <Typography variant="h4">{`Size: ${sizeHeart}"`}</Typography>
+                <Slider
+                  id="sizeHeart"
+                  name="sizeHeart"
+                  value={sizeHeart}
+                  onChange={handleChangeHeart}
+                  defaultValue={8}
+                  valueLabelDisplay="auto"
+                  shiftStep={5}
+                  step={1}
+                  marks
+                  min={6}
+                  max={10}
+                />
+              </>
+            ) : null}
+            {values.shape === "rectangle" ? (
+              <>
+                <Typography variant="h4">{`Size: ${rectangleX}\"x${rectangleY}\"x2.5"`}</Typography>
+                <Slider
+                  value={rectangleX}
+                  onChange={(event, value) =>
+                    handleChangeRectangle("x", value as number)
+                  }
+                  defaultValue={12}
+                  valueLabelDisplay="auto"
+                  shiftStep={5}
+                  step={1}
+                  marks
+                  min={9}
+                  max={16}
+                />
+                <Slider
+                  value={rectangleY}
+                  onChange={(event, value) =>
+                    handleChangeRectangle("y", value as number)
+                  }
+                  defaultValue={12}
+                  valueLabelDisplay="auto"
+                  shiftStep={5}
+                  step={1}
+                  marks
+                  min={5}
+                  max={12}
+                />
+              </>
+            ) : null}
             <TextField
-              label="Event's theme/color palette/important notes/requests"
-              id="field-description"
-              name="description"
-              value={values.description}
+              label="Color"
+              id="color"
+              name="color"
+              value={values.color}
+              onChange={handleChange}
+            />
+            <FormControl fullWidth>
+              <InputLabel id="select-flavor-label">Flavor</InputLabel>
+              <Select
+                labelId="select-flavor-label"
+                id="select-flavor"
+                name="flavor"
+                value={values.flavor}
+                label="Flavor"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.flavor && Boolean(errors.flavor)}
+              >
+                {availableFlavors.map((flavor) => (
+                  <MenuItem key={flavor} value={flavor}>
+                    {flavor}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="select-cover-label">Cover</InputLabel>
+              <Select
+                labelId="select-cover-label"
+                id="select-cover"
+                name="cover"
+                value={values.cover}
+                label="Cover"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.cover && Boolean(errors.cover)}
+              >
+                <MenuItem key="fondant" value="fondant">
+                  Fondant
+                </MenuItem>
+                <MenuItem key="buttercream" value="buttercream">
+                  Buttercream
+                </MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <TextField
+                label="Event's theme/color palette/important notes/requests"
+                id="field-description"
+                name="description"
+                value={values.description}
+                onChange={handleChange}
+                multiline
+                rows={4}
+              />
+              <FormHelperText id="helper-description">
+                Example - Theme: Disney Princess - Belle Color palette: Red,
+                Pastel Yellow, Gold; Notes: #30 candle
+              </FormHelperText>
+            </FormControl>
+            <TextField
+              label="Cake Message"
+              id="field-message"
+              name="message"
+              value={values.message}
               onChange={handleChange}
               multiline
               rows={4}
             />
-            <FormHelperText id="helper-description">
-              Example - Theme: Disney Princess - Belle Color palette: Red,
-              Pastel Yellow, Gold; Notes: #30 candle
-            </FormHelperText>
-          </FormControl>
-          <TextField
-            label="Cake Message"
-            id="field-message"
-            name="message"
-            value={values.message}
-            onChange={handleChange}
-            multiline
-            rows={4}
-          />
-          {values.picture ? (
-            <img src={`data:${imageType};base64,${values.picture}`} />
-          ) : null}
-          <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<UploadIcon />}
-          >
-            {"Upload File"}
-            <VisuallyHiddenInput
-              type="file"
-              onChange={handleFileUpload}
-              accept="image/*"
+            {values.picture ? (
+              <img src={`data:${imageType};base64,${values.picture}`} />
+            ) : null}
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<UploadIcon />}
+            >
+              {"Upload File"}
+              <VisuallyHiddenInput
+                type="file"
+                onChange={handleFileUpload}
+                accept="image/*"
+              />
+            </Button>
+
+            <TermsDialog
+              open={open}
+              onClose={onClose}
+              agree={values.agree}
+              handleChange={handleChange}
             />
-          </Button>
 
-          <TermsDialog
-            open={open}
-            onClose={onClose}
-            agree={values.agree}
-            handleChange={handleChange}
-          />
+            <Button
+              variant="contained"
+              type="submit"
+              onClick={(e) => {
+                e.preventDefault();
 
-          <Button
-            variant="contained"
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-
-              if (Object.keys(errors).length > 0) {
-                // Check if there are any errors
-                if (errors.agree) {
-                  setOpen(true); // Open modal if `errors.agree` exists
+                if (Object.keys(errors).length > 0) {
+                  // Check if there are any errors
+                  if (errors.agree) {
+                    setOpen(true); // Open modal if `errors.agree` exists
+                  } else {
+                    makeAlert(
+                      "error",
+                      Object.entries(errors)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(", ")
+                    );
+                  }
                 } else {
-                  makeAlert(
-                    "error",
-                    Object.entries(errors)
-                      .map(([key, value]) => `${key}: ${value}`)
-                      .join(", ")
-                  );
+                  handleSubmit(); // Submit the form if no errors
                 }
-              } else {
-                handleSubmit(); // Submit the form if no errors
-              }
-            }}
-          >
-            Submit
-          </Button>
-        </Stack>
-      </form>
+              }}
+            >
+              Submit
+            </Button>
+          </Stack>
+        </form>
+      </Box>
     </Container>
   );
 };
