@@ -101,7 +101,7 @@ const Custom = () => {
       await api.post("current-user/custom-orders", {
         color: values.color,
         shape: values.color,
-        tier: tiers.length ? tiers.length : "",
+        tier: tiers.length ? tiers.length : 0,
         quantity: 1,
         cover: values.cover,
         description: values.description,
@@ -114,6 +114,7 @@ const Custom = () => {
         "success",
         "Order successfully placed. You can view it in your cart."
       );
+      resetForm();
     } catch (error) {
       console.error(error);
       makeAlert("error", "Error placing order, please try again.");
@@ -128,6 +129,7 @@ const Custom = () => {
     handleChange,
     handleSubmit,
     setFieldValue,
+    resetForm,
   } = useFormik({
     initialValues: {
       color: "",
@@ -228,6 +230,7 @@ const Custom = () => {
       maxWidth="sm"
       sx={{
         pt: 3,
+        pb: 10,
       }}
     >
       <Header title="Custom Order Form" />
