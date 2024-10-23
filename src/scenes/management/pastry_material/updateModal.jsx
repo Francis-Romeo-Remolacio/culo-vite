@@ -120,7 +120,6 @@ const UpdatePastryMaterialModal = ({
       });
     }
   }, [material]);
-  //useEffect(() => {console.log(formData)}, [formData])
 
   const fetchValidItemTypes = async () => {
     try {
