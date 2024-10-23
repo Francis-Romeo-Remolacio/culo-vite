@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -79,13 +79,6 @@ const ButtonCheckout = ({
   const colors = Tokens(theme.palette.mode);
 
   const [open, setOpen] = useState(false);
-  const minDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
-  const suborderIds: string[] =
-    suborders.length > 0
-      ? suborders
-          .map((suborder) => suborder.id)
-          .filter((id): id is string => id !== undefined)
-      : [];
 
   const handleClickOpen = () => {
     if (suborders.length > 0) {
@@ -94,7 +87,6 @@ const ButtonCheckout = ({
   };
 
   const handleClose = () => {
-    // resetForm();
     setOpen(false);
   };
 
@@ -123,7 +115,7 @@ const ButtonCheckout = ({
           pickupDate: formattedDate,
           pickupTime: formattedTime,
           payment: values.payment,
-          suborderIds: suborderIds as string[],
+          suborderIds: suborders.map((suborder) => suborder.id),
         });
       }
       handleClose();
@@ -135,15 +127,19 @@ const ButtonCheckout = ({
     }
   };
 
-  const { values, errors, isSubmitting, handleChange } = useFormik({
-    initialValues: {
-      type: "normal",
-      pickupDateTime: minDate,
-      payment: "full",
-    },
-    validationSchema: orderSchema,
-    onSubmit,
-  });
+  const { values, errors, isSubmitting, handleChange, setFieldValue } =
+    useFormik({
+      initialValues: {
+        type: "normal",
+        pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
+        payment: "full",
+      },
+      validationSchema: orderSchema,
+      onSubmit,
+    });
+
+  // Set rush-specific behavior
+  const isRushOrder = values.type === "rush";
 
   return (
     <>
@@ -177,6 +173,7 @@ const ButtonCheckout = ({
             <Stack spacing={2} sx={{ minWidth: 512 }}>
               {suborders.map((suborder) => (
                 <SuborderAccordion
+                  key={suborder.id}
                   suborder={suborder}
                   designName={buyNowDesignName}
                 ></SuborderAccordion>
@@ -189,7 +186,18 @@ const ButtonCheckout = ({
                   name="type"
                   value={values.type}
                   label="Type"
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.value === "rush") {
+                      // Set minimum date to 1 day for rush orders
+                      setFieldValue(
+                        "pickupDateTime",
+                        dayjs().add(1, "day").set("hour", 9).set("minute", 0)
+                      );
+                      // Set payment to full for rush orders
+                      setFieldValue("payment", "full");
+                    }
+                  }}
                 >
                   <MenuItem value="normal">Normal</MenuItem>
                   <MenuItem value="rush">Rush</MenuItem>
@@ -199,15 +207,18 @@ const ButtonCheckout = ({
                 label="Pickup Date & Time"
                 name="pickupDateTime"
                 value={values.pickupDateTime}
-                minDate={minDate}
+                minDate={
+                  isRushOrder ? dayjs().add(1, "day") : dayjs().add(7, "day")
+                }
                 minTime={dayjs("2018-01-01T09:00")}
                 maxTime={dayjs("2018-01-01T16:00")}
-                onChange={handleChange}
+                onChange={(date) => setFieldValue("pickupDateTime", date)}
                 viewRenderers={{
                   hours: renderTimeViewClock,
                   minutes: renderTimeViewClock,
                   seconds: renderTimeViewClock,
                 }}
+                ampm={false}
               />
               <FormControl fullWidth variant="filled">
                 <InputLabel id="select-payment-label">Payment</InputLabel>
@@ -218,9 +229,12 @@ const ButtonCheckout = ({
                   value={values.payment}
                   label="Payment"
                   onChange={handleChange}
+                  disabled={isRushOrder} // Disable if type is "rush"
                 >
                   <MenuItem value="full">Full</MenuItem>
-                  <MenuItem value="half">Half</MenuItem>
+                  <MenuItem value="half" disabled={isRushOrder}>
+                    Half
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Stack>
