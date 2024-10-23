@@ -30,8 +30,6 @@ const OrderListItem = ({
   handleOpen,
   status,
 }: OrderListItemProps) => {
-  console.log(status);
-
   const labelId = `checkbox-list-label-${order.id}`;
 
   const navigate = useNavigate();

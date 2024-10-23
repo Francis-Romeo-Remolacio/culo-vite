@@ -11,7 +11,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import OrderListItem from "./ToPayItem";
+import OrderListItem from "./OrderListItem";
 import api from "../../api/axiosConfig.js";
 import { Order } from "../../utils/Schemas.js";
 import { toCurrency } from "../../utils/Formatter.js";
