@@ -41,6 +41,7 @@ import { toCurrency } from "../../../utils/Formatter.ts";
 import { Tokens } from "../../../Theme.ts";
 import CostBreakdownTable from "./CostBreakdownTable.tsx";
 import { getImageType } from "../../../components/Base64Image.tsx";
+import AddAlertIcon from '@mui/icons-material/AddAlert';
 
 type SuborderItemProps = {
   suborder: Suborder;
@@ -310,6 +311,16 @@ const Orders = () => {
     }
   };
 
+  const handleHalfPaidSimulation = async (id: string) => {
+    try {
+      const response = await api.post(`current-user/${id}/half-paid/simulation`);
+      console.log("Half-paid simulation successful:", response.data);
+      // Optionally, you can add logic to refresh the data or show a success message
+    } catch (error) {
+      console.error("Error during half-paid simulation:", error);
+    }
+  };
+
   const columns: readonly GridColDef[] = [
     {
       field: "action",
@@ -323,6 +334,14 @@ const Orders = () => {
               onClick={() => handleApproveOrder(params.row.id)}
             >
               <ApproveIcon />
+            </IconButton>
+          ) : null}
+          {params.row.payment === "half" ? (
+            <IconButton
+              color="success"
+              onClick={() => handleHalfPaidSimulation(params.row.id)}
+            >
+              <AddAlertIcon/>
             </IconButton>
           ) : null}
           <IconButton
