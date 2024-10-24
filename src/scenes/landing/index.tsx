@@ -12,6 +12,12 @@ import {
 import DesignGallery from "./../../components/DesignGallery.tsx";
 import { Tokens } from "../../Theme.ts";
 import { useEffect, useState } from "react";
+import Carousel from 'react-material-ui-carousel';
+
+<Carousel 
+  autoPlay 
+  interval={10000}
+></Carousel>
 
 const Landing = () => {
   const theme = useTheme();
@@ -158,17 +164,52 @@ const Landing = () => {
           <Grid item xs={12}>
             <Fade in={showAbout}>
               <Paper sx={{ padding: 3 }}>
-                <Typography variant="h4" gutterBottom>
-                  About The Pink Butter Cake Studio
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Established in 2017, The Pink Butter Cake Studio has been
-                  crafting stunning and delicious cakes for all occasions.
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon
-                  City, Philippines.
-                </Typography>
+                <Grid container spacing={2}>
+                  {/* Carousel Column */}
+                  <Grid item xs={12} md={6}>
+                    <Carousel>
+                      <iframe
+                        width="100%"
+                        height="500"
+                        src="https://www.youtube.com/embed/-diIiPnmN58"
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                      <img
+                        src="culo chef picture.png" 
+                        alt="Description of Image"
+                        style={{ width: "auto", height: "auto", maxHeight: "500px" }} 
+                      />
+                      <img
+                        src="culo chinese picture.png" 
+                        alt="Description of Image"
+                        style={{ width: "auto", height: "auto", maxHeight: "500px"  }} 
+                      />
+                      <img
+                        src="culo pokemon picture.png" 
+                        alt="Description of Image"
+                        style={{ width: "auto", height: "auto" , maxHeight: "500px" }} 
+                      />
+                    </Carousel>
+                  </Grid>
+
+                  {/* Text Column */}
+                  <Grid item xs={12} md={6} mt={10}>
+                    <Typography variant="h4" gutterBottom>
+                      About The Pink Butter Cake Studio
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      Established in 2017, The Pink Butter Cake Studio has been
+                      crafting stunning and delicious cakes for all occasions.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon
+                      City, Philippines.
+                    </Typography>
+                  </Grid>
+                </Grid>
               </Paper>
             </Fade>
           </Grid>
