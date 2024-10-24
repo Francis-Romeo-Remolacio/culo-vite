@@ -96,7 +96,7 @@ const OrderListItem = ({
   const handleClickPay = async () => {
     setIsSubmitting(true);
     try {
-      const response: any = await api.post(`${order.id}/payment`, {
+      const response: any = await api.post(`paymongo/${order.id}/payment`, {
         option: order.payment,
       });
 

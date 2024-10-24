@@ -41,7 +41,7 @@ import { toCurrency } from "../../../utils/Formatter.ts";
 import { Tokens } from "../../../Theme.ts";
 import CostBreakdownTable from "./CostBreakdownTable.tsx";
 import { getImageType } from "../../../components/Base64Image.tsx";
-import AddAlertIcon from '@mui/icons-material/AddAlert';
+import AddAlertIcon from "@mui/icons-material/AddAlert";
 
 type SuborderItemProps = {
   suborder: Suborder;
@@ -304,7 +304,7 @@ const Orders = () => {
 
   const handleApproveOrder = async (id: string) => {
     try {
-      const response = await api.post(`${id}/approve-order`);
+      const response = await api.post(`orders/${id}/approve-order`);
       console.log("Order approved successfully:", response.data);
     } catch (error) {
       console.error("Error approving order:", error);
@@ -313,7 +313,9 @@ const Orders = () => {
 
   const handleHalfPaidSimulation = async (id: string) => {
     try {
-      const response = await api.post(`current-user/${id}/half-paid/simulation`);
+      const response = await api.post(
+        `current-user/${id}/half-paid/simulation`
+      );
       console.log("Half-paid simulation successful:", response.data);
       // Optionally, you can add logic to refresh the data or show a success message
     } catch (error) {
@@ -341,7 +343,7 @@ const Orders = () => {
               color="success"
               onClick={() => handleHalfPaidSimulation(params.row.id)}
             >
-              <AddAlertIcon/>
+              <AddAlertIcon />
             </IconButton>
           ) : null}
           <IconButton
