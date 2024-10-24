@@ -16,7 +16,6 @@ import {
   FilledInput,
   Tooltip,
 } from "@mui/material";
-import api from "../../api/axiosConfig";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import ButtonBack from "./../../components/ButtonBack.jsx";
@@ -26,10 +25,11 @@ import { MouseEvent, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAlert } from "../../components/CuloAlert.js";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../components/AuthContext.js";
 
 const Register = () => {
-  const navigate = useNavigate();
   const { makeAlert } = useAlert();
+  const { register } = useAuth();
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,21 +41,13 @@ const Register = () => {
   };
 
   const onSubmit = async () => {
-    // Trim leading zeroes from contactNumber
-    const trimmedContactNumber = values.contactNumber.replace(/^0+/, "");
-
     try {
-      await api.post("users/register-customer", {
-        username: values.username,
-        email: values.email,
-        contactNumber: trimmedContactNumber,
-        password: values.password,
-      });
-      makeAlert(
-        "success",
-        "Registration successful! Please check your email for verification."
+      await register(
+        values.username,
+        values.email,
+        values.contactNumber,
+        values.password
       );
-      navigate("/login");
     } catch (error) {
       console.error("Registration error: ", error);
       makeAlert("error", "Registration failed! Please try again.");
@@ -155,13 +147,13 @@ const Register = () => {
                 variant="filled"
                 fullWidth
                 required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">(+63)</InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  maxlength: 12,
+                slotProps={{
+                  htmlInput: {
+                    startAdornment: (
+                      <InputAdornment position="start">(+63)</InputAdornment>
+                    ),
+                    maxlength: 11,
+                  },
                 }}
                 error={touched.contactNumber && Boolean(errors.contactNumber)}
                 helperText={touched.contactNumber && errors.contactNumber}

@@ -24,8 +24,9 @@ import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import Cookies from "js-cookie";
-import { DirectMessage, User } from "../../utils/Schemas";
+import { DirectMessage } from "../../utils/Schemas";
 import api from "../../api/axiosConfig";
+import { useAuth } from "../../components/AuthContext";
 
 // class CustomHttpClient extends DefaultHttpClient {
 //   private bearer: string | null;
@@ -118,6 +119,8 @@ const MessageRight = ({ directMessage }: MessageProps) => {
 };
 
 const FabChat = () => {
+  const { currentUser } = useAuth();
+
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
@@ -126,7 +129,6 @@ const FabChat = () => {
     null
   );
 
-  const [currentUser, setCurrentUser] = useState<User>();
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<DirectMessage[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -138,21 +140,6 @@ const FabChat = () => {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popper" : undefined;
-
-  useEffect(() => {
-    api.get("current-user").then((response) => {
-      const parsedUser: User = {
-        id: response.data.id,
-        email: response.data.email,
-        username: response.data.username,
-        roles: response.data.roles,
-        phoneNumber: response.data.phoneNumber,
-        isEmailConfirmed: response.data.isEmailConfirmed,
-        joinDate: response.data.joinDate,
-      };
-      setCurrentUser(parsedUser);
-    });
-  }, []);
 
   // Start the SignalR connection
   useEffect(() => {

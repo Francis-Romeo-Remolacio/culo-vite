@@ -89,13 +89,15 @@ const Form = () => {
             variant="filled"
             fullWidth
             required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">(+63)</InputAdornment>
-              ),
-            }}
-            inputProps={{
-              maxlength: 12,
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">(+63)</InputAdornment>
+                ),
+              },
+              htmlInput: {
+                maxlength: 11,
+              },
             }}
             error={touched.contactNumber && Boolean(errors.contactNumber)}
             helperText={touched.contactNumber && errors.contactNumber}

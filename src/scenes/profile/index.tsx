@@ -1,7 +1,6 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   Box,
-  CircularProgress,
   Typography,
   Button,
   Container,
@@ -13,12 +12,11 @@ import {
 import api from "../../api/axiosConfig";
 import Cookies from "js-cookie";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { User } from "../../utils/Schemas";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
-import { getImageType } from "../../components/Base64Image";
 import { useAlert } from "../../components/CuloAlert";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../components/AuthContext";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -34,52 +32,10 @@ const VisuallyHiddenInput = styled("input")({
 
 const Profile = () => {
   const { makeAlert } = useAlert();
+  const { currentUser, userPicture, imageType } = useAuth();
   const navigate = useNavigate();
 
-  const [userData, setUserData] = useState<User>();
-  const [userPicture, setUserPicture] = useState("");
-  const [imageType, setImageType] = useState("png");
-  const [loading, setLoading] = useState(true);
   const [isSubmittingVerify, setIsSubmittingVerify] = useState(false);
-
-  const fetchUserPicture = async () => {
-    await api.get("current-user/profile-picture").then((response) => {
-      setUserPicture(response.data);
-      setImageType(getImageType(userPicture));
-    });
-  };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = Cookies.get("token");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        await api.get("current-user").then((response) => {
-          const parsedUser: User = {
-            id: response.data.user_id,
-            email: response.data.email,
-            username: response.data.username,
-            roles: response.data.roles,
-            phoneNumber: response.data.phoneNumber,
-            isEmailConfirmed: response.data.isEmailConfirmed,
-            joinDate: response.data.joinDate,
-          };
-          setUserData(parsedUser);
-          fetchUserPicture();
-        });
-      } catch (err) {
-        console.error("Failed to fetch user data.", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   const convertImageToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -158,19 +114,6 @@ const Profile = () => {
     localStorage.removeItem("currentUser");
   };
 
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
     <Container maxWidth="sm">
       <Helmet>
@@ -201,17 +144,17 @@ const Profile = () => {
             </>
           )}
         </Box>
-        <Typography variant="body1">{`Email: ${userData?.email}`}</Typography>
-        <Typography variant="body1">{`Username: ${userData?.username}`}</Typography>
-        <Typography variant="body1">{`Roles: ${userData?.roles[0]}`}</Typography>
+        <Typography variant="body1">{`Email: ${currentUser?.email}`}</Typography>
+        <Typography variant="body1">{`Username: ${currentUser?.username}`}</Typography>
+        <Typography variant="body1">{`Roles: ${currentUser?.roles[0]}`}</Typography>
         <Typography variant="body1">
           {`Phone Number: ${
-            userData?.phoneNumber ? userData.phoneNumber : "None"
+            currentUser?.phoneNumber ? currentUser.phoneNumber : "None"
           }`}
         </Typography>
         <Stack direction="row">
           <Typography variant="body1">{`Email Confirmed: `}</Typography>
-          {userData?.isEmailConfirmed ? (
+          {currentUser?.isEmailConfirmed ? (
             "Yes"
           ) : (
             <>
@@ -227,7 +170,7 @@ const Profile = () => {
           )}
         </Stack>
         <Typography variant="body1">
-          {`Join Date: ${String(userData?.joinDate)}`}
+          {`Join Date: ${String(currentUser?.joinDate)}`}
         </Typography>
         <Button
           variant="contained"

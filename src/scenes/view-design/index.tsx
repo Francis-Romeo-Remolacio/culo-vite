@@ -30,7 +30,6 @@ import {
 import api from "../../api/axiosConfig.js";
 import { Helmet } from "react-helmet-async";
 import TagChip from "../../components/TagChip.js";
-import Cookies from "js-cookie";
 import { useFormik } from "formik";
 import { cartSchema } from "../../utils/Validation.ts";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -47,9 +46,11 @@ import NumberCounter from "../../components/NumberCounter.tsx";
 import ButtonCheckout from "../../components/ButtonCheckout.tsx";
 import { useAlert } from "../../components/CuloAlert.tsx";
 import { MuiColorInput } from "mui-color-input";
+import { useAuth } from "../../components/AuthContext.tsx";
 
 const ViewDesign = () => {
   const { makeAlert } = useAlert();
+  const { isAuthenticated } = useAuth();
 
   const location = useLocation();
   const query = new URLSearchParams(location.search);
@@ -68,7 +69,6 @@ const ViewDesign = () => {
   const [selectedAddOns, setSelectedAddOns] = useState<OrderAddOn[]>([]);
   const [userAddOns, setUserAddOns] = useState<OrderAddOn[]>([]);
   const [selectedOption, setSelectedOption] = useState<AddOn>();
-  const [loggedIn, setLoggedIn] = useState(false);
 
   const useNavigateParams = () => {
     return (url: string, params: any) => {
@@ -113,7 +113,7 @@ const ViewDesign = () => {
   }, [image]);
 
   const onSubmit = async () => {
-    if (loggedIn) {
+    if (isAuthenticated) {
       try {
         await api.post("current-user/cart", {
           quantity: values.quantity,
@@ -338,23 +338,6 @@ const ViewDesign = () => {
       setFilteredAddOns(updatedFilteredAddOns);
     }
   };
-
-  useEffect(() => {
-    const checkLoggedIn = async () => {
-      const token = Cookies.get("token");
-      if (token) {
-        try {
-          const response = await api.get("current-user");
-          if (response.status === 200) {
-            setLoggedIn(true);
-          }
-        } catch (error) {
-          console.error("Token validation error:", error);
-        }
-      }
-    };
-    checkLoggedIn();
-  }, []);
 
   useEffect(() => {
     const fetchDesignData = async () => {
@@ -810,11 +793,6 @@ const ViewDesign = () => {
                       fullWidth
                       type="submit"
                       startIcon={!isSubmitting ? <AddShoppingCartIcon /> : ""}
-                      onClick={() => {
-                        if (!loggedIn) {
-                          gotoLogin();
-                        }
-                      }}
                       disabled={isSubmitting}
                     >
                       {"Add to Cart"}

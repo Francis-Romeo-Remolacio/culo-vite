@@ -228,7 +228,6 @@ const Custom = () => {
       maxWidth="sm"
       sx={{
         pt: 3,
-        pb: 10,
       }}
     >
       <Header title="Custom Order Form" />

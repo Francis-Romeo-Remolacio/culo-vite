@@ -43,6 +43,7 @@ import { MouseEvent, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import api from "../../../api/axiosConfig";
 import { Notification } from "../../../utils/Schemas";
+import { useAuth } from "../../../components/AuthContext";
 
 const drawerWidth = 200;
 
@@ -137,6 +138,42 @@ const iconMapping: any = {
   default: HelpOutlineIcon,
 };
 
+const generatePageList = () => {
+  const { role } = useAuth();
+  switch (role) {
+    case "Admin":
+      return [
+        "Register",
+        "Calendar",
+        "Inventory",
+        "Add-Ons",
+        "Orders",
+        "Suborders",
+        "Designs",
+        "Pastry Material",
+        "Tags",
+        "Users",
+        "Sales",
+        "FAQ Page",
+      ];
+    case "Admin":
+      return [
+        "Calendar",
+        "Inventory",
+        "Add-Ons",
+        "Orders",
+        "Suborders",
+        "Designs",
+        "Pastry Material",
+        "Tags",
+        "Sales",
+        "FAQ Page",
+      ];
+    case "Artist":
+      return ["Calendar", "Suborders", "Designs", "FAQ Page"];
+  }
+};
+
 type SidebarItemProps = {
   text: string;
   open: boolean;
@@ -184,6 +221,10 @@ export default function ManagementAppBar({
 }: {
   children: React.ReactNode;
 }) {
+  const { role } = useAuth();
+
+  const pageList = generatePageList();
+
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -325,20 +366,7 @@ export default function ManagementAppBar({
           </List>
           <Divider />
           <List>
-            {[
-              "Register",
-              "Calendar",
-              "Inventory",
-              "Add-Ons",
-              "Orders",
-              "Suborders",
-              "Designs",
-              "Pastry Material",
-              "Tags",
-              "Users",
-              "Sales",
-              "FAQ Page",
-            ].map((text, index) => (
+            {pageList.map((text, index) => (
               <SidebarItem key={text} text={text} open={open} />
             ))}
           </List>

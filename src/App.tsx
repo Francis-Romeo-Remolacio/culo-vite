@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router-dom";
+import { useAuth } from "./components/AuthContext.tsx";
+
 import Landing from "./scenes/landing";
 import Home from "./scenes/home";
 import MainAppBar from "./scenes/global/MainAppBar.jsx";
@@ -9,13 +11,10 @@ import Register from "./scenes/register";
 import Shop from "./scenes/shop";
 import Design from "./scenes/view-design";
 import Custom from "./scenes/custom";
-// import About from "./scenes/about/index";
 import Results from "./scenes/results";
 import Cart from "./scenes/cart";
 import Profile from "./scenes/profile";
 import MyOrders from "./scenes/my-orders/index.js";
-// import Forbidden from "./scenes/forbidden";
-// import NotFound from "./scenes/not-found";
 import Dashboard from "./scenes/management/dashboard";
 import Inventory from "./scenes/management/inventory";
 import Orders from "./scenes/management/orders";
@@ -26,143 +25,149 @@ import Sales from "./scenes/management/sales";
 import ManualRegister from "./scenes/management/form";
 import Calendar from "./scenes/management/calendar";
 import Materials from "./scenes/management/pastry_material";
-// import Logs from "./scenes/management/logs";
-// import Settings from "./scenes/management/settings";
 import AddOns from "./scenes/management/addons";
-import AuthGuard from "./components/AuthGuard";
 import NotFound from "./scenes/not-found/index.js";
 import PostPayment from "./scenes/post-payment/index.js";
 import Suborders from "./scenes/management/suborders/index.js";
 import ConfirmEmail from "./scenes/confirm-email/index.js";
-import Chat from "./scenes/chat/index.js";
 import Transactions from "./scenes/transactions";
+import { Box, CircularProgress } from "@mui/material";
 
 function App() {
-  return (
-    <div
-      className="app"
-      style={{
-        /*backgroundColor: colors.grey[100],*/ height: "auto",
-        minHeight: "100vh",
-      }}
-    >
-      <AuthGuard role={"Guest"}>
-        {/* Public */}
-        <MainAppBar>
-          <FabChat />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/view-design" element={<Design />} />
-            <Route path="/custom" element={<Custom />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/confirm-email" element={<ConfirmEmail />} />
-            <Route path="/not-found" element={<NotFound />} />
-            {
-              //<Route path="/about" element={<About />} />
-              //<Route path="/forbidden" element={<Forbidden />} />
-              //<Route path="*" element={<NotFound />} />
-            }
-          </Routes>
-        </MainAppBar>
-      </AuthGuard>
+  const { role, isAuthenticated } = useAuth();
 
-      <AuthGuard role={"Customer"}>
-        {/* Customer */}
-        <MainAppBar>
-          <FabChat />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/view-design" element={<Design />} />
-            <Route path="/custom" element={<Custom />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/my-orders" element={<MyOrders />} />
-            <Route path="/post-payment" element={<PostPayment />} />
-            {/* <Route path="/post-payment" element={<MyOrders />} /> */}
-            <Route path="/results" element={<Results />} />
-            {
-              //<Route path="/purchases" element={<Purchases />} />
-            }
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/transaction-history" element={<Transactions />} />
-            <Route path="/not-found" element={<NotFound />} />
-            {/* <Route path="/chat" element={<Chat />} /> */}
-          </Routes>
-        </MainAppBar>
-      </AuthGuard>
+  if (role === undefined) {
+    return (
+      <Box
+        className="app"
+        sx={{
+          height: "auto",
+          minHeight: "100vh",
+        }}
+      >
+        <Box
+          sx={{
+            display: "inline-flex",
+            width: "100%",
+            height: "100vh",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      </Box>
+    );
+  } else {
+    return (
+      <Box
+        className="app"
+        sx={{
+          height: "auto",
+          minHeight: "100vh",
+        }}
+      >
+        {/* Public Routes */}
+        {!isAuthenticated && role === "Guest" && (
+          <MainAppBar>
+            <FabChat />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/view-design" element={<Design />} />
+              <Route path="/custom" element={<Custom />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/confirm-email" element={<ConfirmEmail />} />
+              <Route path="/not-found" element={<NotFound />} />
+            </Routes>
+          </MainAppBar>
+        )}
 
-      <AuthGuard role={"Artist"}>
-        {/* Artist */}
-        <ManagementAppBar>
-          <FabChat />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/suborders" element={<Suborders />} />
-            <Route path="/designs" element={<Designs />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/not-found" element={<NotFound />} />
-          </Routes>
-        </ManagementAppBar>
-      </AuthGuard>
+        {/* Customer Routes */}
+        {isAuthenticated && role === "Customer" && (
+          <MainAppBar>
+            <FabChat />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/view-design" element={<Design />} />
+              <Route path="/custom" element={<Custom />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/post-payment" element={<PostPayment />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/transaction-history" element={<Transactions />} />
+              <Route path="/not-found" element={<NotFound />} />
+            </Routes>
+          </MainAppBar>
+        )}
 
-      <AuthGuard role={"Manager"}>
-        {/* Manager */}
-        <ManagementAppBar>
-          <FabChat />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/register" element={<ManualRegister />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/suborders" element={<Suborders />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/designs" element={<Designs />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/pastry-material" element={<Materials />} />
-            <Route path="/add-ons" element={<AddOns />} />
-            <Route path="/tags" element={<Tags />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/not-found" element={<NotFound />} />
-          </Routes>
-        </ManagementAppBar>
-      </AuthGuard>
+        {/* Artist Routes */}
+        {isAuthenticated && role === "Artist" && (
+          <ManagementAppBar>
+            <FabChat />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/suborders" element={<Suborders />} />
+              <Route path="/designs" element={<Designs />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/not-found" element={<NotFound />} />
+            </Routes>
+          </ManagementAppBar>
+        )}
 
-      <AuthGuard role={"Admin"}>
-        {/* Admin */}
-        <ManagementAppBar>
-          <FabChat />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/register" element={<ManualRegister />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/suborders" element={<Suborders />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/designs" element={<Designs />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/pastry-material" element={<Materials />} />
-            <Route path="/add-ons" element={<AddOns />} />
-            <Route path="/tags" element={<Tags />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/not-found" element={<NotFound />} />
-            {/* <Route path="/chat" element={<Chat />} /> */}
-            {
-              //<Route path="/logs" element={<Logs />} />
-              //<Route path="/settings" element={<Settings />} />
-              //<Route path="*" element={<NotFound />} />
-            }
-          </Routes>
-        </ManagementAppBar>
-      </AuthGuard>
-    </div>
-  );
+        {/* Manager Routes */}
+        {isAuthenticated && role === "Manager" && (
+          <ManagementAppBar>
+            <FabChat />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/register" element={<ManualRegister />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/suborders" element={<Suborders />} />
+              <Route path="/sales" element={<Sales />} />
+              <Route path="/designs" element={<Designs />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/pastry-material" element={<Materials />} />
+              <Route path="/add-ons" element={<AddOns />} />
+              <Route path="/tags" element={<Tags />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/not-found" element={<NotFound />} />
+            </Routes>
+          </ManagementAppBar>
+        )}
+
+        {/* Admin Routes */}
+        {isAuthenticated && role === "Admin" && (
+          <ManagementAppBar>
+            <FabChat />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/register" element={<ManualRegister />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/suborders" element={<Suborders />} />
+              <Route path="/sales" element={<Sales />} />
+              <Route path="/designs" element={<Designs />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/pastry-material" element={<Materials />} />
+              <Route path="/add-ons" element={<AddOns />} />
+              <Route path="/tags" element={<Tags />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/not-found" element={<NotFound />} />
+            </Routes>
+          </ManagementAppBar>
+        )}
+      </Box>
+    );
+  }
 }
 
 export default App;

@@ -9,6 +9,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import App from "./App";
 import { AlertProvider } from "./components/CuloAlert";
+import { AuthProvider } from "./components/AuthContext";
 
 const Index = () => {
   const [theme, colorMode] = useMode();
@@ -25,7 +26,9 @@ const Index = () => {
                 }
                 <CssBaseline />
                 <AlertProvider>
-                  <App />
+                  <AuthProvider>
+                    <App />
+                  </AuthProvider>
                 </AlertProvider>
                 {
                   //</MantineProvider>
