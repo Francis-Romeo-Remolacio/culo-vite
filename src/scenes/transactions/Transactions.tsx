@@ -18,7 +18,7 @@ const TransactionHistory = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await api.get("/current-user/transaction/history");
+        const response = await api.get("/current-user/transactions");
         setTransactions(response.data); // Assuming the response is an array
       } catch (error) {
         console.error("Error fetching transactions", error);

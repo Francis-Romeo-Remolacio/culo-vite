@@ -101,7 +101,7 @@ const OrderListItem = ({
       });
 
       window.open(response.data.data.attributes.checkout_url);
-      navigate(`/post-payment?order=${order.id}`);
+      navigate(`/post-payment?transaction=${response.data.data.id}`);
     } catch (error) {
       console.error(error);
       makeAlert("error", "Failed to process payment.");
@@ -115,12 +115,12 @@ const OrderListItem = ({
     setIsSubmitting(true);
     if (order.payment === "full")
       try {
-        const response: any = await api.post(`${order.id}/payment`, {
+        const response: any = await api.post(`paymongo/${order.id}/payment`, {
           option: order.payment,
         });
 
         window.open(response.data.data.attributes.checkout_url);
-        navigate(`/post-payment?order=${order.id}`);
+        navigate(`/post-payment?transaction=${response.data.data.id}`);
       } catch (error) {
         console.error(error);
         makeAlert("error", "Failed to process payment.");
