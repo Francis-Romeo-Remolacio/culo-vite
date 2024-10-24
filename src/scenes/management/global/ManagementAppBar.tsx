@@ -366,9 +366,11 @@ export default function ManagementAppBar({
           </List>
           <Divider />
           <List>
-            {pageList.map((text, index) => (
-              <SidebarItem key={text} text={text} open={open} />
-            ))}
+            {pageList
+              ? pageList.map((text, index) => (
+                  <SidebarItem key={text} text={text} open={open} />
+                ))
+              : null}
           </List>
         </Drawer>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
