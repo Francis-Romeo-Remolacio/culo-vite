@@ -11,6 +11,7 @@ import {
   MenuItem,
   IconButton,
   Typography,
+  TextField,
   Box,
   Accordion,
   AccordionSummary,
@@ -47,12 +48,15 @@ type SuborderItemProps = {
   suborder: Suborder;
   index: number;
   handleAssignClickOpen?: (item: Suborder | CustomOrder) => void;
+  handleOpenUpdateModal?: (item: Suborder | CustomOrder) => void;
 };
+
 
 export const SuborderItem = ({
   suborder,
   index,
   handleAssignClickOpen,
+  handleOpenUpdateModal,
 }: SuborderItemProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
@@ -107,6 +111,17 @@ export const SuborderItem = ({
               Assign
             </Button>
           ) : null}
+          {handleOpenUpdateModal ? (
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                handleOpenUpdateModal(suborder);
+              }}
+            >
+              Update
+            </Button>
+          ) : null}
         </Stack>
       </AccordionSummary>
       <AccordionDetails>
@@ -150,6 +165,21 @@ const Orders = () => {
 
   const [bomDialogOpen, setBomDialogOpen] = useState(false);
   const [breakdownData, setBreakdownData] = useState<Breakdown[]>([]);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [selectedSuborder, setSelectedSuborder] = useState<Suborder | CustomOrder | null>(null);
+  const [designName, setDesignName] = useState("");
+  const [price, setPrice] = useState(0);
+  
+  const handleOpenUpdateModal = (item: Suborder | CustomOrder) => {
+    setSelectedSuborder(item); // Set the selected suborder
+    setOpenUpdateModal(true);  // Open the modal
+  };
+
+  // Function to close the modal
+  const handleCloseUpdateModal = () => {
+    setOpenUpdateModal(false);
+    setSelectedSuborder(null); // Reset the selected suborder
+  };  
 
   interface Employee {
     userId: string;
@@ -211,6 +241,38 @@ const Orders = () => {
       console.error("Error fetching orders:", error);
     }
   };
+
+  // Function to handle form submission
+const handleUpdateOrder = async () => {
+  // Ensure required fields are present
+  if (!selectedSuborder || !designName || !price) return;
+
+  try {
+    // Prepare the request body
+    const requestBody = {
+      designName,
+      price,
+    };
+
+    // API call to update the order with the selected suborder ID
+    const response = await api.patch(
+      `orders/custom-orders/${selectedSuborder.id}/set-price`, // Ensure the API endpoint is correct
+      requestBody
+    );
+
+    console.log("Order updated successfully:", response.data);
+
+    // Close the update modal after a successful submission
+    handleCloseUpdateModal();
+
+    // Refresh the data after the update
+    fetchData();
+  } catch (error) {
+    // Log errors properly
+    console.error("Error updating order:", error);
+  }
+};
+
 
   const fetchBreakdownData = async () => {
     if (orderDetails) {
@@ -395,6 +457,43 @@ const Orders = () => {
         />
       </DataGridStyler>
 
+      <Dialog open={openUpdateModal} onClose={handleCloseUpdateModal}>
+        <DialogTitle>Update Custom Order</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Design Name"
+              value={designName}
+              onChange={(e) => setDesignName(e.target.value)}
+              variant="outlined"
+            />
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <TextField
+              label="Price"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              variant="outlined"
+              inputProps={{
+                min: 1
+              }}
+            />
+          </FormControl>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseUpdateModal} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleUpdateOrder} color="success">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
       <Dialog open={viewOrderOpen} onClose={handleClose} maxWidth="md">
         <DialogTitle>Order Details</DialogTitle>
         <DialogContent>
@@ -420,6 +519,7 @@ const Orders = () => {
                   suborder={suborder}
                   index={index}
                   handleAssignClickOpen={handleAssignClickOpen}
+                  handleOpenUpdateModal={handleOpenUpdateModal} //can you make this only for customorders
                 />
               ))}
               {orderDetails.listItems.customOrders.map((customOrder, index) => (
@@ -427,6 +527,7 @@ const Orders = () => {
                   suborder={customOrder}
                   index={index}
                   handleAssignClickOpen={handleAssignClickOpen}
+                  //handleOpenUpdateModal={handleOpenUpdateModal}
                 />
               ))}
               <Dialog
