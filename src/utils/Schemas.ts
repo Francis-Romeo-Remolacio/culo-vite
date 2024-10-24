@@ -198,6 +198,19 @@ export interface Transaction {
   date: Date;
 }
 
+export interface Paymongo {
+  id: string;
+  type: string;
+  attributes: {
+    amount: number;
+    taxAmount: number;
+    checkoutUrl: string;
+    payments: any[];
+    referenceNumber: string;
+    status: string;
+  };
+}
+
 export interface Notification {
   id: string;
   created: Date;
