@@ -32,10 +32,15 @@ import {
   PastryMaterialVariant,
 } from "../../../utils/Schemas";
 import { ChangeEvent, useEffect, useReducer, useState } from "react";
-import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  ExpandMore,
+} from "@mui/icons-material";
 import api from "../../../api/axiosConfig";
 import { toCurrency } from "../../../utils/Formatter";
 import { Tokens } from "../../../Theme";
+import Header from "../../../components/Header";
 
 interface PastryMaterialState {
   values: {
@@ -142,34 +147,57 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
     // Update an existing variant
     // Update an existing variant
     case ACTIONS.UPDATE_VARIANT:
+      var variantList: PastryMaterialVariant[] = state.values.variants;
+      var newVariantData = action.payload.variant;
+      var updatedVariant = {
+        ...variantList[action.payload.index],
+        ...newVariantData,
+      };
+
+      // Generate the name based on the shape
+      // if (newVariantData.tiers && updatedVariant.tiers.length > 0) {
+      //   updatedVariant.name = `${updatedVariant.tiers.length} tiers, ${
+      //     updatedVariant.tiers[updatedVariant.tiers.length - 1]
+      //   } base`;
+      // } else if (newVariantData.sizeHeart) {
+      //   updatedVariant.name = `${updatedVariant.sizeHeart}"`;
+      // } else if (
+      //   newVariantData.rectangleX &&
+      //   newVariantData.rectangleY
+      // ) {
+      //   updatedVariant.name = `${updatedVariant.rectangleX}"x${updatedVariant.rectangleY}"x2.5"`;
+      // }
+      if (
+        newVariantData.tiers !== undefined &&
+        updatedVariant.tiers.length > 0
+      ) {
+        updatedVariant.name = `${updatedVariant.tiers.length} tiers, ${
+          updatedVariant.tiers[updatedVariant.tiers.length - 1]
+        } base`;
+      }
+      if (
+        newVariantData.rectangleX !== undefined ||
+        newVariantData.rectangleY !== undefined
+      ) {
+        updatedVariant.name = `${updatedVariant.rectangleX}"x${updatedVariant.rectangleY}"x2.5"`;
+      }
+      if (newVariantData.sizeHeart !== undefined) {
+        updatedVariant.name = `${updatedVariant.sizeHeart}"`;
+      }
+
+      variantList[action.payload.index] = updatedVariant;
+      console.log("UPDATED DATA::");
+      console.log(newVariantData);
+      console.log(variantList);
+
       return {
         ...state,
         values: {
           ...state.values,
-          variants: state.values.variants.map((variant, index) => {
-            if (index === action.payload.index) {
-              const updatedVariant = { ...variant, ...action.payload.variant };
-
-              // Generate the name based on the shape
-              if (updatedVariant.tiers && updatedVariant.tiers.length > 0) {
-                updatedVariant.name = `${updatedVariant.tiers.length} tiers, ${
-                  updatedVariant.tiers[updatedVariant.tiers.length - 1]
-                } base`;
-              } else if (updatedVariant.sizeHeart) {
-                updatedVariant.name = `${updatedVariant.sizeHeart}"`;
-              } else if (
-                updatedVariant.rectangleX &&
-                updatedVariant.rectangleY
-              ) {
-                updatedVariant.name = `${updatedVariant.rectangleX}"x${updatedVariant.rectangleY}"x2.5"`;
-              }
-
-              return updatedVariant;
-            }
-            return variant;
-          }),
+          variants: variantList,
         },
       };
+
     // Update pastry material top-level properties like "otherCost"
     case ACTIONS.UPDATE_PASTRY_MATERIAL:
       return {
@@ -734,7 +762,10 @@ const PastryMaterialDialog = ({
     }
   };
 
-  useEffect(() => {console.log("HEHEHEHEHEHEH"); console.log(pmState)}, [pmState]);
+  useEffect(() => {
+    console.log("HEHEHEHEHEHEH");
+    console.log(pmState);
+  }, [pmState]);
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -1206,144 +1237,441 @@ const PastryMaterialDialog = ({
                 {"Add"}
               </Button>
             </Stack>
-            {pmState.values.variants.length > 0 && pmState.values.variants[1].map(
-              (variant: PastryMaterialVariant, variantIndex: number) => {
-                <Accordion sx={{ backgroundColor: colors.primary[100] }}>
-                  <AccordionSummary>{variant.name}</AccordionSummary>
-                  <AccordionDetails>
-                    {" "}
-                    {/* Sizing based on shape */}
-                    {shape === "round" ? (
-                      <>
-                        <List>
-                          {pmState.values.variants[1][variantIndex].tiers?.map(
-                            (tier: string, tierIndex: number) => (
-                              <ListItem key={`tier-${tierIndex}`}>
-                                <FormControl fullWidth>
-                                  <InputLabel
-                                    id={`tier-select-label-${tierIndex}`}
-                                  >
-                                    Select Tier
-                                  </InputLabel>
-                                  <Select
-                                    labelId={`tier-select-label-${tierIndex}`}
-                                    label="Select Tier"
-                                    value={tier}
-                                    onChange={(e) =>
-                                      handleChangeTier(
-                                        variantIndex,
-                                        tierIndex,
-                                        e.target.value
-                                      )
-                                    } // Pass both variant and tier index
-                                  >
-                                    {availableTiers.map((availableTier, i) => (
-                                      <MenuItem key={i} value={availableTier}>
-                                        {availableTier}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                                <IconButton
-                                  color="error"
-                                  onClick={() => {
-                                    handleRemoveTier(variantIndex, tierIndex);
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </ListItem>
-                            )
-                          )}
-                          {pmState.values.variants[1][variantIndex].tiers?.length <
-                            6 ||
-                          !pmState.values.variants[1][variantIndex].tiers ? (
-                            <ListItem key="insertTier">
-                              <IconButton onClick={() => handleAddTier(0)}>
-                                <AddIcon />
-                              </IconButton>
-                              <ListItemText primary="Insert Tier" />
-                            </ListItem>
+            {pmState.values.variants.length > 1 &&
+              pmState.values.variants.map(
+                (variant: PastryMaterialVariant, variantIndex: number) => {
+                  if (variantIndex <= 0) return;
+                  return (
+                    <Accordion sx={{ background: colors.primary[100] }}>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        {variant.name}
+                      </AccordionSummary>
+
+                      <AccordionDetails>
+                        <Stack spacing={2}>
+                          {/* Variant Name */}
+                          {shape === "round" ? (
+                            <>
+                              <List>
+                                {variant.tiers?.map(
+                                  (tier: string, tierIndex: number) => (
+                                    <ListItem
+                                      key={`variant-${variantIndex}-tier-${tierIndex}`}
+                                    >
+                                      <FormControl fullWidth>
+                                        <InputLabel
+                                          id={`variant-${variantIndex}-tier-select-label-${tierIndex}`}
+                                        >
+                                          Select Tier
+                                        </InputLabel>
+                                        <Select
+                                          labelId={`variant-${variantIndex}-tier-select-label-${tierIndex}`}
+                                          label="Select Tier"
+                                          value={tier}
+                                          onChange={(e) =>
+                                            handleChangeTier(
+                                              variantIndex,
+                                              tierIndex,
+                                              e.target.value
+                                            )
+                                          } // Pass both variant and tier index
+                                        >
+                                          {availableTiers.map(
+                                            (availableTier, i) => (
+                                              <MenuItem
+                                                key={i}
+                                                value={availableTier}
+                                              >
+                                                {availableTier}
+                                              </MenuItem>
+                                            )
+                                          )}
+                                        </Select>
+                                      </FormControl>
+                                      <IconButton
+                                        color="error"
+                                        onClick={() => {
+                                          handleRemoveTier(
+                                            variantIndex,
+                                            tierIndex
+                                          );
+                                        }}
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </ListItem>
+                                  )
+                                )}
+                                {(variant.tiers !== null &&
+                                  variant.tiers?.length !== undefined &&
+                                  variant.tiers?.length < 6) ||
+                                !variant.tiers ? (
+                                  <ListItem key="insertTier">
+                                    <IconButton
+                                      onClick={() =>
+                                        handleAddTier(variantIndex)
+                                      }
+                                    >
+                                      <AddIcon />
+                                    </IconButton>
+                                    <ListItemText primary="Insert Tier" />
+                                  </ListItem>
+                                ) : null}
+                              </List>
+                            </>
                           ) : null}
-                        </List>
-                      </>
-                    ) : null}
-                    {shape === "heart" ? (
-                      <>
-                        <Typography variant="h4">{`Size: ${pmState.values.variants[0].name}`}</Typography>
-                        <Slider
-                          id="sizeHeart"
-                          name="sizeHeart"
-                          value={
-                            pmState.values.variants[1][variantIndex].sizeHeart
-                          }
-                          onChange={(event, value) =>
-                            handleChangeHeart(variantIndex, value)
-                          } // Pass the variant index
-                          defaultValue={8}
-                          valueLabelDisplay="auto"
-                          step={1}
-                          marks
-                          min={6}
-                          max={10}
-                        />
-                      </>
-                    ) : null}
-                    {shape === "rectangle" ? (
-                      <>
-                        <Typography variant="h4">{`Size: ${pmState.values.variants[variantIndex].name}`}</Typography>
-                        <Slider
-                          value={
-                            pmState.values.variants[1][variantIndex].rectangleX
-                          }
-                          onChange={(event, value) =>
-                            handleChangeRectangle(variantIndex, "x", value)
-                          } // Pass the variant index
-                          defaultValue={12}
-                          valueLabelDisplay="auto"
-                          step={1}
-                          marks
-                          min={9}
-                          max={16}
-                        />
-                        <Slider
-                          value={
-                            pmState.values.variants[1][variantIndex].rectangleY
-                          }
-                          onChange={(event, value) =>
-                            handleChangeRectangle(variantIndex, "y", value)
-                          } // Pass the variant index
-                          defaultValue={12}
-                          valueLabelDisplay="auto"
-                          step={1}
-                          marks
-                          min={5}
-                          max={12}
-                        />
-                      </>
-                    ) : null}
-                    {shape === "custom" ? (
-                      <TextField
-                        label="Size"
-                        id="size"
-                        name="size"
-                        value={pmState.values.variants[1][variantIndex].name}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          dispatch({
-                            type: ACTIONS.UPDATE_VARIANT,
-                            payload: {
-                              index: variantIndex,
-                              variant: { name: e.target.value },
-                            },
-                          });
-                        }}
-                        fullWidth
-                      />
-                    ) : null}
-                  </AccordionDetails>
-                </Accordion>;
-              }
-            )}
+                          {shape === "heart" ? (
+                            <>
+                              <Typography variant="h4">{`Size: ${variant.name}`}</Typography>
+                              <Slider
+                                id="sizeHeart"
+                                name="sizeHeart"
+                                value={variant.sizeHeart}
+                                onChange={(event, value) =>
+                                  handleChangeHeart(variantIndex, value)
+                                } // Pass the variant index
+                                defaultValue={8}
+                                valueLabelDisplay="auto"
+                                step={1}
+                                marks
+                                min={6}
+                                max={10}
+                              />
+                            </>
+                          ) : null}
+                          {shape === "rectangle" ? (
+                            <>
+                              <Typography variant="h4">{`Size: ${variant.name}`}</Typography>
+                              <Slider
+                                value={variant.rectangleX}
+                                onChange={(event, value) =>
+                                  handleChangeRectangle(
+                                    variantIndex,
+                                    "x",
+                                    value
+                                  )
+                                } // Pass the variant index
+                                defaultValue={12}
+                                valueLabelDisplay="auto"
+                                step={1}
+                                marks
+                                min={9}
+                                max={16}
+                              />
+                              <Slider
+                                value={variant.rectangleY}
+                                onChange={(event, value) =>
+                                  handleChangeRectangle(
+                                    variantIndex,
+                                    "y",
+                                    value
+                                  )
+                                } // Pass the variant index
+                                defaultValue={12}
+                                valueLabelDisplay="auto"
+                                step={1}
+                                marks
+                                min={5}
+                                max={12}
+                              />
+                            </>
+                          ) : null}
+                          {shape === "custom" ? (
+                            <TextField
+                              label="Size"
+                              id="size"
+                              name="size"
+                              value={variant.name}
+                              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                dispatch({
+                                  type: ACTIONS.UPDATE_VARIANT,
+                                  payload: {
+                                    index: variantIndex,
+                                    variant: { name: e.target.value },
+                                  },
+                                });
+                              }}
+                              fullWidth
+                            />
+                          ) : null}
+
+                          {/* Ingredients */}
+                          <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="h3">
+                              {"Ingredients"}
+                            </Typography>
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              size="small"
+                              startIcon={<AddIcon />}
+                              onClick={() => handleAddIngredient(variantIndex)}
+                            >
+                              {"Add"}
+                            </Button>
+                          </Stack>
+                          <Stack spacing={1}>
+                            {variant.ingredients.map(
+                              (
+                                ingredient: PastryMaterialIngredient,
+                                ingredientIndex: number
+                              ) => {
+                                const optionsIngredients = [
+                                  ingredient,
+                                  ...fetchedIngredients.filter(
+                                    (availableIngredient) =>
+                                      !variant.ingredients.some(
+                                        (
+                                          variantIngredient: PastryMaterialIngredient
+                                        ) =>
+                                          variantIngredient.id ===
+                                          availableIngredient.id
+                                      )
+                                  ),
+                                ];
+
+                                // Find the corresponding fetched ingredient by ID
+                                const fetchedIngredient =
+                                  fetchedIngredients.find(
+                                    (fetched) => fetched.id === ingredient.id
+                                  );
+
+                                // Get the type from fetchedIngredient if it exists
+                                const ingredientType = fetchedIngredient
+                                  ? fetchedIngredient.type
+                                  : null;
+
+                                // Spread the unitMapping to get the correct measurement options
+                                const optionsMeasurements =
+                                  ingredientType && unitMapping
+                                    ? unitMapping[ingredientType] // Use the type from fetchedIngredient
+                                    : [];
+
+                                return (
+                                  <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    key={`variant-${variantIndex}-ingredient-stack-${ingredientIndex}`}
+                                  >
+                                    <FormControl
+                                      fullWidth
+                                      key={`variant-${variantIndex}-select-ingredient-form-${ingredientIndex}`}
+                                      size="small"
+                                    >
+                                      <Select
+                                        labelId={`variant-${variantIndex}-select-ingredient-${ingredientIndex}`}
+                                        id={`variant-${variantIndex}-select-ingredient-${ingredientIndex}`}
+                                        value={ingredient.id} // Use the current ingredient ID directly
+                                        onChange={(e) => {
+                                          dispatch({
+                                            type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                                            payload: {
+                                              variantIndex: variantIndex,
+                                              ingredientIndex: ingredientIndex,
+                                              ingredient: {
+                                                id: e.target.value,
+                                              },
+                                            },
+                                          });
+                                        }}
+                                      >
+                                        {optionsIngredients.map(
+                                          (optionIngredient) => (
+                                            <MenuItem
+                                              key={optionIngredient.id}
+                                              value={optionIngredient.id}
+                                            >
+                                              {optionIngredient.name}
+                                            </MenuItem>
+                                          )
+                                        )}
+                                      </Select>
+                                    </FormControl>
+
+                                    <FormControl
+                                      fullWidth
+                                      key={`variant-${variantIndex}-select-ingredient-measurement-form-${ingredientIndex}`}
+                                      size="small"
+                                    >
+                                      <Select
+                                        labelId={`variant-${variantIndex}-select-ingredient-measurement-${ingredientIndex}`}
+                                        id={`variant-${variantIndex}-select-ingredient-measurement-${ingredientIndex}`}
+                                        value={ingredient.measurement}
+                                        onChange={(e) =>
+                                          dispatch({
+                                            type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                                            payload: {
+                                              variantIndex: variantIndex,
+                                              ingredientIndex: ingredientIndex,
+                                              ingredient: {
+                                                measurement: e.target.value,
+                                              },
+                                            },
+                                          })
+                                        }
+                                      >
+                                        {optionsMeasurements.map(
+                                          (measurement) => {
+                                            return (
+                                              <MenuItem
+                                                key={measurement}
+                                                value={measurement}
+                                              >
+                                                {measurement}
+                                              </MenuItem>
+                                            );
+                                          }
+                                        )}
+                                      </Select>
+                                    </FormControl>
+
+                                    <TextField
+                                      id={`variant-${variantIndex}-ingredient-amount-${ingredientIndex}`}
+                                      label="Amount"
+                                      type="number"
+                                      value={ingredient.amount} // Make sure you handle this value
+                                      onChange={(e) =>
+                                        dispatch({
+                                          type: ACTIONS.UPDATE_INGREDIENT_IN_VARIANT,
+                                          payload: {
+                                            variantIndex: variantIndex,
+                                            ingredientIndex: ingredientIndex,
+                                            ingredient: {
+                                              amount: Number(e.target.value),
+                                            },
+                                          },
+                                        })
+                                      }
+                                      slotProps={{ htmlInput: { min: 0 } }}
+                                      size="small"
+                                    />
+
+                                    <IconButton
+                                      color="error"
+                                      onClick={() =>
+                                        handleRemoveIngredient(
+                                          variantIndex,
+                                          ingredientIndex
+                                        )
+                                      }
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Stack>
+                                );
+                              }
+                            )}
+                          </Stack>
+                          {/* Add ons */}
+                          <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="h3">{"Add-ons"}</Typography>
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              size="small"
+                              startIcon={<AddIcon />}
+                              onClick={() => handleAddAddOn(variantIndex)}
+                            >
+                              {"Add"}
+                            </Button>
+                          </Stack>
+                          <Stack spacing={1}>
+                            {variant.addOns.map(
+                              (
+                                addOn: PastryMaterialAddOn,
+                                addOnIndex: number
+                              ) => {
+                                const optionsAddOns = [
+                                  addOn,
+                                  ...fetchedAddOns.filter(
+                                    (availableAddOn) =>
+                                      !variant.addOns.some(
+                                        (variantAddOn: PastryMaterialAddOn) =>
+                                          variantAddOn.id === availableAddOn.id
+                                      )
+                                  ),
+                                ];
+
+                                return (
+                                  <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    key={`variant-${variantIndex}-add-on-stack-${addOnIndex}`}
+                                  >
+                                    <FormControl
+                                      fullWidth
+                                      key={`variant-${variantIndex}-select-add-on-form-${addOnIndex}`}
+                                      size="small"
+                                    >
+                                      <Select
+                                        labelId={`variant-${variantIndex}-select-add-on-${addOnIndex}`}
+                                        id={`variant-${variantIndex}-select-add-on-${addOnIndex}`}
+                                        value={addOn.id} // Use the current ingredient ID directly
+                                        onChange={(e) =>
+                                          dispatch({
+                                            type: ACTIONS.UPDATE_ADDON_IN_VARIANT,
+                                            payload: {
+                                              variantIndex: 0,
+                                              addOnIndex: addOnIndex,
+                                              addOn: { id: e.target.value },
+                                            },
+                                          })
+                                        }
+                                      >
+                                        {optionsAddOns.map((optionsAddOn) => (
+                                          <MenuItem
+                                            key={optionsAddOn.id}
+                                            value={optionsAddOn.id}
+                                          >
+                                            {optionsAddOn.name}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </FormControl>
+
+                                    <TextField
+                                      id={`variant-${variantIndex}-ingredient-amount-${addOnIndex}`}
+                                      label="Amount"
+                                      type="number"
+                                      value={addOn.amount} // Make sure you handle this value
+                                      onChange={(e) =>
+                                        dispatch({
+                                          type: ACTIONS.UPDATE_ADDON_IN_VARIANT,
+                                          payload: {
+                                            variantIndex: variantIndex,
+                                            addOnIndex: addOnIndex,
+                                            addOn: {
+                                              amount: Number(e.target.value),
+                                            },
+                                          },
+                                        })
+                                      }
+                                      slotProps={{ htmlInput: { min: 0 } }}
+                                      size="small"
+                                    />
+
+                                    <IconButton
+                                      color="error"
+                                      onClick={() =>
+                                        handleRemoveAddOn(
+                                          variantIndex,
+                                          addOnIndex
+                                        )
+                                      }
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </Stack>
+                                );
+                              }
+                            )}
+                          </Stack>
+                        </Stack>
+                      </AccordionDetails>
+                    </Accordion>
+                  );
+                }
+              )}
           </Stack>
         </DialogContent>
         <DialogActions>

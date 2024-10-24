@@ -20,7 +20,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useFormik } from "formik";
 import api from "../../../api/axiosConfig";
 import { designSchema } from "../../../utils/Validation";
-import { Design, PastryMaterial, Tag } from "../../../utils/Schemas";
+import { Design, PastryMaterial, PastryMaterialVariant, Tag } from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
@@ -129,7 +129,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       await api
         .get(`designs/${encodeURIComponent(design.id)}/pastry-material`)
         .then((response) => {
-          const parsedPastryMaterial: PastryMaterial = {
+          var parsedPastryMaterial: PastryMaterial = {
             id: response.data.pastryMaterialId,
             designId: response.data.designId,
             designName: response.data.designName,
@@ -168,37 +168,39 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 inStock: response.data.ingredientsInStock,
                 created: new Date(response.data.dateAdded),
                 lastModified: new Date(response.data.lastModifiedDate),
-              },
-              // Sub-Variants
-              response.data.subVariants.map((subVariant: any) => ({
-                name: subVariant.subVariantName,
-                costEstimate: subVariant.subVariantCostEstimate,
-                costExactEstimate: subVariant.subVariantExactCostEstimate,
-                ingredients: subVariant.subVariantIngredients.map(
-                  (ingredient: any) => ({
-                    relationId: ingredient.pastryMaterialSubVariantIngredientId,
-                    id: ingredient.itemId,
-                    name: ingredient.itemName,
-                    type: ingredient.type,
-                    amount: ingredient.amount,
-                    amountMeasurement: ingredient.amountMeasurement,
-                    ingredientType: ingredient.ingredientType,
-                    created: new Date(ingredient.dateAdded),
-                    lastModified: new Date(ingredient.lastModifiedDate),
-                  })
-                ),
-                addOns: subVariant.subVariantAddOns.map((addOn: any) => ({
-                  relationId: addOn.pastryMaterialSubVariantAddOnId,
-                  id: addOn.addOnsId,
-                  name: addOn.addOnsName,
-                  amount: addOn.amount,
-                })),
-                inStock: subVariant.ingredientsInStock,
-                created: new Date(subVariant.dateAdded),
-                lastModified: new Date(subVariant.lastModifiedDate),
-              })),
+              }
             ],
           };
+          const subVariants : PastryMaterialVariant[] = 
+          response.data.subVariants.map((subVariant: any) => ({
+            name: subVariant.subVariantName,
+            costEstimate: subVariant.subVariantCostEstimate,
+            costExactEstimate: subVariant.subVariantExactCostEstimate,
+            ingredients: subVariant.subVariantIngredients.map(
+              (ingredient: any) => ({
+                relationId: ingredient.pastryMaterialSubVariantIngredientId,
+                id: ingredient.itemId,
+                name: ingredient.itemName,
+                type: ingredient.type,
+                amount: ingredient.amount,
+                measurement: ingredient.amountMeasurement,
+                ingredientType: ingredient.ingredientType,
+                created: new Date(ingredient.dateAdded),
+                lastModified: new Date(ingredient.lastModifiedDate),
+              })
+            ),
+            addOns: subVariant.subVariantAddOns.map((addOn: any) => ({
+              relationId: addOn.pastryMaterialSubVariantAddOnId,
+              id: addOn.addOnsId,
+              name: addOn.addOnsName,
+              amount: addOn.amount,
+            })),
+            inStock: subVariant.ingredientsInStock,
+            created: new Date(subVariant.dateAdded),
+            lastModified: new Date(subVariant.lastModifiedDate),
+          }));
+          parsedPastryMaterial.variants = parsedPastryMaterial.variants.concat(subVariants);
+
           setPastryMaterial(parsedPastryMaterial);
           console.log("FETCHED::");
           console.log(parsedPastryMaterial);
