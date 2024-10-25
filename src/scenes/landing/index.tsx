@@ -205,7 +205,7 @@ const Landing = () => {
                       <Typography variant="h4">
                         {"Viber: "}
                         <Link href="viber://chat/?number=%2B639682281963">
-                          +63 968 228 1963
+                          {"+63 968 228 1963"}
                         </Link>
                       </Typography>
                     </Grid>
