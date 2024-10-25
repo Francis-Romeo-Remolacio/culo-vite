@@ -82,7 +82,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/confirm-email" element={<ConfirmEmail />} />
-              <Route path="/not-found" element={<NotFound />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </MainAppBar>
         )}
@@ -101,7 +101,7 @@ function App() {
               <Route path="/post-payment" element={<PostPayment />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/transaction-history" element={<Transactions />} />
-              <Route path="/not-found" element={<NotFound />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </MainAppBar>
         )}
@@ -118,7 +118,7 @@ function App() {
               <Route path="/designs" element={<Designs />} />
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/not-found" element={<NotFound />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </ManagementAppBar>
         )}
@@ -140,7 +140,7 @@ function App() {
               <Route path="/add-ons" element={<AddOns />} />
               <Route path="/tags" element={<Tags />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/not-found" element={<NotFound />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </ManagementAppBar>
         )}
@@ -163,7 +163,7 @@ function App() {
               <Route path="/add-ons" element={<AddOns />} />
               <Route path="/tags" element={<Tags />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/not-found" element={<NotFound />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </ManagementAppBar>
         )}
