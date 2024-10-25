@@ -24,7 +24,6 @@ import {
   CalendarToday as CalendarTodayIcon,
   HelpOutline as HelpOutlineIcon,
   Inventory2 as Inventory2Icon,
-  ShoppingCartCheckout as ShoppingCartCheckoutIcon,
   Label as LabelIcon,
   Cake as CakeIcon,
   AttachMoney as AttachMoneyIcon,
@@ -221,8 +220,6 @@ export default function ManagementAppBar({
 }: {
   children: React.ReactNode;
 }) {
-  const { role } = useAuth();
-
   const pageList = generatePageList();
 
   const theme = useTheme();
@@ -240,7 +237,6 @@ export default function ManagementAppBar({
   const [notifOpen, setNotifOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loggedIn, setLoggedIn] = useState(false);
 
   const token = Cookies.get("token");
 
@@ -267,7 +263,6 @@ export default function ManagementAppBar({
             Array.isArray(currentUser.roles) &&
             currentUser.roles.length > 0
           ) {
-            setLoggedIn(true);
             fetchNotifs();
           }
         }
@@ -281,9 +276,7 @@ export default function ManagementAppBar({
 
   const readNotif = async (id: string) => {
     try {
-      const response = await api.post(
-        `current-user/notifications/${id}/mark-as-read`
-      );
+      await api.post(`current-user/notifications/${id}/mark-as-read`);
       fetchNotifs();
     } catch (error) {
       console.error(error);
@@ -367,7 +360,7 @@ export default function ManagementAppBar({
           <Divider />
           <List>
             {pageList
-              ? pageList.map((text, index) => (
+              ? pageList.map((text, _) => (
                   <SidebarItem key={text} text={text} open={open} />
                 ))
               : null}
@@ -379,7 +372,7 @@ export default function ManagementAppBar({
         </Box>
       </Box>
       <Popper
-        open={open}
+        open={notifOpen}
         anchorEl={notifAnchorEl}
         placement="bottom"
         sx={{ padding: 2 }}

@@ -24,12 +24,12 @@ import { registerSchema } from "../../utils/Validation.js";
 import { MouseEvent, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAlert } from "../../components/CuloAlert.js";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../components/AuthContext.js";
+import { Link as RouterLink } from "react-router-dom";
 
 const Register = () => {
   const { makeAlert } = useAlert();
-  const { register } = useAuth();
+  const { authError, register } = useAuth();
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -54,18 +54,25 @@ const Register = () => {
     }
   };
 
-  const { values, errors, touched, isSubmitting, handleChange, handleSubmit } =
-    useFormik({
-      initialValues: {
-        username: "",
-        email: "",
-        contactNumber: "",
-        password: "",
-        confirmPassword: "",
-      },
-      validationSchema: registerSchema,
-      onSubmit,
-    });
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    isValid,
+    handleChange,
+    handleSubmit,
+  } = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      contactNumber: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema: registerSchema,
+    onSubmit,
+  });
 
   return (
     <Container
@@ -75,7 +82,7 @@ const Register = () => {
       }}
     >
       <Helmet>
-        <title>Register - The Pink Butter Cake Studio</title>
+        <title>{"Register - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Box position="absolute" left={0}>
         <ButtonBack />
@@ -163,7 +170,7 @@ const Register = () => {
                 followCursor
               >
                 <FormControl variant="filled" required>
-                  <InputLabel htmlFor="password">Password</InputLabel>
+                  <InputLabel htmlFor="password">{"Password"}</InputLabel>
                   <FilledInput
                     id="password"
                     name="password"
@@ -188,7 +195,7 @@ const Register = () => {
                 </FormControl>
               </Tooltip>
               <FormControl variant="filled" required>
-                <InputLabel htmlFor="password">Confirm Password</InputLabel>
+                <InputLabel htmlFor="password">{"Confirm Password"}</InputLabel>
                 <FilledInput
                   id="confirmPassword"
                   name="confirmPassword"
@@ -218,8 +225,16 @@ const Register = () => {
                   "Upon registering, you will receive an email for verification. Verification is required for ordering."
                 }
               </Typography>
-              <Typography variant="subtitle2"></Typography>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              {authError ? (
+                <Typography variant="subtitle2" color="error">
+                  {authError}
+                </Typography>
+              ) : null}
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting || !isValid}
+              >
                 {!isSubmitting ? "Register" : <CircularProgress size={21} />}
               </Button>
             </Stack>
@@ -227,11 +242,16 @@ const Register = () => {
 
           <Box mt={2}>
             <Typography variant="body2">
-              Already have an account?{" "}
-              <Link href="/login" color="primary">
-                Click here
+              {"Already have an account? "}
+              <Link
+                to="/login"
+                component={RouterLink}
+                sx={{ textDecoration: "none" }}
+                color="primary"
+              >
+                {"Click here"}
               </Link>{" "}
-              to login.
+              {" to login."}
             </Typography>
           </Box>
         </Stack>

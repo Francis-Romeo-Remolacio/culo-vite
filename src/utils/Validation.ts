@@ -110,6 +110,40 @@ export const registerAdminSchema = yup.object().shape({
   }),
 });
 
+export const forgotPasswordSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Required")
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Invalid email address"
+    ),
+});
+
+export const resetPasswordSchema = yup.object().shape({
+  password: yup
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[@$!%*?&#]/,
+      "Password must contain at least one special character"
+    )
+    .required("Required"),
+  confirmPassword: yup
+    .string()
+    .required("Required")
+    .test("matches", "Passwords must match", function (value) {
+      const { createError } = this;
+      return (
+        value === this.resolve(yup.ref("password")) ||
+        createError({ message: "Passwords must match" })
+      );
+    }),
+});
+
 export const cartSchema = yup.object().shape({
   dedication: yup.string(),
   requests: yup.string(),

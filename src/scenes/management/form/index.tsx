@@ -35,6 +35,7 @@ const Form = () => {
     errors,
     touched,
     isSubmitting,
+    isValid,
     handleChange,
     handleSubmit,
     resetForm,
@@ -160,6 +161,7 @@ const Form = () => {
             type="submit"
             variant="contained"
             onClick={(e) => e.preventDefault}
+            disabled={isSubmitting || !isValid}
           >
             {!isSubmitting ? "Register" : <CircularProgress size={21} />}
           </Button>

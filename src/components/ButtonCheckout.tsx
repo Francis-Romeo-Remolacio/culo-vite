@@ -128,15 +128,16 @@ const ButtonCheckout = ({
     }
   };
 
-  const { values, isSubmitting, handleChange, setFieldValue } = useFormik({
-    initialValues: {
-      type: "normal",
-      pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
-      payment: "full",
-    },
-    validationSchema: orderSchema,
-    onSubmit,
-  });
+  const { values, isSubmitting, isValid, handleChange, setFieldValue } =
+    useFormik({
+      initialValues: {
+        type: "normal",
+        pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
+        payment: "full",
+      },
+      validationSchema: orderSchema,
+      onSubmit,
+    });
 
   const normalMinDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
   const rushMinDate = dayjs().add(1, "day").set("hour", 9).set("minute", 0);
@@ -251,7 +252,7 @@ const ButtonCheckout = ({
               type="submit"
               variant="contained"
               endIcon={!isSubmitting ? <CheckoutIcon /> : ""}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isValid}
             >
               {!isSubmitting ? "Send Order" : <CircularProgress size={21} />}
             </Button>

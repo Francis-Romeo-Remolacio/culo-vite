@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Box,
@@ -17,8 +17,6 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import api from "../../api/axiosConfig";
-import Cookies from "js-cookie";
 import Header from "../../components/Header";
 import { Helmet } from "react-helmet-async";
 import ButtonBack from "../../components/ButtonBack.jsx";
@@ -26,6 +24,7 @@ import { useFormik } from "formik";
 import { loginSchema } from "../../utils/Validation.js";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useAuth } from "../../components/AuthContext.js";
+import { Link as RouterLink } from "react-router-dom";
 
 const Login = () => {
   const { authError, login } = useAuth();
@@ -49,15 +48,22 @@ const Login = () => {
     }
   };
 
-  const { values, errors, touched, isSubmitting, handleChange, handleSubmit } =
-    useFormik({
-      initialValues: {
-        email: "",
-        password: "",
-      },
-      validationSchema: loginSchema,
-      onSubmit,
-    });
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    isValid,
+    handleChange,
+    handleSubmit,
+  } = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginSchema,
+    onSubmit,
+  });
 
   return (
     <Container
@@ -67,7 +73,7 @@ const Login = () => {
       }}
     >
       <Helmet>
-        <title>Login - The Pink Butter Cake Studio</title>
+        <title>{"Login - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Paper sx={{ p: 2 }}>
         <Box position="absolute">
@@ -117,7 +123,7 @@ const Login = () => {
                 helperText={touched.email && errors.email}
               />
               <FormControl variant="filled">
-                <InputLabel htmlFor="password">Password</InputLabel>
+                <InputLabel htmlFor="password">{"Password"}</InputLabel>
                 <FilledInput
                   id="password"
                   name="password"
@@ -146,21 +152,40 @@ const Login = () => {
                   {authError}
                 </Typography>
               ) : null}
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting || !isValid}
+              >
                 {!isSubmitting ? "Login" : <CircularProgress size={21} />}
               </Button>
             </Stack>
           </form>
 
-          <Box mt={2}>
+          <Stack mt={2}>
             <Typography variant="body2">
-              Don't have an account?{" "}
-              <Link href="/register" sx={{ color: "primary" }}>
-                Click here
-              </Link>{" "}
-              to register.
+              {"Don't have an account? "}
+              <Link
+                to="/register"
+                component={RouterLink}
+                sx={{ textDecoration: "none" }}
+                color="primary"
+              >
+                {"Click here"}
+              </Link>
+              {" to register."}
             </Typography>
-          </Box>
+            <Typography variant="body2">
+              <Link
+                to="/forgot-password"
+                component={RouterLink}
+                sx={{ textDecoration: "none" }}
+                color="primary"
+              >
+                {"Forgot Password?"}
+              </Link>
+            </Typography>
+          </Stack>
         </Stack>
       </Paper>
     </Container>

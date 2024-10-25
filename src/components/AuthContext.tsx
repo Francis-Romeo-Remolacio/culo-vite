@@ -25,6 +25,8 @@ interface AuthContextType {
     password: string
   ) => Promise<void>;
   login: (email: string, password: string, fromLink?: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
   logout: () => void;
   role: string | undefined;
 }
@@ -157,6 +159,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/login");
   };
 
+  const forgotPassword = async (email: string) => {
+    try {
+      await api.post("users/send-forgot-password-email", email, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      makeAlert("success", "Email sent! Please check your inbox.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to send forgot password email", error);
+      setAuthError(String(error));
+    }
+  };
+
+  const resetPassword = async (token: string, password: string) => {
+    try {
+      await api.post("current-user/reset-password", {
+        resetPasswordToken: token,
+        newPassword: password,
+      });
+      makeAlert("success", "Password reset successfully!");
+      navigate("/login");
+    } catch (error) {
+      console.error("Failed to reset password", error);
+      setAuthError(String(error));
+    }
+  };
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
@@ -181,6 +212,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         login,
         logout,
+        forgotPassword,
+        resetPassword,
         role,
       }}
     >

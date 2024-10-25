@@ -32,6 +32,7 @@ import Suborders from "./scenes/management/suborders/index.js";
 import ConfirmEmail from "./scenes/confirm-email/index.js";
 import Transactions from "./scenes/transactions";
 import { Box, CircularProgress } from "@mui/material";
+import ForgotPassword from "./scenes/forgot-password/ForgotPassword.tsx";
 
 function App() {
   const { role, isAuthenticated } = useAuth();
@@ -79,6 +80,7 @@ function App() {
               <Route path="/results" element={<Results />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/confirm-email" element={<ConfirmEmail />} />
               <Route path="/not-found" element={<NotFound />} />
             </Routes>
