@@ -4,6 +4,7 @@ import {
   AccordionSummary,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -41,6 +42,8 @@ import api from "../../../api/axiosConfig";
 import { toCurrency } from "../../../utils/Formatter";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
+import { parsePastryMaterialForSubmission } from "../../../utils/Parser";
+import { PostPastryMaterial, patchPastryMaterial, postPastryMaterial } from "../../../utils/Requestor";
 
 interface PastryMaterialState {
   values: {
@@ -73,62 +76,6 @@ interface VariantAction {
   payload?: any; // This should be more specific if possible
 }
 
-// type VariantAction =
-//   | {
-//       type: typeof ACTIONS.ADD_VARIANT;
-//       payload: Partial<PastryMaterialVariant>;
-//     }
-//   | {
-//       type: typeof ACTIONS.UPDATE_VARIANT;
-//       payload: { index: number; variant: Partial<PastryMaterialVariant> };
-//     }
-//   | { type: typeof ACTIONS.REMOVE_VARIANT; payload: number }
-//   | {
-//       type: typeof ACTIONS.ADD_INGREDIENT_TO_VARIANT;
-//       payload: { index: number; ingredient: Partial<PastryMaterialIngredient> };
-//     }
-//   | {
-//       type: typeof ACTIONS.REMOVE_INGREDIENT_FROM_VARIANT;
-//       payload: { variantIndex: number; ingredientIndex: number };
-//     }
-//   | {
-//       type: typeof ACTIONS.UPDATE_INGREDIENT_IN_VARIANT;
-//       payload: {
-//         variantIndex: number;
-//         ingredientIndex: number;
-//         ingredient: Partial<PastryMaterialIngredient>;
-//       };
-//     }
-//   | {
-//       type: typeof ACTIONS.ADD_ADDON_TO_VARIANT;
-//       payload: { index: number; addOn: Partial<PastryMaterialAddOn> };
-//     }
-//   | {
-//       type: typeof ACTIONS.REMOVE_ADDON_FROM_VARIANT;
-//       payload: { variantIndex: number; addOnIndex: number };
-//     }
-//   | {
-//       type: typeof ACTIONS.UPDATE_ADDON_IN_VARIANT;
-//       payload: {
-//         variantIndex: number;
-//         addOnIndex: number;
-//         addOn: Partial<PastryMaterialAddOn>;
-//       };
-//     }
-//   | { type: typeof ACTIONS.MARK_VARIANT_FOR_DELETION; payload: number }
-//   | {
-//       type: typeof ACTIONS.MARK_INGREDIENT_FOR_DELETION;
-//       payload: { variantIndex: number; ingredientIndex: number };
-//     }
-//   | {
-//       type: typeof ACTIONS.MARK_ADDON_FOR_DELETION;
-//       payload: { variantIndex: number; addOnIndex: number };
-//     }
-//   | {
-//       type: typeof ACTIONS.UPDATE_PASTRY_MATERIAL;
-//       payload: Partial<Pick<PastryMaterial, "otherCost">>;
-//     };
-
 function reducer(state: PastryMaterialState, action: VariantAction) {
   switch (action.type) {
     // Add a new variant
@@ -153,20 +100,6 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
         ...variantList[action.payload.index],
         ...newVariantData,
       };
-
-      // Generate the name based on the shape
-      // if (newVariantData.tiers && updatedVariant.tiers.length > 0) {
-      //   updatedVariant.name = `${updatedVariant.tiers.length} tiers, ${
-      //     updatedVariant.tiers[updatedVariant.tiers.length - 1]
-      //   } base`;
-      // } else if (newVariantData.sizeHeart) {
-      //   updatedVariant.name = `${updatedVariant.sizeHeart}"`;
-      // } else if (
-      //   newVariantData.rectangleX &&
-      //   newVariantData.rectangleY
-      // ) {
-      //   updatedVariant.name = `${updatedVariant.rectangleX}"x${updatedVariant.rectangleY}"x2.5"`;
-      // }
       if (
         newVariantData.tiers !== undefined &&
         updatedVariant.tiers.length > 0
@@ -186,9 +119,6 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
       }
 
       variantList[action.payload.index] = updatedVariant;
-      console.log("UPDATED DATA::");
-      console.log(newVariantData);
-      console.log(variantList);
 
       return {
         ...state,
@@ -413,6 +343,7 @@ const PastryMaterialDialog = ({
 }: PastryMaterialDialogProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emptyVariants: PastryMaterialVariant[] = [];
 
@@ -441,7 +372,7 @@ const PastryMaterialDialog = ({
   );
 
   const [fetchedIngredients, setFetchedIngredients] = useState<
-    Pick<Ingredient, "id" | "name" | "type">[]
+    Pick<Ingredient, "id" | "name" | "type" | "measurement">[]
   >([]);
   const [fetchedAddOns, setFetchedAddOns] = useState<
     Pick<AddOn, "id" | "name">[]
@@ -463,12 +394,15 @@ const PastryMaterialDialog = ({
 
   const fetchIngredients = async () => {
     await api.get("ingredients").then((response) => {
-      const parsedIngredients: Pick<Ingredient, "id" | "name" | "type">[] =
-        response.data.map((ingredient: any) => ({
-          id: ingredient.id,
-          name: ingredient.name,
-          type: ingredient.type,
-        }));
+      const parsedIngredients: Pick<
+        Ingredient,
+        "id" | "name" | "type" | "measurement"
+      >[] = response.data.map((ingredient: any) => ({
+        id: ingredient.id,
+        name: ingredient.name,
+        type: ingredient.type,
+        measurement: ingredient.measurements,
+      }));
       setFetchedIngredients(parsedIngredients);
     });
   };
@@ -506,12 +440,38 @@ const PastryMaterialDialog = ({
   }, []);
 
   const onSubmit = async () => {
-    // const payload = {
-    //   ...values,
-    //   ingredients: ingredients,
-    //   addOns: addOns,
-    // };
-    // Make API request with the payload
+    setIsSubmitting(true);
+    //Fuck this conversion shit
+    const pastryMaterialObjectForParsing: PastryMaterial = {
+      designId: pastryMaterial?.designId,
+      designName: pastryMaterial?.designName,
+      otherCost: {
+        additionalCost: pmState?.values.otherCost.additionalCost,
+        multiplier: pmState?.values.otherCost.multiplier,
+      },
+      variants: pmState?.values.variants,
+      created: pastryMaterial?.created,
+      lastModified: pastryMaterial?.lastModified,
+    };
+    const parsedPastryMaterialRequestBody = parsePastryMaterialForSubmission(pastryMaterialObjectForParsing);
+
+    var originalPastryMaterial: any;
+    try {
+      const fetchedPastryMaterial = await api.get(
+        `designs/${pastryMaterial?.designId}/pastry-material`
+      );
+      originalPastryMaterial = fetchedPastryMaterial.data;
+    } catch {}
+
+    if (
+      originalPastryMaterial?.pastryMaterialId !== undefined &&
+      originalPastryMaterial?.pastryMaterialId === null 
+    ) {
+      console.log(await postPastryMaterial(parsedPastryMaterialRequestBody));
+    } else {
+      await patchPastryMaterial(parsedPastryMaterialRequestBody);
+    }
+    setIsSubmitting(false);
   };
 
   // Sizing
@@ -558,7 +518,7 @@ const PastryMaterialDialog = ({
     const currentTiers = pmState.values.variants[variantIndex].tiers;
 
     // Create a new array excluding the tier to be removed
-    const newTiers = currentTiers.filter(
+    const newTiers = currentTiers?.filter(
       (_: string, index: number) => index !== tierIndex
     );
 
@@ -1050,7 +1010,15 @@ const PastryMaterialDialog = ({
                               payload: {
                                 variantIndex: 0,
                                 ingredientIndex: ingredientIndex,
-                                ingredient: { id: e.target.value },
+                                ingredient: {
+                                  id: e.target.value,
+                                  measurement: fetchedIngredients.find(
+                                    (x) => x.id === e.target.value
+                                  )?.measurement, //Risky
+                                  name: fetchedIngredients.find(
+                                    (x) => x.id === e.target.value
+                                  )?.name, //Risky
+                                },
                               },
                             });
                           }}
@@ -1177,7 +1145,12 @@ const PastryMaterialDialog = ({
                               payload: {
                                 variantIndex: 0,
                                 addOnIndex: addOnIndex,
-                                addOn: { id: e.target.value },
+                                addOn: {
+                                  id: e.target.value,
+                                  name: fetchedAddOns.find(
+                                    (x) => x.id === e.target.value
+                                  )?.name, //Risky
+                                },
                               },
                             })
                           }
@@ -1223,7 +1196,6 @@ const PastryMaterialDialog = ({
                 }
               )}
             </Stack>
-
             {/* Variants */}
             <Stack direction="row" justifyContent="space-between">
               <Typography variant="h3">{"Variants"}</Typography>
@@ -1470,6 +1442,14 @@ const PastryMaterialDialog = ({
                                               ingredientIndex: ingredientIndex,
                                               ingredient: {
                                                 id: e.target.value,
+                                                measurement:
+                                                  fetchedIngredients.find(
+                                                    (x) =>
+                                                      x.id === e.target.value
+                                                  )?.measurement, //Risky
+                                                name: fetchedIngredients.find(
+                                                  (x) => x.id === e.target.value
+                                                )?.name, //Risky
                                               },
                                             },
                                           });
@@ -1611,9 +1591,14 @@ const PastryMaterialDialog = ({
                                           dispatch({
                                             type: ACTIONS.UPDATE_ADDON_IN_VARIANT,
                                             payload: {
-                                              variantIndex: 0,
+                                              variantIndex: variantIndex,
                                               addOnIndex: addOnIndex,
-                                              addOn: { id: e.target.value },
+                                              addOn: {
+                                                id: e.target.value,
+                                                name: fetchedAddOns.find(
+                                                  (x) => x.id === e.target.value
+                                                )?.name, //Risky
+                                              },
                                             },
                                           })
                                         }
@@ -1679,7 +1664,13 @@ const PastryMaterialDialog = ({
             <Button onClick={onClose}>{"Save without Closing"}</Button>
           ) : null}
           <Button onClick={onClose}>{"Cancel"}</Button>
-          <Button variant="contained">{"Apply"}</Button>
+          <Button variant="contained" onClick={onSubmit} disabled={isSubmitting}>
+          {!isSubmitting ? (
+              "Save"
+            ) : (
+              <CircularProgress size={21} />
+            )}
+          </Button>
         </DialogActions>
       </form>
     </Dialog>

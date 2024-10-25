@@ -20,7 +20,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useFormik } from "formik";
 import api from "../../../api/axiosConfig";
 import { designSchema } from "../../../utils/Validation";
-import { Design, PastryMaterial, PastryMaterialVariant, Tag } from "../../../utils/Schemas";
+import {
+  Design,
+  PastryMaterial,
+  PastryMaterialVariant,
+  Tag,
+} from "../../../utils/Schemas";
 import { useEffect, useState } from "react";
 import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
@@ -129,77 +134,112 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
       await api
         .get(`designs/${encodeURIComponent(design.id)}/pastry-material`)
         .then((response) => {
-          var parsedPastryMaterial: PastryMaterial = {
-            id: response.data.pastryMaterialId,
-            designId: response.data.designId,
-            designName: response.data.designName,
-            created: new Date(response.data.dateAdded),
-            lastModified: new Date(response.data.lastModifiedDate),
-            otherCost: {
-              additionalCost: response.data.otherCost.additionalCost,
-              multiplier: response.data.otherCost.ingredientCostMultiplier,
-            },
-            variants: [
-              // Main Variant
-              {
-                name: response.data.mainVariantName,
-                costEstimate: response.data.costEstimate,
-                costExactEstimate: response.data.costExactEstimate,
-                ingredients: response.data.ingredients.map(
+          const responseData = response.data;
+
+          var parsedPastryMaterial: PastryMaterial;
+          if (
+            responseData === undefined ||
+            responseData === null ||
+            responseData.pastryMaterialId === null
+          ) {
+            parsedPastryMaterial = {
+              id: undefined,
+              designId: design?.id,
+              designName: design?.name,
+              created: new Date(),
+              lastModified: new Date(),
+              otherCost: {
+                additionalCost: 0,
+                multiplier: 2,
+              },
+              variants: [
+                {
+                  name: "",
+                  costEstimate: 0,
+                  costExactEstimate: 0,
+                  ingredients: [],
+                  ingredientImportance: [],
+                  addOns: [],
+                  inStock: false,
+                  created: new Date(),
+                  lastModified: new Date()
+                }
+              ]
+            }
+          } else {
+            parsedPastryMaterial = {
+              id: response.data.pastryMaterialId,
+              designId: response.data.designId,
+              designName: response.data.designName,
+              created: new Date(response.data.dateAdded),
+              lastModified: new Date(response.data.lastModifiedDate),
+              otherCost: {
+                additionalCost: response.data.otherCost.additionalCost,
+                multiplier: response.data.otherCost.ingredientCostMultiplier,
+              },
+              variants: [
+                // Main Variant
+                {
+                  name: response.data.mainVariantName,
+                  costEstimate: response.data.costEstimate,
+                  costExactEstimate: response.data.costExactEstimate,
+                  ingredients: response.data.ingredients.map(
+                    (ingredient: any) => ({
+                      relationId: ingredient.ingredientId,
+                      id: ingredient.itemId,
+                      name: ingredient.itemName,
+                      type: ingredient.type,
+                      measurement: ingredient.amountMeasurement,
+                      amount: ingredient.amount,
+                      ingredientType: ingredient.ingredientType,
+                      created: new Date(ingredient.dateAdded),
+                      lastModified: new Date(ingredient.lastModifiedDate),
+                    })
+                  ),
+                  ingredientImportance: response.data.ingredientImportance,
+                  addOns: response.data.addOns.map((addOn: any) => ({
+                    relationId: addOn.pastryMaterialAddOnId,
+                    id: addOn.addOnsId,
+                    name: addOn.addOnsName,
+                    amount: addOn.amount,
+                  })),
+                  inStock: response.data.ingredientsInStock,
+                  created: new Date(response.data.dateAdded),
+                  lastModified: new Date(response.data.lastModifiedDate),
+                },
+              ],
+            };
+            const subVariants: PastryMaterialVariant[] =
+              response.data.subVariants.map((subVariant: any) => ({
+                name: subVariant.subVariantName,
+                costEstimate: subVariant.subVariantCostEstimate,
+                costExactEstimate: subVariant.subVariantExactCostEstimate,
+                ingredients: subVariant.subVariantIngredients.map(
                   (ingredient: any) => ({
-                    relationId: ingredient.ingredientId,
+                    relationId: ingredient.pastryMaterialSubVariantIngredientId,
                     id: ingredient.itemId,
                     name: ingredient.itemName,
                     type: ingredient.type,
-                    measurement: ingredient.amountMeasurement,
                     amount: ingredient.amount,
+                    measurement: ingredient.amountMeasurement,
                     ingredientType: ingredient.ingredientType,
                     created: new Date(ingredient.dateAdded),
                     lastModified: new Date(ingredient.lastModifiedDate),
                   })
                 ),
-                ingredientImportance: response.data.ingredientImportance,
-                addOns: response.data.addOns.map((addOn: any) => ({
-                  relationId: addOn.pastryMaterialAddOnId,
+                addOns: subVariant.subVariantAddOns.map((addOn: any) => ({
+                  relationId: addOn.pastryMaterialSubVariantAddOnId,
                   id: addOn.addOnsId,
                   name: addOn.addOnsName,
                   amount: addOn.amount,
                 })),
-                inStock: response.data.ingredientsInStock,
-                created: new Date(response.data.dateAdded),
-                lastModified: new Date(response.data.lastModifiedDate),
-              }
-            ],
-          };
-          const subVariants : PastryMaterialVariant[] = 
-          response.data.subVariants.map((subVariant: any) => ({
-            name: subVariant.subVariantName,
-            costEstimate: subVariant.subVariantCostEstimate,
-            costExactEstimate: subVariant.subVariantExactCostEstimate,
-            ingredients: subVariant.subVariantIngredients.map(
-              (ingredient: any) => ({
-                relationId: ingredient.pastryMaterialSubVariantIngredientId,
-                id: ingredient.itemId,
-                name: ingredient.itemName,
-                type: ingredient.type,
-                amount: ingredient.amount,
-                measurement: ingredient.amountMeasurement,
-                ingredientType: ingredient.ingredientType,
-                created: new Date(ingredient.dateAdded),
-                lastModified: new Date(ingredient.lastModifiedDate),
-              })
-            ),
-            addOns: subVariant.subVariantAddOns.map((addOn: any) => ({
-              relationId: addOn.pastryMaterialSubVariantAddOnId,
-              id: addOn.addOnsId,
-              name: addOn.addOnsName,
-              amount: addOn.amount,
-            })),
-            inStock: subVariant.ingredientsInStock,
-            created: new Date(subVariant.dateAdded),
-            lastModified: new Date(subVariant.lastModifiedDate),
-          }));
-          parsedPastryMaterial.variants = parsedPastryMaterial.variants.concat(subVariants);
+                inStock: subVariant.ingredientsInStock,
+                created: new Date(subVariant.dateAdded),
+                lastModified: new Date(subVariant.lastModifiedDate),
+              }));
+            parsedPastryMaterial.variants =
+              parsedPastryMaterial.variants.concat(subVariants);
+          }
 
           setPastryMaterial(parsedPastryMaterial);
           console.log("FETCHED::");
@@ -479,7 +519,11 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 variant="contained"
                 disabled={isSubmitting || isDeleting}
               >
-                {!isSubmitting || !isDeleting ? "Delete" : <CircularProgress size={21} />}
+                {!isSubmitting || !isDeleting ? (
+                  "Delete"
+                ) : (
+                  <CircularProgress size={21} />
+                )}
               </Button>
             )}
           <Button
@@ -493,7 +537,11 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
             variant="contained"
             disabled={isSubmitting || isDeleting}
           >
-            {!isSubmitting || !isDeleting ? "Save" : <CircularProgress size={21} />}
+            {!isSubmitting || !isDeleting ? (
+              "Save"
+            ) : (
+              <CircularProgress size={21} />
+            )}
           </Button>
         </DialogActions>
       </form>
