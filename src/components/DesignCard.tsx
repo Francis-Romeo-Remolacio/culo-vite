@@ -41,7 +41,7 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
 
   return (
     <Card
-      elevation={2}
+      elevation={4}
       sx={
         manager
           ? { height: 360, display: "inline-block" }

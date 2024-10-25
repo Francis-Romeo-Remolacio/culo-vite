@@ -1,301 +1,261 @@
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import {
   Typography,
   Button,
   Stack,
+  Link,
   Paper,
   Box,
-  Grid,
+  Grid2 as Grid,
   useTheme,
-  Fade,
 } from "@mui/material";
+import { Helmet } from "react-helmet-async";
 import DesignGallery from "./../../components/DesignGallery.tsx";
 import { Tokens } from "../../Theme.ts";
-import { useEffect, useState } from "react";
-import Carousel from 'react-material-ui-carousel';
-
-<Carousel 
-  autoPlay 
-  interval={10000}
-></Carousel>
+import Carousel from "react-material-ui-carousel";
 
 const Landing = () => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
-  // Scroll-triggered reveal sections
-  const [showAbout, setShowAbout] = useState(false);
-  const [showContact, setShowContact] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-
-      if (currentScrollY > 100) setShowAbout(true);
-      if (currentScrollY > 200) setShowContact(true);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const getOpacity = (threshold: number) => {
-    if (scrollY < threshold) return 0; // Fully hidden
-    if (scrollY > threshold + 300) return 1; // Fully visible
-    return (scrollY - threshold) / 300; // Fade in effect
-  };
-
   return (
-    <>
+    <Box
+      sx={{
+        m: -2,
+        zIndex: -2,
+      }}
+    >
       <Box
+        minHeight={1000}
+        minWidth="100vw"
         sx={{
           position: "absolute",
-          top: 20,
-          left: -2,
-          width: "100vw",
-          height: "120vh",
-          background: `url(banner.png) center/cover no-repeat`,
+          top: 0,
           zIndex: -1,
-          overflow: "hidden",
+          backgroundColor: colors.primary[100],
+          background: `url(banner.png) center/cover no-repeat`,
+          filter: "opacity(50%)",
+          maskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,1) 0%,  rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%)",
         }}
       />
-      <Box
-        sx={{
-          left: 0,
-          position: "relative",
-          minHeight: "70vh",
-          width: "100vw",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1,
-        }}
-      >
-        <Stack alignItems="center" spacing={2}>
-          <Typography
-            variant="h1"
-            sx={{ fontWeight: "bold", textAlign: "center", color: "#fff" }}
-          >
-            Welcome to The Pink Butter Cake Studio
+      <Stack justifyContent="center" spacing={4} sx={{ zIndex: 25 }}>
+        <Helmet>
+          <title>{"The Pink Butter Cake Studio"}</title>
+        </Helmet>
+        {/* Section: Hero */}
+        <Stack alignItems="center" justifyContent="center" minHeight={400}>
+          <Typography variant="h1" gutterBottom>
+            {"The Pink Butter Cake Studio"}
           </Typography>
-          <Typography
-            variant="h3"
-            sx={{ textAlign: "center", color: "#fff", mb: 2 }}
-          >
-            Delicious Artistry in Every Bite
+          <Typography variant="h3" gutterBottom>
+            {"Delicious Artistry in Every Bite"}
           </Typography>
-          <Typography
-            variant="h5"
-            sx={{ textAlign: "center", color: "#ccc", mb: 4 }}
-          >
-            Custom and Premade Cakes in Quezon City
+          <Typography variant="h5" color="textSecondary" gutterBottom>
+            {"Custom and Premade Cakes in Quezon City"}
           </Typography>
-          <Stack direction="row" spacing={2}>
-            <Link to="/shop">
-              <Button variant="contained" sx={{ backgroundColor: "#ff4081" }}>
-                Design Collection
+          <Stack direction="row" spacing={2} sx={{ pt: 8 }}>
+            <RouterLink to="shop">
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ fontSize: "2rem", fontWeight: "bolder" }}
+              >
+                {"Browse Now"}
               </Button>
-            </Link>
-            <Link to="/custom">
+            </RouterLink>
+            <RouterLink to="custom">
               <Button
                 variant="outlined"
-                sx={{ color: "#fff", borderColor: "#fff" }}
+                size="large"
+                sx={{ fontSize: "2rem", fontWeight: "bold" }}
               >
-                Custom Order
+                {"Customize"}
               </Button>
-            </Link>
+            </RouterLink>
           </Stack>
         </Stack>
 
-        <Box
-          sx={{
-            py: 4,
-            textAlign: "center",
-            width: "100vw",
-          }}
-        >
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12 }}>
+            {/* Section: Premade Designs */}
+            <Grid container justifyContent="center">
+              <Grid sx={{ maxWidth: "lg" }}>
+                <Paper sx={{ p: 2, height: "100%" }}>
+                  <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{ textAlign: "center" }}
+                  >
+                    {"Browse Our Popular Premade Cake Designs"}
+                  </Typography>
+
+                  <Typography variant="body1">
+                    <DesignGallery landing />
+                  </Typography>
+                  {/*<Button variant="contained">View More Designs</Button>*/}
+                </Paper>
+              </Grid>
+            </Grid>
+          </Grid>
+          {/* About Us Section */}
           <Grid
             container
             spacing={2}
             sx={{
-              opacity: 1, // Always visible
-              transition: "opacity 1s ease-in-out",
+              width: "100vw",
             }}
           >
-            <Grid item xs={12}>
-              <Typography
-                variant="h4"
-                gutterBottom
-                sx={{ color: "white", mt: 4 }}
-              >
-                Browse Our Premade Cake Designs
-              </Typography>
-              <Typography variant="body1" paragraph sx={{ color: "white" }}>
-                Check out our range of beautiful premade designs available for
-                quick orders.
-              </Typography>
-              <DesignGallery landing />
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          py: 8,
-          textAlign: "center",
-          backgroundColor: colors.primary[100],
-          width: "100vw",
-          ml: -2,
-        }}
-      >
-        {/* About Us Section */}
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            opacity: getOpacity(100),
-            transition: "opacity 1s ease-in-out",
-            width: "100vw",
-          }}
-        >
-          <Grid item xs={12}>
-            <Fade in={showAbout}>
-              <Paper sx={{ padding: 3 }}>
-                <Grid container spacing={2}>
+            <Grid size={12}>
+              <Paper sx={{ m: 4, p: 4 }}>
+                <Grid
+                  container
+                  spacing={2}
+                  alignItems="center"
+                  sx={{
+                    textAlign: "center",
+                  }}
+                >
                   {/* Carousel Column */}
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Carousel>
                       <iframe
                         width="100%"
                         height="500"
                         src="https://www.youtube.com/embed/-diIiPnmN58"
                         title="YouTube video player"
-                        frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                      ></iframe>
-                      <img
-                        src="culo chef picture.png" 
-                        alt="Description of Image"
-                        style={{ width: "auto", height: "auto", maxHeight: "500px" }} 
                       />
                       <img
-                        src="culo chinese picture.png" 
+                        src="culo chef picture.png"
                         alt="Description of Image"
-                        style={{ width: "auto", height: "auto", maxHeight: "500px"  }} 
+                        style={{
+                          width: "auto",
+                          height: "auto",
+                          maxHeight: "500px",
+                        }}
                       />
                       <img
-                        src="culo pokemon picture.png" 
+                        src="culo chinese picture.png"
                         alt="Description of Image"
-                        style={{ width: "auto", height: "auto" , maxHeight: "500px" }} 
+                        style={{
+                          width: "auto",
+                          height: "auto",
+                          maxHeight: "500px",
+                        }}
+                      />
+                      <img
+                        src="culo pokemon picture.png"
+                        alt="Description of Image"
+                        style={{
+                          width: "auto",
+                          height: "auto",
+                          maxHeight: "500px",
+                        }}
                       />
                     </Carousel>
                   </Grid>
 
                   {/* Text Column */}
-                  <Grid item xs={12} md={6} mt={10}>
-                    <Typography variant="h4" gutterBottom>
-                      About The Pink Butter Cake Studio
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <Typography variant="h1" gutterBottom>
+                      {"About The Pink Butter Cake Studio"}
                     </Typography>
-                    <Typography variant="body1" paragraph>
-                      Established in 2017, The Pink Butter Cake Studio has been
-                      crafting stunning and delicious cakes for all occasions.
+                    <Typography variant="h5">
+                      {
+                        "Established in 2017, The Pink Butter Cake Studio has been crafting stunning and delicious cakes for all occasions."
+                      }
                     </Typography>
-                    <Typography variant="body1" paragraph>
-                      We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon
-                      City, Philippines.
+                    <Typography variant="h5">
+                      {
+                        "We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon City, Philippines."
+                      }
                     </Typography>
                   </Grid>
                 </Grid>
               </Paper>
-            </Fade>
+            </Grid>
+          </Grid>
+
+          <Box
+            sx={{
+              py: 8,
+              textAlign: "center",
+              backgroundColor: colors.primary[200],
+              width: "100vw",
+              ml: -2,
+            }}
+          >
+            {/* Contact Us Section */}
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                width: "100vw",
+              }}
+            >
+              <Grid size={12}>
+                <Paper sx={{ padding: 3, textAlign: "center" }}>
+                  <Typography variant="h4" gutterBottom>
+                    {"Contact Us"}
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={4}>
+                      <Typography variant="h4">
+                        {"Viber: "}
+                        <Link href="viber://chat/?number=%2B639682281963">
+                          +63 968 228 1963
+                        </Link>
+                      </Typography>
+                    </Grid>
+                    <Grid size={4}>
+                      <Typography variant="h4">
+                        {"Facebook: "}
+                        <Link
+                          href="https://www.facebook.com/TPBcakestudio"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {"TBP Cake Studio"}
+                        </Link>
+                      </Typography>
+                    </Grid>
+                    <Grid size={4}>
+                      <Typography variant="h4">
+                        {"Instagram: "}
+                        <Link
+                          href="https://www.instagram.com/thepinkbutter?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {"@thepinkbutter"}
+                        </Link>
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  <Typography variant="h4" sx={{ marginTop: 2 }}>
+                    {"Operating Hours: 8 AM to 5 PM (Mon-Sat GMT+8)"}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* Footer: Rights Info */}
+          <Grid size={{ xs: 12 }} sx={{ minHeight: 100 }}>
+            <Typography
+              variant="body1"
+              color="textSecondary"
+              align="center"
+              sx={{ mt: 4 }}
+            >
+              {`© ${new Date().getFullYear()} The Pink Butter Cake Studio. All rights reserved.`}
+            </Typography>
           </Grid>
         </Grid>
-      </Box>
-
-      <Box
-        sx={{
-          py: 8,
-          textAlign: "center",
-          backgroundColor: colors.primary[200],
-          width: "100vw",
-          ml: -2,
-        }}
-      >
-        {/* Contact Us Section */}
-        <Grid
-          container
-          spacing={2}
-          sx={{
-            opacity: getOpacity(200),
-            transition: "opacity 1s ease-in-out",
-            width: "100vw",
-          }}
-        >
-          <Grid item xs={12}>
-            <Fade in={showContact}>
-              <Paper sx={{ padding: 3, textAlign: "center" }}>
-                <Typography variant="h4" gutterBottom>
-                  Contact Us
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={4}>
-                    <Typography variant="body1" paragraph>
-                      Viber: +63 968 228 1963
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body1" paragraph>
-                      Facebook:{" "}
-                      <a
-                        href="https://www.facebook.com/TPBcakestudio"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        TBP Cake Studio
-                      </a>
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="body1" paragraph>
-                      Instagram:{" "}
-                      <a
-                        href="https://www.instagram.com/thepinkbutter?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        @thepinkbutter
-                      </a>
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Typography variant="body1" paragraph sx={{ marginTop: 2 }}>
-                  Operating Hours: 8 AM - 5 PM (Mon-Sat)
-                </Typography>
-              </Paper>
-            </Fade>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 4,
-          backgroundColor: colors.primary[300],
-          width: "100vw",
-          ml: -2,
-        }}
-      >
-        <Typography variant="body2" sx={{ color: "white" }}>
-          © {new Date().getFullYear()} The Pink Butter Cake Studio. All rights
-          reserved.
-        </Typography>
-      </Box>
-    </>
+      </Stack>
+    </Box>
   );
 };
 
