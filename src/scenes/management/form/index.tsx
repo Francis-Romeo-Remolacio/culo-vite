@@ -51,6 +51,7 @@ const Form = () => {
     },
     validationSchema: registerAdminSchema,
     onSubmit,
+    validateOnMount: true,
   });
 
   return (

@@ -72,6 +72,7 @@ const Register = () => {
     },
     validationSchema: registerSchema,
     onSubmit,
+    validateOnMount: true,
   });
 
   return (

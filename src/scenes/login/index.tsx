@@ -63,6 +63,7 @@ const Login = () => {
     },
     validationSchema: loginSchema,
     onSubmit,
+    validateOnMount: true,
   });
 
   return (

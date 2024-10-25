@@ -65,6 +65,7 @@ const ForgotPassword = () => {
       },
       validationSchema: resetPasswordSchema,
       onSubmit,
+      validateOnMount: true,
     });
     return (
       <Container
@@ -193,6 +194,7 @@ const ForgotPassword = () => {
       },
       validationSchema: forgotPasswordSchema,
       onSubmit,
+      validateOnMount: true,
     });
 
     return (
