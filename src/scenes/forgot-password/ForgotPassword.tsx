@@ -35,7 +35,6 @@ const ForgotPassword = () => {
   if (token) {
     const { authError, resetPassword } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
-    const [errorVisible, setErrorVisible] = useState(false);
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 

@@ -142,7 +142,6 @@ const ViewDesign = () => {
     errors,
     touched,
     isSubmitting,
-    isValid,
     handleBlur,
     handleChange,
     handleSubmit,
