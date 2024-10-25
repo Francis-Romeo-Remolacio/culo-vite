@@ -33,6 +33,7 @@ import ConfirmEmail from "./scenes/confirm-email/index.js";
 import Transactions from "./scenes/transactions";
 import { Box, CircularProgress } from "@mui/material";
 import ForgotPassword from "./scenes/forgot-password/ForgotPassword.tsx";
+import Forbidden from "./scenes/forbidden/index.tsx";
 
 function App() {
   const { role, isAuthenticated } = useAuth();
@@ -109,14 +110,19 @@ function App() {
         {/* Artist Routes */}
         {isAuthenticated && role === "Artist" && (
           <ManagementAppBar>
-            <FabChat />
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<Forbidden />} />
+              <Route path="/register" element={<Forbidden />} />
               <Route path="/calendar" element={<Calendar />} />
-              <Route path="/orders" element={<Orders />} />
+              <Route path="/users" element={<Forbidden />} />
+              <Route path="/orders" element={<Forbidden />} />
               <Route path="/suborders" element={<Suborders />} />
-              <Route path="/designs" element={<Designs />} />
-              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/sales" element={<Forbidden />} />
+              <Route path="/designs" element={<Forbidden />} />
+              <Route path="/inventory" element={<Forbidden />} />
+              <Route path="/pastry-material" element={<Forbidden />} />
+              <Route path="/add-ons" element={<Forbidden />} />
+              <Route path="/tags" element={<Forbidden />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/*" element={<NotFound />} />
             </Routes>
@@ -129,8 +135,9 @@ function App() {
             <FabChat />
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/register" element={<ManualRegister />} />
+              <Route path="/register" element={<Forbidden />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/users" element={<Forbidden />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/suborders" element={<Suborders />} />
               <Route path="/sales" element={<Sales />} />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Chip, Drawer, Stack, Typography } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -15,15 +15,7 @@ import {
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
-import {
-  Edit,
-  Delete,
-  Restore,
-  Save,
-  Cancel,
-  Refresh,
-  Add,
-} from "@mui/icons-material";
+import { Edit, Delete, Save, Cancel, Refresh, Add } from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
 
 const AddOns = () => {
@@ -165,8 +157,8 @@ const AddOns = () => {
       setRows([...newRows, ...addOns]);
     } else {
       try {
-        await api.delete(`add-ons/${id}`); // Updated API endpoint
-        fetchData(); // Refresh data after delete
+        await api.delete(`add-ons/${id}`);
+        fetchData();
       } catch (error) {
         console.error("Error deleting add-on:", error);
       }
@@ -175,8 +167,8 @@ const AddOns = () => {
 
   const handleClickRestore = async (id: string) => {
     try {
-      await api.patch("add-ons", null, { params: { restore: id } }); // Updated API endpoint
-      fetchData(); // Refresh data after restore
+      await api.patch("add-ons", null, { params: { restore: id } });
+      fetchData();
     } catch (error) {
       console.error("Error restoring add-on:", error);
     }
@@ -269,18 +261,6 @@ const AddOns = () => {
       type: "date",
     },
   ];
-
-  const [batchesOpen, setBatchesOpen] = useState(false);
-
-  const toggleDrawer = (open: boolean) => (event: any) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-    setBatchesOpen(open);
-  };
 
   return (
     <>
