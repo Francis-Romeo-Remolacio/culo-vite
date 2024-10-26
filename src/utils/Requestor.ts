@@ -25,14 +25,19 @@ export async function patchPastryMaterial(
   const pastryMaterialRequestAddressBase: string = `pastry-materials/${pastryMaterialId}`;
 
   var originalPastryMaterial: any;
-  try {
-    const fetchedPastryMaterial = await api.get(
-      `designs/${pastryMaterial?.designId}/pastry-material`
-    );
-    originalPastryMaterial = fetchedPastryMaterial.data;
-  } catch {
-    return response;
+
+  const fetchOriginalPastryMaterial = async () => {
+    try {
+      const fetchedPastryMaterial = await api.get(
+        `designs/${pastryMaterial?.designId}/pastry-material`
+      );
+      originalPastryMaterial = fetchedPastryMaterial.data;
+    } catch {
+      return response;
+    }
   }
+
+  await fetchOriginalPastryMaterial();
 
   //Update main variant
   var mainVariantPatchBody = {
@@ -227,9 +232,25 @@ export async function patchPastryMaterial(
     }
   }
 
-  //Update sub variants
   const subVariantRequestAddressBase =
-    pastryMaterialRequestAddressBase + `/sub-variants`;
+  pastryMaterialRequestAddressBase + `/sub-variants`;
+
+  //Delete extra sub variants
+  //This is so scuffed, consider updating this in the future
+  const numberOfSubVariantsInForm :number = pastryMaterial.subVariants.length - 1; //Base 0
+  const originalSubVariantsIdList : [{pastryMaterialSubVariantId: string}] = originalPastryMaterial.subVariants?.map(({pastryMaterialSubVariantId}) => ({pastryMaterialSubVariantId}));
+  for (const originalSubVariantsIdListIndex in originalSubVariantsIdList){
+    const currentIdIndex = Number(originalSubVariantsIdListIndex);
+    if (currentIdIndex > numberOfSubVariantsInForm) {
+      try {
+        const subVariantDeleteResponse = await api.delete(subVariantRequestAddressBase + `/${originalSubVariantsIdList[currentIdIndex].pastryMaterialSubVariantId}`);
+      }
+      catch{}
+    }
+  }
+
+  //Update sub variants
+  await fetchOriginalPastryMaterial();
   for (const subVariant of pastryMaterial.subVariants) {
     //Get corresponding sub variant entry id from the original pastry material data
     //Using the index of the current sub variant data in the form

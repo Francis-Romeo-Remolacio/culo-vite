@@ -43,7 +43,11 @@ import { toCurrency } from "../../../utils/Formatter";
 import { Tokens } from "../../../Theme";
 import Header from "../../../components/Header";
 import { parsePastryMaterialForSubmission } from "../../../utils/Parser";
-import { PostPastryMaterial, patchPastryMaterial, postPastryMaterial } from "../../../utils/Requestor";
+import {
+  PostPastryMaterial,
+  patchPastryMaterial,
+  postPastryMaterial,
+} from "../../../utils/Requestor";
 
 interface PastryMaterialState {
   values: {
@@ -154,9 +158,9 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
             (_, index) => index !== action.payload
           ),
         },
-        variantsToDelete: variantId
-          ? [...state.variantsToDelete, variantId]
-          : state.variantsToDelete,
+        // variantsToDelete: variantId
+        //   ? [...state.variantsToDelete, variantId]
+        //   : state.variantsToDelete,
       };
 
     // Add an ingredient to a variant
@@ -286,7 +290,7 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
         ];
 
       return {
-        ...state
+        ...state,
         //addOnsToDelete: addOnToMark.relationId
         //  ? [...state.addOnsToDelete, addOnToMark.relationId]
         //  : state.addOnsToDelete,
@@ -453,7 +457,9 @@ const PastryMaterialDialog = ({
       created: pastryMaterial?.created,
       lastModified: pastryMaterial?.lastModified,
     };
-    const parsedPastryMaterialRequestBody = parsePastryMaterialForSubmission(pastryMaterialObjectForParsing);
+    const parsedPastryMaterialRequestBody = parsePastryMaterialForSubmission(
+      pastryMaterialObjectForParsing
+    );
 
     var originalPastryMaterial: any;
     try {
@@ -465,11 +471,14 @@ const PastryMaterialDialog = ({
 
     if (
       originalPastryMaterial?.pastryMaterialId !== undefined &&
-      originalPastryMaterial?.pastryMaterialId === null 
+      originalPastryMaterial?.pastryMaterialId === null
     ) {
       console.log(await postPastryMaterial(parsedPastryMaterialRequestBody));
     } else {
-      await patchPastryMaterial(parsedPastryMaterialRequestBody, originalPastryMaterial?.pastryMaterialId);
+      await patchPastryMaterial(
+        parsedPastryMaterialRequestBody,
+        originalPastryMaterial?.pastryMaterialId
+      );
     }
     setIsSubmitting(false);
   };
@@ -721,11 +730,6 @@ const PastryMaterialDialog = ({
       });
     }
   };
-
-  useEffect(() => {
-    console.log("HEHEHEHEHEHEH");
-    console.log(pmState);
-  }, [pmState]);
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -1216,7 +1220,17 @@ const PastryMaterialDialog = ({
                   return (
                     <Accordion sx={{ background: colors.primary[100] }}>
                       <AccordionSummary expandIcon={<ExpandMore />}>
-                        {variant.name}
+                        <Typography variant="h6">{variant.name}</Typography>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => {
+                            handleRemoveVariant(variantIndex);
+                          }}
+                          sx={{justify: "right"}}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </AccordionSummary>
 
                       <AccordionDetails>
@@ -1664,12 +1678,12 @@ const PastryMaterialDialog = ({
             <Button onClick={onClose}>{"Save without Closing"}</Button>
           ) : null}
           <Button onClick={onClose}>{"Cancel"}</Button>
-          <Button variant="contained" onClick={onSubmit} disabled={isSubmitting}>
-          {!isSubmitting ? (
-              "Save"
-            ) : (
-              <CircularProgress size={21} />
-            )}
+          <Button
+            variant="contained"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+          >
+            {!isSubmitting ? "Save" : <CircularProgress size={21} />}
           </Button>
         </DialogActions>
       </form>
