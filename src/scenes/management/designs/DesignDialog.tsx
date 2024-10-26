@@ -52,7 +52,9 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     useState<Partial<PastryMaterial>>();
   const [fetchingPastryMaterial, setFetchingPastryMaterial] = useState(true);
   const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
+
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isFetchingImage, setIsFetchingImage] = useState(true);
 
   const handleTogglePastryMaterial = () => {
     setPastryMaterialOpen(!pastryMaterialOpen);
@@ -250,11 +252,13 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   };
   //Fetch design image using the id property in the design prop
   const fetchDesignImage = async () => {
+    setIsFetchingImage(true);
     const response = await api.get(
       `designs/${design?.id}/display-picture-data`
     );
     setPicture(response.data.displayPictureData);
     setImageType(getImageType(response.data.displayPictureData));
+    setIsFetchingImage(false);
   };
 
   // Filter available tags when values.tags changes
@@ -535,9 +539,9 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
             onClick={() => handleSubmit()}
             type="submit"
             variant="contained"
-            disabled={isSubmitting || isDeleting}
+            disabled={isSubmitting || isDeleting || isFetchingImage}
           >
-            {!isSubmitting || !isDeleting ? (
+            {!isSubmitting || !isDeleting  ? (
               "Save"
             ) : (
               <CircularProgress size={21} />
