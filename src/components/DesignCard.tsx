@@ -77,6 +77,7 @@ const DesignCard = ({ design, manager, onClick }: DesignCardProps) => {
                 overflow: "hidden",
                 WebkitBoxOrient: "vertical",
                 WebkitLineClamp: 3,
+                wordBreak: "break-word",
               }}
             >
               {manager ? design.description : ""}
