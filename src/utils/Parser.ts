@@ -19,14 +19,7 @@ export interface DesignBodyRequestFormat {
 export interface PastryMaterialRequestFormat {
   designId: string;
   mainVariantName: string;
-  ingredients: [
-    {
-      itemId: string;
-      ingredientType: string;
-      amount: number;
-      amountMeasurement: string;
-    }?
-  ];
+  ingredients: PastryMaterialIngredientRequestFormat[];
   otherCost: {
     additionalCost: number;
     ingredientCostMultiplier: number;
@@ -38,30 +31,24 @@ export interface PastryMaterialRequestFormat {
       importance: number;
     }?
   ];
-  addOns: [
-    {
-      addOnsId: number;
-      amount: number;
-    }?
-  ];
+  addOns: PastryMaterialAddOnRequestFormat[];
   subVariants: PastryMaterialSubVariantRequestFormat[];
 }
-export interface PastryMaterialSubVariantRequestFormat{
+export interface PastryMaterialSubVariantRequestFormat {
   subVariantName: string;
-  subVariantIngredients: [
-    {
-      itemId: string;
-      ingredientType: string;
-      amount: number;
-      amountMeasurement: string;
-    }?
-  ];
-  subVariantAddOns: [
-    {
-      addOnsId: number;
-      amount: number;
-    }?
-  ];
+  subVariantIngredients: PastryMaterialIngredientRequestFormat[];
+  subVariantAddOns: PastryMaterialAddOnRequestFormat[];
+}
+
+export interface PastryMaterialIngredientRequestFormat {
+  itemId: string;
+  ingredientType: string;
+  amount: number;
+  amountMeasurement: string;
+}
+export interface PastryMaterialAddOnRequestFormat {
+  addOnsId: number;
+  amount: number;
 }
 
 export function parseDesignDataForSubmission(
@@ -112,53 +99,54 @@ export function parsePastryMaterialForSubmission(
     subVariants: [],
   };
 
-  pastryMaterial.variants.map((variant: PastryMaterialVariant, variantIndex: number) => {
-    if (variantIndex <= 0){
-      response.mainVariantName = variant.name;
-      
-      variant.ingredients.forEach(element => {
-        response.ingredients.push({
-          itemId: element.id === undefined ? "1" : element.id, //Risky
-          ingredientType: element.ingredientType,
-          amount: element.amount,
-          amountMeasurement: element.measurement === undefined ? "Piece" : element.measurement //Risky
-        })
-      });
+  pastryMaterial.variants.map(
+    (variant: PastryMaterialVariant, variantIndex: number) => {
+      if (variantIndex <= 0) {
+        response.mainVariantName = variant.name;
 
-      variant.addOns.forEach(element => {
-        response.addOns.push({
-          addOnsId: element.id === undefined ? 1 : Number(element.id), //Extra Risky
-          amount: element.amount
-        })
-      })
+        variant.ingredients.forEach((element) => {
+          response.ingredients.push({
+            itemId: element.id === undefined ? "1" : element.id, //Risky
+            ingredientType: element.ingredientType,
+            amount: element.amount,
+            amountMeasurement:
+              element.measurement === undefined ? "Piece" : element.measurement, //Risky
+          });
+        });
+
+        variant.addOns.forEach((element) => {
+          response.addOns.push({
+            addOnsId: element.id === undefined ? 1 : Number(element.id), //Extra Risky
+            amount: element.amount,
+          });
+        });
+      } else {
+        var newVariantEntry: PastryMaterialSubVariantRequestFormat = {
+          subVariantName: variant.name,
+          subVariantIngredients: [],
+          subVariantAddOns: [],
+        };
+
+        variant.ingredients.forEach((element) => {
+          newVariantEntry.subVariantIngredients.push({
+            itemId: element.id === undefined ? "1" : element.id, //Risky
+            ingredientType: element.ingredientType,
+            amount: element.amount,
+            amountMeasurement:
+              element.measurement === undefined ? "Piece" : element.measurement, //Risky
+          });
+        });
+
+        variant.addOns.forEach((element) => {
+          newVariantEntry.subVariantAddOns.push({
+            addOnsId: element.id === undefined ? 1 : Number(element.id), //Extra Risky
+            amount: element.amount,
+          });
+        });
+        response.subVariants.push(newVariantEntry);
+      }
     }
-    else{
-      var newVariantEntry : PastryMaterialSubVariantRequestFormat = {
-        subVariantName: variant.name,
-        subVariantIngredients: [],
-        subVariantAddOns: []
-      };
-
-      variant.ingredients.forEach(element => {
-        newVariantEntry.subVariantIngredients.push({
-          itemId: element.id === undefined ? "1" : element.id, //Risky
-          ingredientType: element.ingredientType,
-          amount: element.amount,
-          amountMeasurement: element.measurement === undefined ? "Piece" : element.measurement //Risky
-        })
-      });
-
-      variant.addOns.forEach(element => {
-        newVariantEntry.subVariantAddOns.push({
-          addOnsId: element.id === undefined ? 1 : Number(element.id), //Extra Risky
-          amount: element.amount
-        })
-      })
-      response.subVariants.push(newVariantEntry);
-    }
-  })
-
-
+  );
 
   return response;
 }
