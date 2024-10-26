@@ -209,9 +209,9 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
 
       return {
         ...state,
-        ingredientsToDelete: ingredientToMark.relationId
-          ? [...state.ingredientsToDelete, ingredientToMark.relationId]
-          : state.ingredientsToDelete,
+        // ingredientsToDelete: ingredientToMark.relationId
+        //   ? [...state.ingredientsToDelete, ingredientToMark.relationId]
+        //   : state.ingredientsToDelete,
       };
 
     // Update an ingredient in a variant
@@ -286,10 +286,10 @@ function reducer(state: PastryMaterialState, action: VariantAction) {
         ];
 
       return {
-        ...state,
-        addOnsToDelete: addOnToMark.relationId
-          ? [...state.addOnsToDelete, addOnToMark.relationId]
-          : state.addOnsToDelete,
+        ...state
+        //addOnsToDelete: addOnToMark.relationId
+        //  ? [...state.addOnsToDelete, addOnToMark.relationId]
+        //  : state.addOnsToDelete,
       };
 
     // Update an add-on in a variant
@@ -469,7 +469,7 @@ const PastryMaterialDialog = ({
     ) {
       console.log(await postPastryMaterial(parsedPastryMaterialRequestBody));
     } else {
-      await patchPastryMaterial(parsedPastryMaterialRequestBody);
+      await patchPastryMaterial(parsedPastryMaterialRequestBody, originalPastryMaterial?.pastryMaterialId);
     }
     setIsSubmitting(false);
   };
