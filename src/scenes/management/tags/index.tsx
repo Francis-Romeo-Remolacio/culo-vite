@@ -118,7 +118,7 @@ const Tags = () => {
 
   return (
     <>
-      <Header title="Tags" subtitle="Tags for categorizing designs" />
+      <Header title="TAGS" subtitle="Tags for categorizing designs" />
       <Stack direction="row" spacing={2}>
         <Button
           onClick={() => {

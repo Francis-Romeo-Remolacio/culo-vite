@@ -12,11 +12,20 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { DataGrid, GridColDef, GridRowsProp, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRowsProp,
+  GridToolbar,
+} from "@mui/x-data-grid";
 import Header from "../../../components/Header.js";
 import api from "../../../api/axiosConfig.js";
 import DataGridStyler from "../../../components/DataGridStyler.tsx";
-import { Edit as EditIcon, Delete as DeleteIcon, Restore as RestoreIcon } from "@mui/icons-material";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Restore as RestoreIcon,
+} from "@mui/icons-material";
 import { ManagementSuborder } from "../../../utils/Schemas.js";
 
 const Suborders = () => {
@@ -128,11 +137,17 @@ const Suborders = () => {
             </Select>
           </FormControl>
           {params.row.isActive ? (
-            <IconButton color="error" onClick={() => handleClickDelete(params.row.id)}>
+            <IconButton
+              color="error"
+              onClick={() => handleClickDelete(params.row.id)}
+            >
               <DeleteIcon />
             </IconButton>
           ) : (
-            <IconButton color="success" onClick={() => handleClickRestore(params.row.id)}>
+            <IconButton
+              color="success"
+              onClick={() => handleClickRestore(params.row.id)}
+            >
               <RestoreIcon />
             </IconButton>
           )}
@@ -145,7 +160,10 @@ const Suborders = () => {
       headerName: "Description",
       minWidth: 200,
       renderCell: (params) => (
-        <Button onClick={() => handleDescriptionClick(params.row.description)} color="primary">
+        <Button
+          onClick={() => handleDescriptionClick(params.row.description)}
+          color="primary"
+        >
           View Description
         </Button>
       ),
@@ -162,7 +180,7 @@ const Suborders = () => {
 
   return (
     <>
-      <Header title="To-Do" subtitle="Employee updates" />
+      <Header title="TO-DO" subtitle="Employee updates" />
       <DataGridStyler>
         <DataGrid
           rows={rows as GridRowsProp}

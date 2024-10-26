@@ -166,7 +166,7 @@ const Calendar = () => {
     //console.log("Event clicked:", selected.event.extendedProps.orderId);
 
     const clickedOrder: Order | undefined = orderRows.find(
-      value => value.id === selected.event.id
+      (value) => value.id === selected.event.id
     );
     setSelectedOrder(clickedOrder === undefined ? null : clickedOrder);
     setViewOrderOpen(true);
@@ -192,7 +192,7 @@ const Calendar = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedOrder(null);
-    setOrderDetails(null)
+    setOrderDetails(null);
     setViewOrderOpen(false);
   };
 
@@ -202,7 +202,7 @@ const Calendar = () => {
         backdropFilter: "blur(24px)",
       }}
     >
-      <Header title="Calendar" subtitle="Full Calendar Interactive Page" />
+      <Header title="CALENDAR" subtitle="Full Calendar Interactive Page" />
 
       <Box flex="1 1 100%" ml="15px">
         <FullCalendar

@@ -47,7 +47,6 @@ import { Batch, Ingredient } from "../../../utils/Schemas.js";
 import { Tokens } from "../../../Theme.ts";
 import { useAlert } from "../../../components/CuloAlert.tsx";
 import { useFormik } from "formik";
-import NumberCounter from "../../../components/NumberCounter.tsx";
 
 const Inventory = () => {
   const theme = useTheme();
@@ -321,7 +320,7 @@ const Inventory = () => {
     {
       field: "action",
       type: "actions",
-      minWidth: 100,
+      minWidth: 120,
       getActions: (params) => {
         const isInEditMode =
           rowModesModel[params.id]?.mode === GridRowModes.Edit;
@@ -522,7 +521,7 @@ const Inventory = () => {
 
   return (
     <>
-      <Header title="Inventory" subtitle="Manage your ingredients" />
+      <Header title="INVENTORY" subtitle="Manage your ingredients" />
       <Stack direction="row" spacing={2}>
         <Button
           variant="contained"

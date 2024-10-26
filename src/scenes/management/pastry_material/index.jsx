@@ -568,15 +568,15 @@ const PastryMaterial = () => {
   return (
     <>
       <Header
-        title="Pastry Materials"
-        subtitle="The ingredients of something"
+        title="PASTRY MATERIALS"
+        subtitle="Compiled lists of ingredients for designs"
       ></Header>
       <Button
         onClick={handleAddButtonClick}
         variant="contained"
         color="primary"
       >
-        Add new Pastry Material
+        {"Add new Pastry Material"}
       </Button>
       <DataGridStyler>
         <DataGrid

@@ -1,20 +1,13 @@
 import { useEffect, useState } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import {
-  DataGrid,
-  GridColDef,
-  GridRowsProp,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
-import DataGridStyler from "./../../../components/DataGridStyler.jsx";
+import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import { User } from "../../../utils/Schemas.js";
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -32,10 +25,7 @@ const Users = () => {
           setUsers(parsedUsers);
         });
       } catch (error) {
-        setError("Failed to fetch users");
         console.error("Failed to fetch users:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -52,7 +42,7 @@ const Users = () => {
       headerName: "Username",
       cellClassName: "name-column--cell",
     },
-    { field: "email", headerName: "Email", flex: 0.5 },
+    { field: "email", headerName: "Email", width: 240 },
     {
       field: "roles",
       headerName: "Role",
@@ -60,6 +50,7 @@ const Users = () => {
     {
       field: "phoneNumber",
       headerName: "Phone Number",
+      width: 120,
       valueFormatter: (value: number) => {
         if (!value) return ""; // Handle empty values
         // Convert number to string and format as "###-###-####"
@@ -76,44 +67,15 @@ const Users = () => {
       field: "joinDate",
       headerName: "Join Date",
       type: "dateTime",
-      flex: 0.5,
+      width: 160,
     },
   ];
 
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box p={2}>
+    <>
       <Header title="USERS" subtitle="Managers, Employees, and Customers" />
       <DataGridStyler>
         <DataGrid
-          checkboxSelection
           rows={users}
           columns={columns}
           slots={{ toolbar: GridToolbar }}
@@ -124,9 +86,13 @@ const Users = () => {
               },
             },
           }}
+          autosizeOptions={{
+            columns: ["username", "email", "phoneNumber"],
+            includeHeaders: false,
+          }}
         />
       </DataGridStyler>
-    </Box>
+    </>
   );
 };
 

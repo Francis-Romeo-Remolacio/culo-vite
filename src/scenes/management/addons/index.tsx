@@ -15,7 +15,15 @@ import {
 import Header from "../../../components/Header";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
-import { Edit, Delete, Save, Cancel, Refresh, Add } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Save,
+  Cancel,
+  Refresh,
+  Add,
+  Restore,
+} from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
 
 const AddOns = () => {
@@ -182,7 +190,21 @@ const AddOns = () => {
       getActions: (params) => {
         const isInEditMode =
           rowModesModel[params.id]?.mode === GridRowModes.Edit;
-
+        // const secondAction = params.row.isActive ? (
+        //   <GridActionsCellItem
+        //     icon={<Delete />}
+        //     label="Delete"
+        //     onClick={() => handleClickDelete(params.row.id)}
+        //     color="error"
+        //   />
+        // ) : (
+        //   <GridActionsCellItem
+        //     icon={<Restore />}
+        //     label="Restore"
+        //     onClick={() => handleClickRestore(params.row.id)}
+        //     color="success"
+        //   />
+        // );
         if (isInEditMode) {
           return [
             <GridActionsCellItem
@@ -264,7 +286,7 @@ const AddOns = () => {
 
   return (
     <>
-      <Header title="Add-Ons" subtitle="Manage your add-ons" />
+      <Header title="ADD-ONS" subtitle="Manage your add-ons" />
       <Stack direction="row" spacing={2}>
         <Button
           variant="contained"
