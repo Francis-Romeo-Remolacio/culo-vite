@@ -31,8 +31,12 @@ import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
 import { Add, Delete as DeleteIcon, X } from "@mui/icons-material";
 import PastryMaterialDialog from "./PastryMaterialDialog";
-import { parseDesignDataForSubmission, parsePastryMaterialForSubmission } from "../../../utils/Parser";
+import {
+  parseDesignDataForSubmission,
+  parsePastryMaterialForSubmission,
+} from "../../../utils/Parser";
 import { postPastryMaterial } from "../../../utils/Requestor";
+import { useAuth } from "../../../components/AuthContext";
 
 type DesignDialogProps = {
   design?: Design;
@@ -45,29 +49,33 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   console.log("DESIGN::");
   console.log(design);
 
+  const { role } = useAuth();
+
   const [picture, setPicture] = useState("");
   const [imageType, setImageType] = useState("");
   const [availableTags, setAvailableTags] = useState<Tag[]>(tags);
 
   const [pastryMaterial, setPastryMaterial] =
     useState<Partial<PastryMaterial>>();
-  const defaultPastryMaterial : PastryMaterial = {
+  const defaultPastryMaterial: PastryMaterial = {
     id: "",
     designId: "",
     designName: "",
-    variants: [{
-      name: "",
-      ingredients: [],
-      addOns: [],
-      tiers: []
-    }],
+    variants: [
+      {
+        name: "",
+        ingredients: [],
+        addOns: [],
+        tiers: [],
+      },
+    ],
     otherCost: {
       additionalCost: 0,
       multiplier: 2,
     },
     created: new Date(),
-    lastModified: new Date()
-  }
+    lastModified: new Date(),
+  };
 
   const [fetchingPastryMaterial, setFetchingPastryMaterial] = useState(true);
   const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
@@ -114,24 +122,29 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     } else {
       const designPostResponse = await api.post("designs", parsedDesignBody);
       const newDesignId = designPostResponse.data.id;
-      
+
       //Why
-      const pastryMaterialForParsing : PastryMaterial = {
+      const pastryMaterialForParsing: PastryMaterial = {
         designId: newDesignId,
         variants: pastryMaterial?.variants as PastryMaterialVariant[],
-        otherCost: pastryMaterial?.otherCost as {additionalCost: number, multiplier : number},
+        otherCost: pastryMaterial?.otherCost as {
+          additionalCost: number;
+          multiplier: number;
+        },
       };
-      
-      const parsedPostPastryMaterialBody = parsePastryMaterialForSubmission(pastryMaterialForParsing);
+
+      const parsedPostPastryMaterialBody = parsePastryMaterialForSubmission(
+        pastryMaterialForParsing
+      );
       await postPastryMaterial(parsedPostPastryMaterialBody);
     }
     onClose();
   };
   useEffect(() => {
-    if (open === false){
+    if (open === false) {
       setPastryMaterial(defaultPastryMaterial);
     }
-  } ,[open])
+  }, [open]);
 
   const handleDelete = async () => {
     if (design?.id == undefined) {
@@ -141,9 +154,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
     setIsDeleting(true);
 
     try {
-      const response = await api.delete(
-        `/designs/${encodeURIComponent(design?.id)}`
-      );
+      await api.delete(`/designs/${encodeURIComponent(design?.id)}`);
       onClose();
     } catch {
       console.error("Failed delete design: " + design?.id);
@@ -167,7 +178,12 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
   const fetchPastryMaterial = async () => {
     setFetchingPastryMaterial(true);
-    if (design && design.id !== undefined && design.id !== "" && design.id.length > 0) {
+    if (
+      design &&
+      design.id !== undefined &&
+      design.id !== "" &&
+      design.id.length > 0
+    ) {
       await api
         .get(`designs/${encodeURIComponent(design.id)}/pastry-material`)
         .then((response) => {
@@ -199,10 +215,10 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                   addOns: [],
                   inStock: false,
                   created: new Date(),
-                  lastModified: new Date()
-                }
-              ]
-            }
+                  lastModified: new Date(),
+                },
+              ],
+            };
           } else {
             parsedPastryMaterial = {
               id: response.data.pastryMaterialId,
@@ -282,8 +298,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
           console.log("FETCHED::");
           console.log(parsedPastryMaterial);
         });
-    }
-    else{
+    } else {
       setPastryMaterial(defaultPastryMaterial);
     }
     console.log(pastryMaterial);
@@ -407,28 +422,31 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                 />
               ) : null}
             </Box>
-            <Button
-              component="label"
-              role={undefined}
-              variant={picture ? "contained" : "outlined"}
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
-              Upload image
-              <VisuallyHiddenInput
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  handleImageUpload(e);
-                }}
-              />
-            </Button>
+            {role === "Manager" || role === "Admin" ? (
+              <Button
+                component="label"
+                role={undefined}
+                variant={picture ? "contained" : "outlined"}
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+              >
+                {"Upload image"}
+                <VisuallyHiddenInput
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleImageUpload(e);
+                  }}
+                />
+              </Button>
+            ) : null}
             <TextField
               label="Name"
               id="name"
               name="name"
               value={values.name}
               onChange={handleChange}
+              disabled={!(role === "Manager" || role === "Admin")}
             />
             <TextField
               label="Description"
@@ -436,12 +454,16 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
               name="description"
               value={values.description}
               onChange={handleChange}
+              disabled={!(role === "Manager" || role === "Admin")}
               multiline
               rows={6}
             />
             <Stack direction="row" spacing={2}>
-              <FormControl fullWidth>
-                <InputLabel id="select-shape-label">Shape</InputLabel>
+              <FormControl
+                fullWidth
+                disabled={!(role === "Manager" || role === "Admin")}
+              >
+                <InputLabel id="select-shape-label">{"Shape"}</InputLabel>
                 <Select
                   labelId="select-shape"
                   label="Shape"
@@ -472,7 +494,8 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
               {availableTags.length > 0 &&
               values.tags &&
-              values.tags.length < 5 ? (
+              values.tags.length < 5 &&
+              (role === "Manager" || role === "Admin") ? (
                 <Button
                   color="primary"
                   variant="contained"
@@ -480,7 +503,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                   onClick={handleAddTag}
                 >
                   <Add />
-                  Add
+                  {"Add"}
                 </Button>
               ) : null}
             </Stack>
@@ -501,6 +524,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                         fullWidth
                         key={`select-tag-form-${index}`}
                         size="small"
+                        disabled={!(role === "Manager" || role === "Admin")}
                       >
                         <Select
                           labelId={`select-tag-${index}`}
@@ -520,24 +544,29 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                           ))}
                         </Select>
                       </FormControl>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleRemoveTag(index)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      {role === "Manager" || role === "Admin" ? (
+                        <IconButton
+                          color="error"
+                          onClick={() => handleRemoveTag(index)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      ) : null}
                     </Stack>
                   );
                 })}
             </Stack>
-            <Button
-              onClick={handleTogglePastryMaterial}
-              variant="contained"
-              color="secondary"
-              disabled={fetchingPastryMaterial}
-            >
-              {"Materials List"}
-            </Button>
+
+            {role === "Manager" || role === "Admin" ? (
+              <Button
+                onClick={handleTogglePastryMaterial}
+                variant="contained"
+                color="secondary"
+                disabled={fetchingPastryMaterial}
+              >
+                {"Materials List"}
+              </Button>
+            ) : null}
             {!fetchingPastryMaterial ? (
               <PastryMaterialDialog
                 pastryMaterial={pastryMaterial as PastryMaterial}
@@ -552,40 +581,46 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          {design?.id !== undefined &&
-            design?.id !== null &&
-            design?.id !== "" && (
+          {role === "Manager" || role === "Admin" ? (
+            <>
+              <Button onClick={onClose}>{"Cancel"}</Button>
+              {design?.id !== undefined &&
+                design?.id !== null &&
+                design?.id !== "" && (
+                  <Button
+                    onClick={() => handleDelete()}
+                    disabled={isSubmitting || isDeleting}
+                    color="error"
+                  >
+                    {!isSubmitting || !isDeleting ? (
+                      "Delete"
+                    ) : (
+                      <CircularProgress size={21} />
+                    )}
+                  </Button>
+                )}
               <Button
-                onClick={() => handleDelete()}
-                color="error"
+                color="info"
+                onClick={() => resetForm({ values: design || initialValues })}
+              >
+                {"Reset"}
+              </Button>
+              <Button
+                onClick={() => handleSubmit()}
+                type="submit"
                 variant="contained"
-                disabled={isSubmitting || isDeleting}
+                disabled={isSubmitting || isDeleting || isFetchingImage}
               >
                 {!isSubmitting || !isDeleting ? (
-                  "Delete"
+                  "Save"
                 ) : (
                   <CircularProgress size={21} />
                 )}
               </Button>
-            )}
-          <Button
-            onClick={() => resetForm({ values: design || initialValues })}
-          >
-            Reset
-          </Button>
-          <Button
-            onClick={() => handleSubmit()}
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting || isDeleting || isFetchingImage}
-          >
-            {!isSubmitting || !isDeleting  ? (
-              "Save"
-            ) : (
-              <CircularProgress size={21} />
-            )}
-          </Button>
+            </>
+          ) : (
+            <Button onClick={onClose}>{"Close"}</Button>
+          )}
         </DialogActions>
       </form>
     </Dialog>

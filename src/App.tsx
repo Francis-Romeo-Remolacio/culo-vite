@@ -118,7 +118,7 @@ function App() {
               <Route path="/orders" element={<Forbidden />} />
               <Route path="/suborders" element={<Suborders />} />
               <Route path="/sales" element={<Forbidden />} />
-              <Route path="/designs" element={<Forbidden />} />
+              <Route path="/designs" element={<Designs />} />
               <Route path="/inventory" element={<Forbidden />} />
               <Route path="/pastry-material" element={<Forbidden />} />
               <Route path="/add-ons" element={<Forbidden />} />
