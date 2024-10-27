@@ -194,7 +194,7 @@ const ButtonCheckout = ({
                 <SuborderAccordion
                   key={suborder.id}
                   suborder={suborder}
-                  designName={buyNowDesignName}
+                  designName={buyNowDesignName ?? suborder.designName}
                 />
               ))}
               <FormControl fullWidth variant="filled">

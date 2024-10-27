@@ -28,6 +28,7 @@ const CartList = () => {
       const parsedCart: Suborder[] = response.data.map((item: any) => ({
         id: item.suborderId,
         designId: item.designId,
+        designName: item.designName,
         pastryId: item.pastryId,
         description: item.description,
         size: item.size,
