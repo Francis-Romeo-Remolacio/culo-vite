@@ -49,6 +49,20 @@ const SuborderAccordion = ({
   suborder,
   designName,
 }: SuborderAccordionProps) => {
+  const descriptionText = suborder.description || "";
+
+  // Regular expression to capture "Dedication" and "Requests" sections
+  const dedicationMatch = descriptionText.match(
+    /Dedication:\s*(.*?)(?=Requests:|$)/s
+  );
+  const requestsMatch = descriptionText.match(/Requests:\s*(.*)/s);
+
+  // Extract text if it matches, otherwise default to empty string
+  const dedicationText = dedicationMatch
+    ? dedicationMatch[1].trim()
+    : "Not provided";
+  const requestsText = requestsMatch ? requestsMatch[1].trim() : "Not provided";
+
   return (
     <Accordion>
       <AccordionSummary
@@ -59,11 +73,28 @@ const SuborderAccordion = ({
         {designName ? designName : "Your Order"}
       </AccordionSummary>
       <AccordionDetails>
-        <Typography>{`Size: ${suborder.size}`}</Typography>
-        <Typography>{`Color: ${suborder.color}`}</Typography>
-        <Typography>{`Flavor: ${suborder.flavor}`}</Typography>
-        <Typography>{`Description: ${suborder.description}`}</Typography>
-        <Typography>{`Quantity: ${suborder.quantity}x`}</Typography>
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{"Size: "}</span>
+          {suborder.size}
+        </Typography>
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{"Color: "}</span>
+          {suborder.color}
+        </Typography>
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{"Flavor: "}</span>
+          {suborder.flavor}
+        </Typography>
+
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{"Dedication: "}</span>
+          {dedicationText.replace("Dedication: ", "")}
+        </Typography>
+
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{"Requests: "}</span>
+          {requestsText.replace("Requests: ", "")}
+        </Typography>
       </AccordionDetails>
     </Accordion>
   );

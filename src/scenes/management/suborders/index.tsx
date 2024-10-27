@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Typography,
 } from "@mui/material";
 import {
   DataGrid,
@@ -22,8 +23,8 @@ import Header from "../../../components/Header.js";
 import api from "../../../api/axiosConfig.js";
 import DataGridStyler from "../../../components/DataGridStyler.tsx";
 import {
-  Edit as EditIcon,
   Delete as DeleteIcon,
+  Refresh as RefreshIcon,
   Restore as RestoreIcon,
 } from "@mui/icons-material";
 import { ManagementSuborder } from "../../../utils/Schemas.js";
@@ -31,9 +32,10 @@ import { ManagementSuborder } from "../../../utils/Schemas.js";
 const Suborders = () => {
   const [rows, setRows] = useState<ManagementSuborder[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>(""); // State for dropdown value
-  const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false); // State for dialog
   const [selectedDescription, setSelectedDescription] = useState(""); // State for selected description
+  const [dedicationText, setDedicationText] = useState("");
+  const [requestsText, setRequestsText] = useState("");
 
   const fetchData = async () => {
     try {
@@ -84,7 +86,6 @@ const Suborders = () => {
       fetchData(); // Refetch data after status update
     } catch (error) {
       console.error("Error updating status:", error);
-      setError("Failed to update status.");
     }
   };
 
@@ -109,6 +110,11 @@ const Suborders = () => {
   // Open dialog with the selected description
   const handleDescriptionClick = (description: string) => {
     setSelectedDescription(description);
+
+    const [dedication, requests] = parseDescription(description);
+    setDedicationText(dedication);
+    setRequestsText(requests);
+
     setOpenDialog(true);
   };
 
@@ -178,9 +184,36 @@ const Suborders = () => {
     { field: "isActive", headerName: "Active", type: "boolean" },
   ];
 
+  const parseDescription = (description: string) => {
+    const descriptionText = description || "";
+
+    // Regular expression to capture "Dedication" and "Requests" sections
+    const dedicationMatch = descriptionText.match(
+      /Dedication:\s*(.*?)(?=Requests:|$)/s
+    );
+    const requestsMatch = descriptionText.match(/Requests:\s*(.*)/s);
+
+    // Extract text if it matches, otherwise default to empty string
+    const dedicationText = dedicationMatch
+      ? dedicationMatch[1].trim()
+      : "Not provided";
+    const requestsText = requestsMatch
+      ? requestsMatch[1].trim()
+      : "Not provided";
+
+    return [dedicationText, requestsText];
+  };
+
   return (
     <>
       <Header title="TO-DO" subtitle="Employee updates" />
+      <Button
+        variant="contained"
+        startIcon={<RefreshIcon />}
+        onClick={fetchData}
+      >
+        Refresh
+      </Button>
       <DataGridStyler>
         <DataGrid
           rows={rows as GridRowsProp}
@@ -198,13 +231,20 @@ const Suborders = () => {
 
       {/* Dialog to show the full description */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Description</DialogTitle>
+        <DialogTitle>{"Description"}</DialogTitle>
         <DialogContent>
-          <div>{selectedDescription}</div>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+            {"Dedication:"}
+          </Typography>
+          <Typography>{dedicationText}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+            {"Requests:"}
+          </Typography>
+          <Typography>{requestsText}</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
-            Close
+            {"Close"}
           </Button>
         </DialogActions>
       </Dialog>

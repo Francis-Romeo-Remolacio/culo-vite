@@ -644,10 +644,7 @@ const ViewDesign = () => {
                               tabIndex={-1}
                               disableRipple
                             />
-                            <ListItemText
-                              primary={addOn.name}
-                              secondary={`₱${fetchedAddOn?.price ?? 0}`} // Use price from fetchedAddOns or default to 0
-                            />
+                            <ListItemText primary={addOn.name} />
                             <NumberCounter
                               value={
                                 selectedAddOns.find(

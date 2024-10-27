@@ -15,7 +15,7 @@ import OrderListItem from "./OrderListItem";
 import api from "../../api/axiosConfig.js";
 import { Order } from "../../utils/Schemas.js";
 import { toCurrency } from "../../utils/Formatter.js";
-import { SuborderItem } from "../management/orders/index.js";
+import { SuborderItem } from "./index";
 
 const ToPay = () => {
   const [orderData, setOrderData] = useState<Order[]>([]);
@@ -46,7 +46,7 @@ const ToPay = () => {
                 color: suborder.color,
                 flavor: suborder.flavor,
                 quantity: suborder.quantity,
-                price: suborder.price,
+                price: { full: suborder.price },
                 addOns: suborder.orderAddons,
               })),
               customOrders: order.customItems,

@@ -15,7 +15,7 @@ import OrderListItem from "./OrderListItem";
 import api from "../../api/axiosConfig.js";
 import { Order } from "../../utils/Schemas.js";
 import { toCurrency } from "../../utils/Formatter.js";
-import { SuborderItem } from "../management/orders/index.js";
+import { SuborderItem } from "./index";
 
 const ToApprove = () => {
   const [orderData, setOrderData] = useState<Order[]>([]);
