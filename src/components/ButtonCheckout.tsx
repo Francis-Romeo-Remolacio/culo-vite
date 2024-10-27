@@ -91,7 +91,11 @@ const ButtonCheckout = ({
     setOpen(false);
   };
 
-  const onSubmit = async () => {
+  const onSubmit = () => {
+    return;
+  };
+
+  const handleCheckout = async () => {
     const formattedDate = dayjs(values.pickupDateTime).format("YYYY-MM-DD");
     const formattedTime = dayjs(values.pickupDateTime).format("hh:mm A");
 
@@ -183,12 +187,7 @@ const ButtonCheckout = ({
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Order</DialogTitle>
-        <form
-          onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
-            onSubmit();
-          }}
-        >
+        <form>
           <DialogContent>
             <Stack spacing={2} sx={{ minWidth: 512 }}>
               {suborders.map((suborder) => (
@@ -249,10 +248,10 @@ const ButtonCheckout = ({
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
             <Button
-              type="submit"
               variant="contained"
               endIcon={!isSubmitting ? <CheckoutIcon /> : ""}
               disabled={isSubmitting || !isValid}
+              onClick={handleCheckout}
             >
               {!isSubmitting ? "Send Order" : <CircularProgress size={21} />}
             </Button>
