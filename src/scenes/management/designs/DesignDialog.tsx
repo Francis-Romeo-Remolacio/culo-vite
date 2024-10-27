@@ -31,7 +31,8 @@ import { getImageType } from "../../../components/Base64Image";
 // import PastryMaterialDialog from "./PastryMaterialDialog";
 import { Add, Delete as DeleteIcon, X } from "@mui/icons-material";
 import PastryMaterialDialog from "./PastryMaterialDialog";
-import { parseDesignDataForSubmission } from "../../../utils/Parser";
+import { parseDesignDataForSubmission, parsePastryMaterialForSubmission } from "../../../utils/Parser";
+import { postPastryMaterial } from "../../../utils/Requestor";
 
 type DesignDialogProps = {
   design?: Design;
@@ -50,11 +51,29 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
 
   const [pastryMaterial, setPastryMaterial] =
     useState<Partial<PastryMaterial>>();
+  const defaultPastryMaterial : PastryMaterial = {
+    id: "",
+    designId: "",
+    designName: "",
+    variants: [{
+      name: "",
+      ingredients: [],
+      addOns: [],
+      tiers: []
+    }],
+    otherCost: {
+      additionalCost: 0,
+      multiplier: 2,
+    },
+    created: new Date(),
+    lastModified: new Date()
+  }
+
   const [fetchingPastryMaterial, setFetchingPastryMaterial] = useState(true);
   const [pastryMaterialOpen, setPastryMaterialOpen] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isFetchingImage, setIsFetchingImage] = useState(true);
+  const [isFetchingImage, setIsFetchingImage] = useState(false);
 
   const handleTogglePastryMaterial = () => {
     setPastryMaterialOpen(!pastryMaterialOpen);
@@ -93,10 +112,26 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
         await api.delete(`designs/${design.id}/tags`, { data: deletedTags });
       }
     } else {
-      await api.post("designs", parsedDesignBody);
+      const designPostResponse = await api.post("designs", parsedDesignBody);
+      const newDesignId = designPostResponse.data.id;
+      
+      //Why
+      const pastryMaterialForParsing : PastryMaterial = {
+        designId: newDesignId,
+        variants: pastryMaterial?.variants as PastryMaterialVariant[],
+        otherCost: pastryMaterial?.otherCost as {additionalCost: number, multiplier : number},
+      };
+      
+      const parsedPostPastryMaterialBody = parsePastryMaterialForSubmission(pastryMaterialForParsing);
+      await postPastryMaterial(parsedPostPastryMaterialBody);
     }
     onClose();
   };
+  useEffect(() => {
+    if (open === false){
+      setPastryMaterial(defaultPastryMaterial);
+    }
+  } ,[open])
 
   const handleDelete = async () => {
     if (design?.id == undefined) {
@@ -131,8 +166,8 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
   });
 
   const fetchPastryMaterial = async () => {
-    if (design && design.id.length > 0) {
-      setFetchingPastryMaterial(true);
+    setFetchingPastryMaterial(true);
+    if (design && design.id !== undefined && design.id !== "" && design.id.length > 0) {
       await api
         .get(`designs/${encodeURIComponent(design.id)}/pastry-material`)
         .then((response) => {
@@ -247,8 +282,12 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
           console.log("FETCHED::");
           console.log(parsedPastryMaterial);
         });
-      setFetchingPastryMaterial(false);
     }
+    else{
+      setPastryMaterial(defaultPastryMaterial);
+    }
+    console.log(pastryMaterial);
+    setFetchingPastryMaterial(false);
   };
   //Fetch design image using the id property in the design prop
   const fetchDesignImage = async () => {
@@ -282,13 +321,13 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
         fetchDesignImage();
 
         //Fetch the design's pastry material as well if design id exists
-        fetchPastryMaterial();
       }
 
       //Set the form data to selected design
       setValues(design);
       console.log(design);
     }
+    fetchPastryMaterial();
   }, [design]);
 
   const VisuallyHiddenInput = styled("input")({

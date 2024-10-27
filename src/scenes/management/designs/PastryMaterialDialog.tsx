@@ -457,29 +457,36 @@ const PastryMaterialDialog = ({
       created: pastryMaterial?.created,
       lastModified: pastryMaterial?.lastModified,
     };
-    const parsedPastryMaterialRequestBody = parsePastryMaterialForSubmission(
-      pastryMaterialObjectForParsing
-    );
 
-    var originalPastryMaterial: any;
-    try {
-      const fetchedPastryMaterial = await api.get(
-        `designs/${pastryMaterial?.designId}/pastry-material`
-      );
-      originalPastryMaterial = fetchedPastryMaterial.data;
-    } catch {}
-
-    if (
-      originalPastryMaterial?.pastryMaterialId !== undefined &&
-      originalPastryMaterial?.pastryMaterialId === null
-    ) {
-      console.log(await postPastryMaterial(parsedPastryMaterialRequestBody));
-    } else {
-      await patchPastryMaterial(
-        parsedPastryMaterialRequestBody,
-        originalPastryMaterial?.pastryMaterialId
-      );
+    if (mode === "add"){
+      setPastryMaterial(pastryMaterialObjectForParsing);
     }
+    else {
+      const parsedPastryMaterialRequestBody = parsePastryMaterialForSubmission(
+        pastryMaterialObjectForParsing
+      );
+  
+      var originalPastryMaterial: any;
+      try {
+        const fetchedPastryMaterial = await api.get(
+          `designs/${pastryMaterial?.designId}/pastry-material`
+        );
+        originalPastryMaterial = fetchedPastryMaterial.data;
+      } catch {}
+  
+      if (
+        originalPastryMaterial?.pastryMaterialId !== undefined &&
+        originalPastryMaterial?.pastryMaterialId === null
+      ) {
+        console.log(await postPastryMaterial(parsedPastryMaterialRequestBody));
+      } else {
+        await patchPastryMaterial(
+          parsedPastryMaterialRequestBody,
+          originalPastryMaterial?.pastryMaterialId
+        );
+      }
+    }
+    onClose();
     setIsSubmitting(false);
   };
 
