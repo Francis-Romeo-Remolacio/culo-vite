@@ -485,6 +485,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
                   name="customShape"
                   value={values.customShape}
                   onChange={handleChange}
+                  disabled={!(role === "Manager" || role === "Admin")}
                   fullWidth
                 />
               ) : null}
