@@ -118,7 +118,7 @@ const Landing = () => {
                 >
                   {/* Carousel Column */}
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <Carousel>
+                    <Carousel stopAutoPlayOnHover>
                       <iframe
                         width="100%"
                         height="500"
