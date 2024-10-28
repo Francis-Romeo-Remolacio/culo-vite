@@ -101,7 +101,7 @@ const UpdateTagModal = ({
           <Box mt={2} display="flex" justifyContent="flex-end">
             <Button
               onClick={() => {
-                setOpenEditModal;
+                setOpenEditModal(false);
               }}
               color="secondary"
               sx={{ mr: 2 }}
