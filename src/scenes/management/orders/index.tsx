@@ -204,6 +204,10 @@ const Orders = () => {
     setAssignOpen(false);
   };
 
+  const AssignClose = () => {
+    setAssignOpen(false);
+  };
+
   const handleReport = async () => {
     try {
       const response = await fetchBreakdownData(); // Fetch breakdown data from API or state
@@ -357,7 +361,7 @@ const handleUpdateOrder = async () => {
       );
 
       console.log("Employee assigned successfully:", response.data);
-      handleClose();
+      AssignClose();
       fetchData();
     } catch (error) {
       console.error("Error assigning employee:", error);
@@ -368,6 +372,7 @@ const handleUpdateOrder = async () => {
     try {
       const response = await api.post(`orders/${id}/approve-order`);
       console.log("Order approved successfully:", response.data);
+      fetchData();
     } catch (error) {
       console.error("Error approving order:", error);
     }
@@ -379,7 +384,7 @@ const handleUpdateOrder = async () => {
         `current-user/${id}/half-paid/simulation`
       );
       console.log("Half-paid simulation successful:", response.data);
-      // Optionally, you can add logic to refresh the data or show a success message
+      fetchData();
     } catch (error) {
       console.error("Error during half-paid simulation:", error);
     }

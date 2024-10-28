@@ -73,13 +73,10 @@ const Suborders = () => {
     fetchData();
   }, []);
 
-  const handleStatusChange = async (event: SelectChangeEvent, id: string) => {
-    const newStatus = event.target.value;
-    setSelectedStatus(newStatus);
-
+  const handleStatusChange = async (id: string) => {
     try {
       await api.patch(`orders/suborders/${id}/update-status`, null, {
-        params: { action: newStatus },
+        params: { action: "send" }, // Always use "send" for action
       });
       fetchData(); // Refetch data after status update
     } catch (error) {
@@ -87,6 +84,7 @@ const Suborders = () => {
       setError("Failed to update status.");
     }
   };
+
 
   const handleClickDelete = async (id: string) => {
     try {
@@ -126,16 +124,15 @@ const Suborders = () => {
       renderCell: (params: any) => (
         <>
           <FormControl variant="outlined" size="small" fullWidth>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={selectedStatus[params.row.id] || params.row.status}
-              onChange={(event) => handleStatusChange(event, params.row.id)}
-              label="Status"
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleStatusChange(params.row.id)} // Directly pass the ID to handleStatusChange
             >
-              <MenuItem value="send">Send</MenuItem>
-              <MenuItem value="done">Done</MenuItem>
-            </Select>
+              Send
+            </Button>
           </FormControl>
+
           {params.row.isActive ? (
             <IconButton
               color="error"
