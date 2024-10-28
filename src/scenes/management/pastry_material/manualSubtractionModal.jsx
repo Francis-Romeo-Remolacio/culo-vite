@@ -78,10 +78,10 @@ const ManualSubtractionModal = ({
     if (material !== undefined && material !== null &&
       material.subVariants !== undefined && material.subVariants !== null){
         if (formData.pastryMaterialId == formData.variant_id){
-         setIngredientsInStock(material.ingredients_in_stock); 
+         setIngredientsInStock(material.ingredientsInStock); 
         }
         else {
-          setIngredientsInStock(material.subVariants.find(x => x.pastryMaterialSubVariantId == formData.variant_id).ingredients_in_stock)
+          setIngredientsInStock(material.subVariants.find(x => x.pastryMaterialSubVariantId == formData.variant_id).ingredientsInStock)
         }
       }
   }
