@@ -119,7 +119,7 @@ const AddOns = () => {
     const changedFields: any = {};
 
     if (originalRow.name !== updatedRow.name) {
-      changedFields.addOnName = updatedRow.name;
+      changedFields.name = updatedRow.name;
     }
     if (originalRow.price !== updatedRow.price) {
       changedFields.price = updatedRow.price;
