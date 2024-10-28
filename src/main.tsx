@@ -15,30 +15,28 @@ const Index = () => {
   const [theme, colorMode] = useMode();
 
   return (
-    <React.StrictMode>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <HelmetProvider>
-          <BrowserRouter>
-            <ColorModeContext.Provider value={colorMode}>
-              <ThemeProvider theme={theme}>
-                {
-                  //<MantineProvider theme={theme}>
-                }
-                <CssBaseline />
-                <AlertProvider>
-                  <AuthProvider>
-                    <App />
-                  </AuthProvider>
-                </AlertProvider>
-                {
-                  //</MantineProvider>
-                }
-              </ThemeProvider>
-            </ColorModeContext.Provider>
-          </BrowserRouter>
-        </HelmetProvider>
-      </LocalizationProvider>
-    </React.StrictMode>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <HelmetProvider>
+        <BrowserRouter>
+          <ColorModeContext.Provider value={colorMode}>
+            <ThemeProvider theme={theme}>
+              {
+                //<MantineProvider theme={theme}>
+              }
+              <CssBaseline />
+              <AlertProvider>
+                <AuthProvider>
+                  <App />
+                </AuthProvider>
+              </AlertProvider>
+              {
+                //</MantineProvider>
+              }
+            </ThemeProvider>
+          </ColorModeContext.Provider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </LocalizationProvider>
   );
 };
 
