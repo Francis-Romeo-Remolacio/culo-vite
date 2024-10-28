@@ -572,6 +572,7 @@ const DesignDialog = ({ open, onClose, design, tags }: DesignDialogProps) => {
               <PastryMaterialDialog
                 pastryMaterial={pastryMaterial as PastryMaterial}
                 setPastryMaterial={setPastryMaterial}
+                fetchPastryMaterial={fetchPastryMaterial}
                 shape={values.shape ? values.shape : "custom"}
                 mode={design && design.id.length > 0 ? "edit" : "add"}
                 open={pastryMaterialOpen}
