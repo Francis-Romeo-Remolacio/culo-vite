@@ -227,6 +227,10 @@ const Orders = () => {
     setSelectedEmployee("");
   };
 
+  const AssignClose = () => {
+    setAssignOpen(false);
+  };
+
   const handleReport = async () => {
     try {
       const response = await fetchBreakdownData(); // Fetch breakdown data from API or state
