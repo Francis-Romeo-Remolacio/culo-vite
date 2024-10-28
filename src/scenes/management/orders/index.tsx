@@ -153,7 +153,7 @@ const SuborderItem = ({
         {suborderDetails.map(([key, value]) => (
           <Box key={key} sx={{ marginBottom: 1 }}>
             <Typography variant="body1">
-              <strong>{key}:</strong> {String(value)}
+              <strong>{key}:</strong> {key === "price" ? String(value.full) : String(value)}
             </Typography>
           </Box>
         ))}
