@@ -9,13 +9,14 @@ import {
   Typography,
 } from "@mui/material";
 import { Breakdown } from "../../../utils/Schemas";
+import { toCurrency } from "../../../utils/Formatter";
 
 type CostBreakdownTableProps = {
   data: Breakdown[];
 };
 
 const CostBreakdownTable = ({ data }: CostBreakdownTableProps) => {
-  const breakdown = data[0]; // Assuming you're dealing with a single entry for now
+  const breakdown = data[0];
 
   return (
     <TableContainer component={Paper}>
@@ -28,25 +29,29 @@ const CostBreakdownTable = ({ data }: CostBreakdownTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Item ID</TableCell>
+            <TableCell>#</TableCell>
             <TableCell>Item Name</TableCell>
-            <TableCell>Inventory Price</TableCell>
-            <TableCell>Inventory Quantity</TableCell>
-            <TableCell>Inventory Amount Unit</TableCell>
-            <TableCell>Amount Quantity Type</TableCell>
-            <TableCell>Calculated Price</TableCell>
+            <TableCell align="right">Unit Cost</TableCell>
+            <TableCell align="right">Quantity</TableCell>
+            <TableCell>Amount Unit</TableCell>
+            <TableCell align="right">Total Cost</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {breakdown.ingredientCostBreakdown.map((ingredient, index) => (
             <TableRow key={index}>
-              <TableCell>{ingredient.itemId}</TableCell>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>{ingredient.itemName}</TableCell>
-              <TableCell>{ingredient.inventoryPrice}</TableCell>
-              <TableCell>{ingredient.inventoryQuantity}</TableCell>
+              <TableCell align="right">
+                {toCurrency(ingredient.inventoryPrice)}
+              </TableCell>
+              <TableCell align="right">
+                {ingredient.inventoryQuantity.toFixed(2)}
+              </TableCell>
               <TableCell>{ingredient.inventoryAmountUnit}</TableCell>
-              <TableCell>{ingredient.amountQuantityType}</TableCell>
-              <TableCell>{ingredient.calculatedPrice}</TableCell>
+              <TableCell align="right">
+                {toCurrency(ingredient.calculatedPrice)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -62,12 +67,47 @@ const CostBreakdownTable = ({ data }: CostBreakdownTableProps) => {
         <TableBody>
           <TableRow>
             <TableCell colSpan={2}>Additional Cost</TableCell>
-            <TableCell>{breakdown.otherCostBreakdown.additionalCost}</TableCell>
+            <TableCell align="right">
+              {toCurrency(breakdown.otherCostBreakdown.additionalCost)}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell colSpan={2}>Ingredient Cost Multiplier</TableCell>
-            <TableCell>
+            <TableCell align="right">
               {breakdown.otherCostBreakdown.ingredientCostMultiplier}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+
+        {/* Totals */}
+        <TableHead>
+          <TableRow>
+            <TableCell colSpan={7}>
+              <Typography variant="h6">Totals</Typography>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell colSpan={5}>Total Ingredient Price</TableCell>
+            <TableCell align="right">
+              {toCurrency(breakdown.totalIngredientPrice)}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell colSpan={5}>
+              Total Ingredient Price (w/ Other Costs)
+            </TableCell>
+            <TableCell align="right">
+              {toCurrency(breakdown.totalIngredientPriceWithOtherCostIncluded)}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell colSpan={5}>Total Ingredient Price (Rounded)</TableCell>
+            <TableCell align="right">
+              {toCurrency(
+                breakdown.totalIngredientPriceWithOtherCostIncludedRounded
+              )}
             </TableCell>
           </TableRow>
         </TableBody>
