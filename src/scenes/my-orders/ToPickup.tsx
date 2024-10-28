@@ -35,9 +35,10 @@ const ToPickup = () => {
             pickupDateTime: order.pickup ? new Date(order.pickup) : null,
             payment: order.payment,
             price: order.price,
+            status: order.status,
             listItems: {
               suborders: order.orderItems.map((suborder: any) => ({
-                id: suborder.id,
+                id: suborder.suborderId,
                 designId: suborder.designId,
                 designName: suborder.designName,
                 pastryMaterialId: suborder.pastryId,
@@ -52,6 +53,7 @@ const ToPickup = () => {
               customOrders: order.customItems,
             },
           };
+          console.log(parsedOrder);
           return parsedOrder;
         })
       );

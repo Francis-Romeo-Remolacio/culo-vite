@@ -11,7 +11,6 @@ import {
   Button,
   Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
 import { Order } from "../../utils/Schemas";
 import { getImageType } from "../../components/Base64Image";
@@ -45,24 +44,20 @@ const OrderListItem = ({
         order.listItems.customOrders.length > 0 &&
         order.listItems.customOrders[0].designId
       ) {
-        setImage(
-          await api
-            .get(
-              `current-user/custom-orders/${order.listItems.customOrders[0].designId}/picture`
-            )
-            .then((response) => response.data.base64Picture)
-        );
+        await api
+          .get(
+            `current-user/custom-orders/${order.listItems.customOrders[0].designId}/picture`
+          )
+          .then((response) => setImage(response.data.base64Picture));
       } else if (
         order.listItems.suborders.length > 0 &&
         order.listItems.suborders[0].pastryId
       ) {
-        setImage(
-          await api
-            .get(
-              `designs/${order.listItems.suborders[0].designId}/display-picture-data`
-            )
-            .then((response) => response.data.displayPictureData)
-        );
+        await api
+          .get(
+            `designs/${order.listItems.suborders[0].designId}/display-picture-data`
+          )
+          .then((response) => setImage(response.data.displayPictureData));
       }
     };
     fetchImage();
@@ -113,41 +108,46 @@ const OrderListItem = ({
 
   const handleClickReceive = async () => {
     setIsSubmitting(true);
-    if (order.payment === "full")
-      try {
-        const response: any = await api.post(`paymongo/${order.id}/payment`, {
-          option: order.payment,
+    try {
+      if (order.payment === "full") {
+        order.listItems.suborders.forEach(async (suborder) => {
+          try {
+            await api.patch(
+              `orders/suborders/${suborder.id}/update-status`,
+              null,
+              {
+                params: { action: "done" },
+              }
+            );
+            fetchOrders();
+          } catch (error) {
+            console.error("Error updating status:", error);
+          }
         });
-
-        window.open(response.data.data.attributes.checkout_url);
-        navigate(`/post-payment?transaction=${response.data.data.id}`);
-      } catch (error) {
-        console.error(error);
-        makeAlert("error", "Failed to process payment.");
-      } finally {
-        fetchOrders();
-        setIsSubmitting(false);
+        order.listItems.customOrders.forEach(async (customOrder) => {
+          try {
+            await api.patch(
+              `orders/suborders/${customOrder.id}/update-status`,
+              null,
+              {
+                params: { action: "done" },
+              }
+            );
+            fetchOrders();
+          } catch (error) {
+            console.error("Error updating status:", error);
+          }
+        });
       }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <ListItem
-      key={order.id}
-      secondaryAction={
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Cancel">
-            <IconButton
-              edge="end"
-              color="error"
-              size="large"
-              onClick={handleClickCancel}
-            >
-              <DeleteIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      }
-    >
+    <ListItem key={order.id}>
       <Stack justifyContent="right" sx={{ width: "100%" }}>
         <ListItemButton onClick={() => handleOpen(order)}>
           <ListItemAvatar sx={{ height: "160px" }}>
@@ -220,7 +220,7 @@ const OrderListItem = ({
               variant="contained"
               size="large"
               onClick={handleClickReceive}
-              disabled={isSubmitting}
+              disabled={isSubmitting || order.status === "baking"}
             >
               {"Complete Order"}
             </Button>

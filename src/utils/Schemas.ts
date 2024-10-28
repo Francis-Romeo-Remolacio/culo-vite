@@ -143,6 +143,7 @@ export interface Order {
   pickupDateTime: Dayjs | Date;
   payment: "full" | "half";
   price: { full: number; half?: number };
+  status: string;
   listItems: { suborders: Suborder[]; customOrders: CustomOrder[] };
 }
 

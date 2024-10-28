@@ -35,6 +35,7 @@ const ToApprove = () => {
             pickupDateTime: order.pickup ? new Date(order.pickup) : null,
             payment: order.payment,
             price: order.price,
+            status: order.status,
             listItems: {
               suborders: order.orderItems.map((suborder: any) => ({
                 id: suborder.id,
