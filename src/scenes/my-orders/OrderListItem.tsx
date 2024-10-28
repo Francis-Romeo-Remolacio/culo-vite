@@ -3,10 +3,8 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
-  IconButton,
   Stack,
   Skeleton,
-  Tooltip,
   ListItemButton,
   Button,
   Box,
@@ -51,7 +49,7 @@ const OrderListItem = ({
           .then((response) => setImage(response.data.base64Picture));
       } else if (
         order.listItems.suborders.length > 0 &&
-        order.listItems.suborders[0].pastryId
+        order.listItems.suborders[0].designId
       ) {
         await api
           .get(
@@ -110,37 +108,17 @@ const OrderListItem = ({
     setIsSubmitting(true);
     try {
       if (order.payment === "full") {
-        order.listItems.suborders.forEach(async (suborder) => {
-          try {
-            await api.patch(
-              `orders/suborders/${suborder.id}/update-status`,
-              null,
-              {
-                params: { action: "done" },
-              }
-            );
-            fetchOrders();
-          } catch (error) {
-            console.error("Error updating status:", error);
-          }
-        });
-        order.listItems.customOrders.forEach(async (customOrder) => {
-          try {
-            await api.patch(
-              `orders/suborders/${customOrder.id}/update-status`,
-              null,
-              {
-                params: { action: "done" },
-              }
-            );
-            fetchOrders();
-          } catch (error) {
-            console.error("Error updating status:", error);
-          }
-        });
+        try {
+          await api.post(`orders/current-user/${order.id}/order-received`);
+          fetchOrders();
+          makeAlert("success", "Order completed.");
+        } catch (error) {
+          console.error("Error updating status:", error);
+        }
       }
     } catch (error) {
       console.error("Error updating status:", error);
+      makeAlert("error", "Failed to complete order");
     } finally {
       setIsSubmitting(false);
     }
@@ -220,7 +198,7 @@ const OrderListItem = ({
               variant="contained"
               size="large"
               onClick={handleClickReceive}
-              disabled={isSubmitting || order.status === "baking"}
+              disabled={isSubmitting || order.status !== "to-receive"}
             >
               {"Complete Order"}
             </Button>
