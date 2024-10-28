@@ -78,17 +78,19 @@ const ToPickup = () => {
       <Stack spacing={2}>
         {orderData.length > 0 ? (
           <List sx={{ width: "100%" }}>
-            {orderData.map((order) => (
-              <React.Fragment key={order.id}>
-                <OrderListItem
-                  order={order}
-                  fetchOrders={fetchOrders}
-                  handleOpen={handleOpen}
-                  status="to-receive"
-                />
-                <Divider />
-              </React.Fragment>
-            ))}
+            {orderData.map((order) =>
+              order.status === "for pick up" || order.status === "baking" ? (
+                <React.Fragment key={order.id}>
+                  <OrderListItem
+                    order={order}
+                    fetchOrders={fetchOrders}
+                    handleOpen={handleOpen}
+                    status="to-receive"
+                  />
+                  <Divider />
+                </React.Fragment>
+              ) : null
+            )}
           </List>
         ) : (
           <Box
