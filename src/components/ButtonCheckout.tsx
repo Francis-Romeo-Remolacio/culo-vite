@@ -40,6 +40,7 @@ type SuborderAccordionProps = {
 type ButtonCheckoutProps = {
   suborders: Partial<Suborder>[];
   fetchCart?: Function;
+  setChecked?: React.Dispatch<React.SetStateAction<Suborder[]>>;
   buyNow?: boolean;
   buyNowAddOns?: OrderAddOn[];
   buyNowDesignName?: string;
@@ -103,6 +104,7 @@ const SuborderAccordion = ({
 const ButtonCheckout = ({
   suborders,
   fetchCart,
+  setChecked,
   buyNow,
   buyNowAddOns,
   buyNowDesignName,
@@ -120,6 +122,7 @@ const ButtonCheckout = ({
 
   const handleClose = () => {
     setOpen(false);
+    resetForm();
   };
 
   const onSubmit = () => {
@@ -158,21 +161,30 @@ const ButtonCheckout = ({
       if (fetchCart) {
         fetchCart();
       }
+      if (setChecked) {
+        setChecked([]);
+      }
     } catch (error) {
       console.error("Error checkout:", error);
     }
   };
 
-  const { values, isSubmitting, isValid, handleChange, setFieldValue } =
-    useFormik({
-      initialValues: {
-        type: "normal",
-        pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
-        payment: "full",
-      },
-      validationSchema: orderSchema,
-      onSubmit,
-    });
+  const {
+    values,
+    isSubmitting,
+    isValid,
+    handleChange,
+    setFieldValue,
+    resetForm,
+  } = useFormik({
+    initialValues: {
+      type: "normal",
+      pickupDateTime: dayjs().add(7, "day").set("hour", 9).set("minute", 0),
+      payment: "full",
+    },
+    validationSchema: orderSchema,
+    onSubmit,
+  });
 
   const normalMinDate = dayjs().add(7, "day").set("hour", 9).set("minute", 0);
   const rushMinDate = dayjs().add(1, "day").set("hour", 9).set("minute", 0);

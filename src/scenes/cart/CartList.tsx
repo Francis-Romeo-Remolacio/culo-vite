@@ -118,7 +118,11 @@ const CartList = () => {
           <Typography variant="body1">No items in the cart.</Typography>
         </Box>
       )}
-      <ButtonCheckout suborders={checked} fetchCart={fetchCart} />
+      <ButtonCheckout
+        suborders={checked}
+        fetchCart={fetchCart}
+        setChecked={setChecked}
+      />
     </Stack>
   );
 };
