@@ -111,7 +111,7 @@ function App() {
         {isAuthenticated && role === "Artist" && (
           <ManagementAppBar>
             <Routes>
-              <Route path="/" element={<Forbidden />} />
+              <Route path="/" element={<Calendar />} />
               <Route path="/register" element={<Forbidden />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/users" element={<Forbidden />} />
