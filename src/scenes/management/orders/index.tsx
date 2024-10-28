@@ -567,7 +567,7 @@ const Orders = () => {
                 <DialogTitle>BOM Report</DialogTitle>
                 <DialogContent>
                   {breakdownData.length > 0 ? (
-                    <CostBreakdownTable data={breakdownData} />
+                    <CostBreakdownTable data={breakdownData} orderData={setSelectedOrder as ManagementOrder} />
                   ) : (
                     <Typography>No breakdown data available</Typography>
                   )}
