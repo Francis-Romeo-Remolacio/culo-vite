@@ -325,7 +325,7 @@ const Orders = () => {
               type: response.data.orderType,
               pickupDateTime: new Date(response.data.pickupDateTime),
               payment: response.data.paymentMethod,
-              price: response.data.orderTotal,
+              price: { full: response.data.orderTotal },
               listItems: {
                 suborders: response.data.orderItems.map((suborder: any) => ({
                   id: suborder.suborderId,
