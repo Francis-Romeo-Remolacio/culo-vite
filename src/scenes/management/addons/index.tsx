@@ -26,6 +26,7 @@ import {
 } from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
 import { Helmet } from "react-helmet-async";
+import { toCurrency } from "../../../utils/Formatter.ts";
 
 const AddOns = () => {
   const apiRef = useGridApiRef();
@@ -262,7 +263,7 @@ const AddOns = () => {
       type: "number",
       renderCell: (params: any) => {
         if (!params.value) return "";
-        return `₱${params.value.toFixed(2)}`;
+        return toCurrency(params.value);
       },
       editable: true,
       width: 80,

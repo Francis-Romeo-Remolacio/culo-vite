@@ -48,6 +48,7 @@ import { Tokens } from "../../../Theme.ts";
 import { useAlert } from "../../../components/CuloAlert.tsx";
 import { useFormik } from "formik";
 import { Helmet } from "react-helmet-async";
+import { toCurrency } from "../../../utils/Formatter.ts";
 
 const Inventory = () => {
   const theme = useTheme();
@@ -430,7 +431,7 @@ const Inventory = () => {
       type: "number",
       renderCell: (params: any) => {
         if (!params.value) return "";
-        return `₱${params.value.toFixed(2)}`;
+        return toCurrency(params.value);
       },
       editable: true,
       width: 80,
