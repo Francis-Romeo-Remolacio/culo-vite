@@ -38,10 +38,10 @@ const ManualSubtractionModal = ({
 }) => {
   const [formData, setFormData] = useState({
     pastryMaterialId: "",
-    variant_id: "",
+    variantId: "",
     subtraction_count: 1,
   });
-  const [ingredientsInStock, setIngredientsInStock] = useState(true);
+  const [ingredientsInStock, setIngredientsInStock] = useState(false);
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
 
@@ -56,13 +56,14 @@ const ManualSubtractionModal = ({
     }
     const parsedData = {
       pastryMaterialId: material.pastryMaterialId,
-      variant_id: material.pastryMaterialId,
+      variantId: material.pastryMaterialId,
       subtraction_count: 1,
     };
 
     setFormData(parsedData);
+    updateIngredientInStockState();
   }, [open]);
-  useEffect(() => {updateIngredientInStockState()}, [material])
+  useEffect(() => {updateIngredientInStockState()}, [material, formData])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,18 +71,17 @@ const ManualSubtractionModal = ({
       ...prevData,
       [name]: value,
     }));
-    if (name == "variant_id"){
-      updateIngredientInStockState();
-    }
+    updateIngredientInStockState();
   };
+
   const updateIngredientInStockState = () => {
     if (material !== undefined && material !== null &&
       material.subVariants !== undefined && material.subVariants !== null){
-        if (formData.pastryMaterialId == formData.variant_id){
+        if (formData.pastryMaterialId === formData.variantId){
          setIngredientsInStock(material.ingredientsInStock); 
         }
         else {
-          setIngredientsInStock(material.subVariants.find(x => x.pastryMaterialSubVariantId == formData.variant_id).ingredientsInStock)
+          setIngredientsInStock(material.subVariants.find(x => x.pastryMaterialSubVariantId == formData.variantId).ingredientsInStock)
         }
       }
   }
@@ -110,12 +110,12 @@ const ManualSubtractionModal = ({
                 sx={{ width: "100%" }}
                 margin="dense"
                 label="Size"
-                name="variant_id"
-                value={formData.variant_id}
+                name="variantId"
+                value={formData.variantId}
                 onChange={(e) => handleChange(e)}
               >
                 {material !== undefined && material !== null && 
-                <MenuItem value={formData.pastryMaterialId}>{material.mainVariantName}</MenuItem>}
+                <MenuItem value={material.pastryMaterialId}>{material.mainVariantName}</MenuItem>}
                 {
                   material !== undefined && material !== null && 
                   material.subVariants !== undefined && material.subVariants !== null && 
