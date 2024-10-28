@@ -28,6 +28,7 @@ import {
   Restore as RestoreIcon,
 } from "@mui/icons-material";
 import { ManagementSuborder } from "../../../utils/Schemas.js";
+import { Helmet } from "react-helmet-async";
 
 const Suborders = () => {
   const [rows, setRows] = useState<ManagementSuborder[]>([]);
@@ -206,6 +207,9 @@ const Suborders = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"To-Do - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="TO-DO" subtitle="Employee updates" />
       <Button
         variant="contained"

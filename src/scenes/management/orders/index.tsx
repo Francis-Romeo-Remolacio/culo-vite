@@ -45,6 +45,7 @@ import CostBreakdownTable from "./CostBreakdownTable.tsx";
 import { getImageType } from "../../../components/Base64Image.tsx";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
 import { useAlert } from "../../../components/CuloAlert.tsx";
+import { Helmet } from "react-helmet-async";
 
 type SuborderItemProps = {
   suborder: ManagementSuborder | ManagementCustomOrder;
@@ -449,6 +450,9 @@ const Orders = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Orders - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="ORDERS" subtitle="Order Management and Tracking" />
       <Button
         variant="contained"

@@ -5,6 +5,7 @@ import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import { User } from "../../../utils/Schemas.js";
+import { Helmet } from "react-helmet-async";
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -73,6 +74,9 @@ const Users = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Users - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="USERS" subtitle="Managers, Employees, and Customers" />
       <DataGridStyler>
         <DataGrid

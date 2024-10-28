@@ -19,6 +19,7 @@ import { Tokens } from "../../../Theme";
 import api from "../../../api/axiosConfig"; // Ensure this path is correct
 import { ManagementOrder } from "../../../utils/Schemas";
 import { formatDate } from "@fullcalendar/core/index.js";
+import { Helmet } from "react-helmet-async";
 
 interface OrderDetails {
   orderId: string;
@@ -202,6 +203,9 @@ const Calendar = () => {
         backdropFilter: "blur(24px)",
       }}
     >
+      <Helmet>
+        <title>{"Calendar - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="CALENDAR" subtitle="Full Calendar Interactive Page" />
 
       <Box flex="1 1 100%" ml="15px">

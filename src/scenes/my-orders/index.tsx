@@ -20,6 +20,7 @@ import { Tokens } from "../../Theme";
 import api from "../../api/axiosConfig";
 import { getImageType } from "../../components/Base64Image";
 import { ArrowDropDown } from "@mui/icons-material";
+import { Helmet } from "react-helmet-async";
 
 type SuborderItemProps = {
   suborder: Suborder | CustomOrder;
@@ -181,6 +182,9 @@ const MyOrders: React.FC = () => {
 
   return (
     <Container maxWidth="md">
+      <Helmet>
+        <title>{"My Orders - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange} aria-label="My Orders Tabs">
           <Tab label="To Approve" {...a11yProps(0)} />

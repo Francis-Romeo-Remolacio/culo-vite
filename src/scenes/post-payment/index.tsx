@@ -14,6 +14,7 @@ import { useLocation } from "react-router-dom";
 import api from "../../api/axiosConfig";
 import { Paymongo } from "../../utils/Schemas";
 import { toCurrency } from "../../utils/Formatter";
+import { Helmet } from "react-helmet-async";
 
 const PostPayment = () => {
   const location = useLocation();
@@ -107,6 +108,9 @@ const PostPayment = () => {
 
   return (
     <Stack spacing={2} alignItems="center">
+      <Helmet>
+        <title>{"Receipt - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Grid
         container
         alignItems="center"

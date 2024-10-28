@@ -47,6 +47,7 @@ import { Batch, Ingredient } from "../../../utils/Schemas.js";
 import { Tokens } from "../../../Theme.ts";
 import { useAlert } from "../../../components/CuloAlert.tsx";
 import { useFormik } from "formik";
+import { Helmet } from "react-helmet-async";
 
 const Inventory = () => {
   const theme = useTheme();
@@ -521,6 +522,9 @@ const Inventory = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Inventory - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="INVENTORY" subtitle="Manage your ingredients" />
       <Stack direction="row" spacing={2}>
         <Button

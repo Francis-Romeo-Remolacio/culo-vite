@@ -25,6 +25,7 @@ import {
   Restore,
 } from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
+import { Helmet } from "react-helmet-async";
 
 const AddOns = () => {
   const apiRef = useGridApiRef();
@@ -286,6 +287,9 @@ const AddOns = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Add-Ons - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="ADD-ONS" subtitle="Manage your add-ons" />
       <Stack direction="row" spacing={2}>
         <Button
