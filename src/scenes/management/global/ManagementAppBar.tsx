@@ -243,7 +243,7 @@ export default function ManagementAppBar({
   const fetchNotifs = async () => {
     try {
       const response = await api.get("current-user/notifications");
-      setNotifications(response.data);
+      setNotifications(response.data.notifs);
     } catch (error) {
       console.error(error);
     }
@@ -384,16 +384,16 @@ export default function ManagementAppBar({
             <Typography>Notifications</Typography>
             {notifications.length > 0
               ? notifications.map((notif: Notification) => {
-                  const labelId = `checkbox-list-label-${notif.id}`;
+                  const labelId = `checkbox-list-label-${notif.notifId}`;
                   return (
                     <ListItem
-                      key={notif.id}
+                      key={notif.notifId}
                       secondaryAction={
                         notif.isRead === false ? (
                           <IconButton
                             edge="end"
                             aria-label="mark-as-read"
-                            onClick={() => readNotif(notif.id)}
+                            onClick={() => readNotif(notif.notifId)}
                           >
                             <CheckIcon />
                           </IconButton>
@@ -405,7 +405,7 @@ export default function ManagementAppBar({
                         <ListItemText
                           id={labelId}
                           primary={notif.message}
-                          secondary={String(notif.created)}
+                          secondary={String(notif.dateCreated)}
                         />
                       </ListItemButton>
                     </ListItem>
