@@ -332,6 +332,7 @@ type PastryMaterialDialogProps = {
   setPastryMaterial: React.Dispatch<
     React.SetStateAction<Partial<PastryMaterial> | undefined>
   >;
+  fetchPastryMaterial: () => Promise<void>,
   shape: "round" | "heart" | "rectangle" | "custom";
   mode: string;
   open: boolean;
@@ -339,7 +340,9 @@ type PastryMaterialDialogProps = {
 };
 const PastryMaterialDialog = ({
   pastryMaterial,
+
   setPastryMaterial,
+  fetchPastryMaterial,
   shape,
   mode,
   open,
@@ -445,6 +448,22 @@ const PastryMaterialDialog = ({
 
   const onSubmit = async () => {
     setIsSubmitting(true);
+    
+    await savePastryMaterial();
+
+    onClose();
+    await fetchPastryMaterial();
+    setIsSubmitting(false);
+  };
+  const onSubmitWithoutClosing = async () => {
+    setIsSubmitting(true);
+    
+    await savePastryMaterial();
+    await fetchPastryMaterial();
+    setIsSubmitting(false);
+  }
+
+  const savePastryMaterial = async () => {
     //Fuck this conversion shit
     const pastryMaterialObjectForParsing: PastryMaterial = {
       designId: pastryMaterial?.designId,
@@ -486,9 +505,7 @@ const PastryMaterialDialog = ({
         );
       }
     }
-    onClose();
-    setIsSubmitting(false);
-  };
+  }
 
   // Sizing
   const handleAddTier = (variantIndex: number) => {
@@ -1681,7 +1698,9 @@ const PastryMaterialDialog = ({
           </Stack>
         </DialogContent>
         <DialogActions>
-          
+        {pastryMaterial ? (
+            <Button onClick={onSubmitWithoutClosing} sx={{display: mode === "add" ? "none" : "flex"}} disabled={isSubmitting}>{!isSubmitting ? "Save without closing" : <CircularProgress size={21} />}</Button>
+          ) : null}
           <Button onClick={onClose}>{"Cancel"}</Button>
           <Button
             variant="contained"
