@@ -21,6 +21,7 @@ import api from "../../api/axiosConfig";
 import { getImageType } from "../../components/Base64Image";
 import { ArrowDropDown } from "@mui/icons-material";
 import { Helmet } from "react-helmet-async";
+import Completed from "./Completed";
 
 type SuborderItemProps = {
   suborder: Suborder | CustomOrder;
@@ -46,6 +47,7 @@ export const SuborderItem = ({
       key !== "id" &&
       key !== "designId" &&
       key !== "designName" &&
+      key !== "status" &&
       key !== "addOns"
   );
 
@@ -190,6 +192,7 @@ const MyOrders: React.FC = () => {
           <Tab label="To Approve" {...a11yProps(0)} />
           <Tab label="To Pay" {...a11yProps(1)} />
           <Tab label="To Pickup" {...a11yProps(2)} />
+          <Tab label="Completed" {...a11yProps(3)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
@@ -200,6 +203,9 @@ const MyOrders: React.FC = () => {
       </TabPanel>
       <TabPanel value={value} index={2}>
         <ToPickup />
+      </TabPanel>
+      <TabPanel value={value} index={3}>
+        <Completed />
       </TabPanel>
     </Container>
   );

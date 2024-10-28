@@ -20,7 +20,7 @@ type OrderListItemProps = {
   order: Order;
   fetchOrders: () => Promise<void>;
   handleOpen: (order: Order) => void;
-  status: "to-approve" | "to-pay" | "to-receive";
+  status: "to-approve" | "to-pay" | "to-receive" | "completed";
 };
 
 const OrderListItem = ({
