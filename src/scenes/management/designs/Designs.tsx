@@ -91,11 +91,6 @@ const Designs = () => {
       })),
       shape: parseShape(design.designShapes),
       customShape: parseCustomShape(design.designShapes),
-
-      // shapes: design.designShapes.map((shape: any) => ({
-      //   id: shape.designShapeId,
-      //   name: shape.shapeName,
-      // })),
     }));
   }
 
@@ -114,16 +109,6 @@ const Designs = () => {
       }));
       setTags(parsedTags);
     });
-  };
-  const handleDelete = async () => {
-    try {
-      const response = await api.delete(
-        `/designs/${encodeURIComponent(designData.designId)}`
-      );
-      onclose();
-    } catch {
-      console.error("Failed delete design: " + designData.designId);
-    }
   };
 
   useEffect(() => {
