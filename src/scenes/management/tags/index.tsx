@@ -15,6 +15,7 @@ import UpdateTagModal from "./updateModal";
 import BulkAddDialog from "./BulkAddDialog";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import { Tag } from "../../../utils/Schemas.js";
+import { Helmet } from "react-helmet-async";
 
 const Tags = () => {
   const [rows, setRows] = useState([]);
@@ -118,6 +119,9 @@ const Tags = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Tags - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="TAGS" subtitle="Tags for categorizing designs" />
       <Stack direction="row" spacing={2}>
         <Button

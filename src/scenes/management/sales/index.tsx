@@ -1,80 +1,63 @@
-import React, { useState, useEffect } from "react";
-import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { Tokens } from "../../../Theme";
+import { useState, useEffect } from "react";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import api from "../../../api/axiosConfig";
 import Header from "../../../components/Header";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
+import { Helmet } from "react-helmet-async";
+import { toCurrency } from "../../../utils/Formatter.ts";
 const columns = [
-  { field: "name", headerName: "Product", flex: 1 },
-  { field: "number", headerName: "Contact", flex: 1 },
-  { field: "email", headerName: "Email", flex: 1 },
-  { field: "price", headerName: "Cost", flex: 0.5 },
-  { field: "total", headerName: "Total", flex: 0.5 },
-  { field: "date", headerName: "Date", flex: 1 },
+  { field: "name", headerName: "Product", width: 200 },
+  { field: "number", headerName: "Contact" },
+  { field: "email", headerName: "Email", width: 200 },
+  {
+    field: "price",
+    headerName: "Cost",
+    renderCell: (params: any) => {
+      if (!params.value) return "";
+      return toCurrency(params.value);
+    },
+  },
+  {
+    field: "total",
+    headerName: "Total",
+    renderCell: (params: any) => {
+      if (!params.value) return "";
+      return `₱${params.value.toFixed(2)}`;
+    },
+  },
+  { field: "date", headerName: "Date", width: 140 },
 ];
 
 const Sales = () => {
-  const [salesList, setSalesList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [rows, setRows] = useState([]);
+
+  const fetchSalesData = async () => {
+    try {
+      const response = await api.get("sales");
+      setRows(response.data);
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchSalesData = async () => {
-      try {
-        const response = await api.get("/Sales"); // Adjust endpoint as per your backend API
-        setSalesList(response.data);
-      } catch (error) {
-        console.error("Error fetching sales data:", error);
-        setError("Failed to fetch sales data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSalesData();
   }, []);
 
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box p={2}>
+    <>
+      <Helmet>
+        <title>{"Sales - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="SALES" subtitle="Detailed Sales Information" />
       <DataGridStyler>
         <DataGrid
-          rows={salesList}
+          rows={rows}
           columns={columns}
-          disableSelectionOnClick
-          pageSize={10}
+          slots={{ toolbar: GridToolbar }}
         />
       </DataGridStyler>
-    </Box>
+    </>
   );
 };
 

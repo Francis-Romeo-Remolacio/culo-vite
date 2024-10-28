@@ -15,6 +15,7 @@ import { registerAdminSchema } from "../../../utils/Validation.js";
 import { useFormik } from "formik";
 import { useAlert } from "../../../components/CuloAlert.js";
 import Header from "../../../components/Header.js";
+import { Helmet } from "react-helmet-async";
 
 const Form = () => {
   const { makeAlert } = useAlert();
@@ -56,6 +57,9 @@ const Form = () => {
 
   return (
     <Container maxWidth={"sm"}>
+      <Helmet>
+        <title>{"Manual Registration - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="REGISTER USER" />
       <form onSubmit={handleSubmit}>
         <Stack spacing={2} sx={{ mt: 2 }}>

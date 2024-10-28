@@ -25,6 +25,8 @@ import {
   Restore,
 } from "@mui/icons-material";
 import { ManagementAddOn } from "../../../utils/Schemas.js";
+import { Helmet } from "react-helmet-async";
+import { toCurrency } from "../../../utils/Formatter.ts";
 
 const AddOns = () => {
   const apiRef = useGridApiRef();
@@ -261,7 +263,7 @@ const AddOns = () => {
       type: "number",
       renderCell: (params: any) => {
         if (!params.value) return "";
-        return `₱${params.value.toFixed(2)}`;
+        return toCurrency(params.value);
       },
       editable: true,
       width: 80,
@@ -286,6 +288,9 @@ const AddOns = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Add-Ons - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="ADD-ONS" subtitle="Manage your add-ons" />
       <Stack direction="row" spacing={2}>
         <Button

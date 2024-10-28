@@ -13,16 +13,16 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api/axiosConfig";
-import { Order, ToPayOrder } from "../../utils/Schemas";
+import { Order } from "../../utils/Schemas";
 import { getImageType } from "../../components/Base64Image";
 import { useNavigate } from "react-router-dom";
 import { useAlert } from "../../components/CuloAlert";
 import { toCurrency } from "../../utils/Formatter";
 
 type OrderListItemProps = {
-  order: ToPayOrder;
+  order: Order;
   fetchOrders: () => Promise<void>;
-  handleOpen: (order: Order | ToPayOrder) => void;
+  handleOpen: (order: Order) => void;
   status: "to-approve" | "to-pay" | "to-receive";
 };
 
@@ -54,7 +54,7 @@ const OrderListItem = ({
         );
       } else if (
         order.listItems.suborders.length > 0 &&
-        order.listItems.suborders[0].pastryMaterialId
+        order.listItems.suborders[0].pastryId
       ) {
         setImage(
           await api

@@ -142,19 +142,19 @@ export interface Order {
   type: "normal" | "rush";
   pickupDateTime: Dayjs | Date;
   payment: "full" | "half";
-  price: number;
+  price: { full: number; half?: number };
   listItems: { suborders: Suborder[]; customOrders: CustomOrder[] };
 }
 
-export interface ToPayOrder extends Omit<Order, "price"> {
-  price: { full: number; half: number };
-}
-
-export interface ManagementOrder extends Order {
+export interface ManagementOrder extends Omit<Order, "listItems"> {
   customerId: string;
   customerName: string;
   status: string;
   isActive: boolean;
+  listItems: {
+    suborders: ManagementSuborder[];
+    customOrders: ManagementCustomOrder[];
+  };
 }
 
 export interface Suborder {
@@ -162,7 +162,7 @@ export interface Suborder {
   orderId?: string;
   designId: string;
   designName?: string;
-  pastryMaterialId: string;
+  pastryId: string;
   description: string;
   size: string;
   color: string;
@@ -181,8 +181,17 @@ export interface ManagementSuborder extends Required<Suborder> {
   employeeId: string;
   employeeName: string;
   customerName: string;
-  designName: string;
-  pastryMaterialId: string;
+  created: Date;
+  lastModified: Date;
+  lastModifiedBy: string;
+  isActive: boolean;
+}
+
+export interface ManagementCustomOrder extends Required<CustomOrder> {
+  customerId: string;
+  employeeId: string;
+  employeeName: string;
+  customerName: string;
   created: Date;
   lastModified: Date;
   lastModifiedBy: string;

@@ -35,24 +35,31 @@ import {
   ManagementOrder,
   Suborder,
   CustomOrder,
-  OrderAddOn,
   Breakdown,
+  ManagementSuborder,
+  ManagementCustomOrder,
 } from "../../../utils/Schemas.ts";
 import { toCurrency } from "../../../utils/Formatter.ts";
 import { Tokens } from "../../../Theme.ts";
 import CostBreakdownTable from "./CostBreakdownTable.tsx";
 import { getImageType } from "../../../components/Base64Image.tsx";
 import AddAlertIcon from "@mui/icons-material/AddAlert";
+import { useAlert } from "../../../components/CuloAlert.tsx";
+import { Helmet } from "react-helmet-async";
 
 type SuborderItemProps = {
-  suborder: Suborder;
+  suborder: ManagementSuborder | ManagementCustomOrder;
   index: number;
-  handleAssignClickOpen?: (item: Suborder | CustomOrder) => void;
-  handleOpenUpdateModal?: (item: Suborder | CustomOrder) => void;
+  handleAssignClickOpen?: (
+    item: ManagementSuborder | ManagementCustomOrder
+  ) => void;
+  handleOpenUpdateModal?: (
+    item: ManagementSuborder | ManagementCustomOrder
+  ) => void;
+  custom?: boolean;
 };
 
-
-export const SuborderItem = ({
+const SuborderItem = ({
   suborder,
   index,
   handleAssignClickOpen,
@@ -60,6 +67,12 @@ export const SuborderItem = ({
 }: SuborderItemProps) => {
   const theme = useTheme();
   const colors = Tokens(theme.palette.mode);
+
+  const isCustom = (
+    item: ManagementSuborder | ManagementCustomOrder
+  ): item is ManagementCustomOrder => {
+    return !!item;
+  };
 
   // Dynamically get key-value pairs except 'id'
   const suborderDetails = Object.entries(suborder).filter(
@@ -99,7 +112,11 @@ export const SuborderItem = ({
           alignItems="center"
           justifyContent="space-between"
         >
-          <Typography>{`Suborder ID: ${suborder.id}`}</Typography>
+          <Typography>
+            {isCustom(suborder)
+              ? `Custom Order ID: ${suborder.id}`
+              : `Suborder ID: ${suborder.id}`}
+          </Typography>
           {handleAssignClickOpen ? (
             <Button
               size="small"
@@ -146,14 +163,15 @@ export const SuborderItem = ({
 };
 
 const Orders = () => {
+  const { makeAlert } = useAlert();
+
   const [orderDetails, setOrderDetails] = useState<Omit<
     ManagementOrder,
     "customerId" | "customerName" | "isActive"
   > | null>(null);
   const [rows, setRows] = useState<Partial<ManagementOrder>[]>([]);
-  const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [employeeUsername, setEmployeeUsername] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<ManagementOrder | null>(
     null
@@ -166,20 +184,22 @@ const Orders = () => {
   const [bomDialogOpen, setBomDialogOpen] = useState(false);
   const [breakdownData, setBreakdownData] = useState<Breakdown[]>([]);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [selectedSuborder, setSelectedSuborder] = useState<Suborder | CustomOrder | null>(null);
+  const [selectedSuborder, setSelectedSuborder] = useState<
+    Suborder | CustomOrder | null
+  >(null);
   const [designName, setDesignName] = useState("");
   const [price, setPrice] = useState(0);
-  
+
   const handleOpenUpdateModal = (item: Suborder | CustomOrder) => {
     setSelectedSuborder(item); // Set the selected suborder
-    setOpenUpdateModal(true);  // Open the modal
+    setOpenUpdateModal(true); // Open the modal
   };
 
   // Function to close the modal
   const handleCloseUpdateModal = () => {
     setOpenUpdateModal(false);
     setSelectedSuborder(null); // Reset the selected suborder
-  };  
+  };
 
   interface Employee {
     userId: string;
@@ -197,11 +217,14 @@ const Orders = () => {
   };
 
   const handleClose = () => {
-    setOpen(false);
     setOrderDetails(null);
     setViewOrderOpen(false);
     setSelectedOrder(null);
+  };
+
+  const handleCloseAssign = () => {
     setAssignOpen(false);
+    setSelectedEmployee("");
   };
 
   const AssignClose = () => {
@@ -247,36 +270,35 @@ const Orders = () => {
   };
 
   // Function to handle form submission
-const handleUpdateOrder = async () => {
-  // Ensure required fields are present
-  if (!selectedSuborder || !designName || !price) return;
+  const handleUpdateOrder = async () => {
+    // Ensure required fields are present
+    if (!selectedSuborder || !designName || !price) return;
 
-  try {
-    // Prepare the request body
-    const requestBody = {
-      designName,
-      price,
-    };
+    try {
+      // Prepare the request body
+      const requestBody = {
+        designName,
+        price,
+      };
 
-    // API call to update the order with the selected suborder ID
-    const response = await api.patch(
-      `orders/custom-orders/${selectedSuborder.id}/set-price`, // Ensure the API endpoint is correct
-      requestBody
-    );
+      // API call to update the order with the selected suborder ID
+      await api.patch(
+        `orders/custom-orders/${selectedSuborder.id}/set-price`, // Ensure the API endpoint is correct
+        requestBody
+      );
+      makeAlert("success", "Order updated successfully.");
 
-    console.log("Order updated successfully:", response.data);
+      // Close the update modal after a successful submission
+      handleCloseUpdateModal();
 
-    // Close the update modal after a successful submission
-    handleCloseUpdateModal();
-
-    // Refresh the data after the update
-    fetchData();
-  } catch (error) {
-    // Log errors properly
-    console.error("Error updating order:", error);
-  }
-};
-
+      // Refresh the data after the update
+      fetchData();
+    } catch (error) {
+      // Log errors properly
+      console.error("Error updating order:", error);
+      makeAlert("error", "Order update failed.");
+    }
+  };
 
   const fetchBreakdownData = async () => {
     if (orderDetails) {
@@ -315,7 +337,7 @@ const handleUpdateOrder = async () => {
                   color: suborder.color,
                   flavor: suborder.flavor,
                   quantity: suborder.quantity,
-                  price: suborder.price,
+                  price: { full: suborder.price },
                 })),
                 customOrders: response.data.customItems,
               },
@@ -348,43 +370,42 @@ const handleUpdateOrder = async () => {
   }, []);
 
   const handleAssignEmployee = async () => {
-    if (!selectedOrderItem || !employeeUsername || !orderDetails) return;
+    if (!selectedOrderItem || !selectedEmployee || !orderDetails) return;
 
     try {
       const requestBody = {
-        employeeId: employeeUsername,
+        employeeId: selectedEmployee,
       };
 
-      const response = await api.post(
+      await api.post(
         `orders/suborders/${selectedOrderItem.id}/assign`,
         requestBody
       );
 
-      console.log("Employee assigned successfully:", response.data);
-      AssignClose();
+      makeAlert("success", "Task assigned successfully.");
+      handleCloseAssign();
       fetchData();
     } catch (error) {
       console.error("Error assigning employee:", error);
+      makeAlert("error", "Task assignment failed.");
     }
   };
 
   const handleApproveOrder = async (id: string) => {
     try {
-      const response = await api.post(`orders/${id}/approve-order`);
-      console.log("Order approved successfully:", response.data);
-      fetchData();
+      await api.post(`orders/${id}/approve-order`);
+      makeAlert("success", "Order approved.");
     } catch (error) {
       console.error("Error approving order:", error);
+      makeAlert("error", "Order approval failed.");
     }
   };
 
   const handleHalfPaidSimulation = async (id: string) => {
     try {
-      const response = await api.post(
-        `current-user/${id}/half-paid/simulation`
-      );
-      console.log("Half-paid simulation successful:", response.data);
-      fetchData();
+      await api.post(`current-user/${id}/half-paid/simulation`);
+      makeAlert("success", "Half-paid simulation successful.");
+      // Optionally, you can add logic to refresh the data or show a success message
     } catch (error) {
       console.error("Error during half-paid simulation:", error);
     }
@@ -433,6 +454,9 @@ const handleUpdateOrder = async () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Orders - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="ORDERS" subtitle="Order Management and Tracking" />
       <Button
         variant="contained"
@@ -482,7 +506,7 @@ const handleUpdateOrder = async () => {
               onChange={(e) => setPrice(Number(e.target.value))}
               variant="outlined"
               inputProps={{
-                min: 1
+                min: 1,
               }}
             />
           </FormControl>
@@ -497,7 +521,6 @@ const handleUpdateOrder = async () => {
           </Button>
         </DialogActions>
       </Dialog>
-
 
       <Dialog open={viewOrderOpen} onClose={handleClose} maxWidth="md">
         <DialogTitle>Order Details</DialogTitle>
@@ -515,7 +538,7 @@ const handleUpdateOrder = async () => {
                 Pickup: {String(orderDetails.pickupDateTime)}
               </Typography>
               <Typography variant="h6">
-                Price: {toCurrency(orderDetails.price)}
+                Price: {toCurrency(orderDetails.price.full)}
               </Typography>
 
               <Typography variant="h6">Order Items:</Typography>
@@ -564,16 +587,16 @@ const handleUpdateOrder = async () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={assignOpen} onClose={handleClose}>
+      <Dialog open={assignOpen} onClose={handleCloseAssign}>
         <DialogTitle>Assign Employee</DialogTitle>
         <DialogContent>
           {selectedOrder && (
             <FormControl fullWidth variant="standard" margin="dense">
-              <InputLabel>Employee Username</InputLabel>
+              <InputLabel>Employee</InputLabel>
               <Select
-                value={employeeUsername}
-                onChange={(e) => setEmployeeUsername(e.target.value)}
-                label="Employee Username"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+                label="Employee"
               >
                 {employees.map((employee) => (
                   <MenuItem key={employee.userId} value={employee.userId}>
@@ -586,7 +609,7 @@ const handleUpdateOrder = async () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAssignEmployee} disabled={!employeeUsername}>
+          <Button onClick={handleAssignEmployee} disabled={!selectedEmployee}>
             Assign
           </Button>
         </DialogActions>

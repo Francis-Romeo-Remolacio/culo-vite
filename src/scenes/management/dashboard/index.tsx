@@ -27,6 +27,7 @@ import {
 } from "../../../utils/Schemas";
 import * as TimePeriods from "./../../../utils/TimePeriods.ts";
 import { ExpandMore } from "@mui/icons-material";
+import { Helmet } from "react-helmet-async";
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -441,6 +442,9 @@ const Dashboard = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Dashboard - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       {/* HEADER */}
       <Box
         sx={{

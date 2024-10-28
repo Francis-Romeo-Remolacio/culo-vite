@@ -7,6 +7,7 @@ import { AxiosResponse } from "axios";
 import DesignCard from "../../../components/DesignCard.tsx";
 import DesignDialog from "./DesignDialog.tsx";
 import { Add, ShapeLine } from "@mui/icons-material";
+import { Helmet } from "react-helmet-async";
 
 const Designs = () => {
   const [designs, setDesigns] = useState<Design[]>([]);
@@ -132,6 +133,9 @@ const Designs = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{"Designs - The Pink Butter Cake Studio"}</title>
+      </Helmet>
       <Header title="DESIGNS" subtitle="Gallery of all designs" />
       <Grid
         container

@@ -47,6 +47,7 @@ import ButtonCheckout from "../../components/ButtonCheckout.tsx";
 import { useAlert } from "../../components/CuloAlert.tsx";
 import { MuiColorInput } from "mui-color-input";
 import { useAuth } from "../../components/AuthContext.tsx";
+import { toCurrency } from "../../utils/Formatter.ts";
 
 const ViewDesign = () => {
   const { makeAlert } = useAlert();
@@ -644,10 +645,7 @@ const ViewDesign = () => {
                               tabIndex={-1}
                               disableRipple
                             />
-                            <ListItemText
-                              primary={addOn.name}
-                              secondary={`₱${fetchedAddOn?.price ?? 0}`} // Use price from fetchedAddOns or default to 0
-                            />
+                            <ListItemText primary={addOn.name} />
                             <NumberCounter
                               value={
                                 selectedAddOns.find(
@@ -724,11 +722,11 @@ const ViewDesign = () => {
                                 (item) => item.id === addOn.id
                               )?.name
                             }
-                            secondary={`₱${
+                            secondary={toCurrency(
                               availableAddOns.find(
                                 (item) => item.id === addOn.id
-                              )?.price
-                            }`}
+                              )?.price || 0
+                            )}
                           />
                         </ListItem>
                       ))}
