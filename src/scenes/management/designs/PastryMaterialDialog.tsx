@@ -1681,9 +1681,7 @@ const PastryMaterialDialog = ({
           </Stack>
         </DialogContent>
         <DialogActions>
-          {pastryMaterial ? (
-            <Button onClick={onClose}>{"Save without Closing"}</Button>
-          ) : null}
+          
           <Button onClick={onClose}>{"Cancel"}</Button>
           <Button
             variant="contained"
