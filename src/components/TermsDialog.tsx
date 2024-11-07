@@ -95,8 +95,7 @@ const TermsDialog = ({
         </Typography>
         <Typography variant="body1">
           {
-            "We do not offer discounts or refunds if the exact shade of a color or design is not achieved or if variation occurs. In the event that a major variation needs to be made, Cake Studio
-             will communicate this to the customer and seek re-design approval, 5 days before the event."
+            "We do not offer discounts or refunds if the exact shade of a color or design is not achieved or if variation occurs. In the event that a major variation needs to be made, Cake Studio will communicate this to the customer and seek re-design approval, 5 days before the event."
           }
         </Typography>
         <FormControlLabel
