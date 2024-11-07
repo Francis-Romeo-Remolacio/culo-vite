@@ -207,9 +207,7 @@ const Landing = () => {
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Facebook: "}
-                        <Link target="_blank" rel="noopener noreferrer">
-                          {"Cake Studio"}
-                        </Link>
+                        <Link target="_blank">{"Cake Studio"}</Link>
                       </Typography>
                     </Grid>
                     <Grid size={4}>
