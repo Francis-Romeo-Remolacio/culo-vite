@@ -109,7 +109,7 @@ const Register = () => {
               />
             )}
             <img
-              src="logo192.png"
+              src="logo.png"
               alt="Logo"
               style={{
                 width: "150px",

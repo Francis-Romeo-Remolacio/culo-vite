@@ -384,16 +384,16 @@ export default function ManagementAppBar({
             <Typography>Notifications</Typography>
             {notifications.length > 0
               ? notifications.map((notif: Notification) => {
-                  const labelId = `checkbox-list-label-${notif.notifId}`;
+                  const labelId = `checkbox-list-label-${notif.id}`;
                   return (
                     <ListItem
-                      key={notif.notifId}
+                      key={notif.id}
                       secondaryAction={
                         notif.isRead === false ? (
                           <IconButton
                             edge="end"
                             aria-label="mark-as-read"
-                            onClick={() => readNotif(notif.notifId)}
+                            onClick={() => readNotif(notif.id)}
                           >
                             <CheckIcon />
                           </IconButton>

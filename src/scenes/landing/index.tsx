@@ -33,7 +33,6 @@ const Landing = () => {
           top: 0,
           zIndex: -1,
           backgroundColor: colors.primary[100],
-          background: `url(banner.png) center/cover no-repeat`,
           filter: "opacity(50%)",
           maskImage:
             "linear-gradient(to bottom, rgba(0,0,0,1) 0%,  rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%)",
@@ -122,7 +121,7 @@ const Landing = () => {
                       <iframe
                         width="100%"
                         height="500"
-                        src="https://www.youtube.com/embed/-diIiPnmN58"
+                        src="https://www.youtube.com/embed/C0DPdy98e4c"
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -168,9 +167,7 @@ const Landing = () => {
                       }
                     </Typography>
                     <Typography variant="h5">
-                      {
-                        "We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon City, Philippines."
-                      }
+                      {"We are located at ADDRESS."}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -204,31 +201,21 @@ const Landing = () => {
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Viber: "}
-                        <Link href="viber://chat/?number=%2B639682281963">
-                          {"+63 968 228 1963"}
-                        </Link>
+                        <Link>{"+63 968 228 1963"}</Link>
                       </Typography>
                     </Grid>
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Facebook: "}
-                        <Link
-                          href="https://www.facebook.com/TPBcakestudio"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {"TBP Cake Studio"}
+                        <Link target="_blank" rel="noopener noreferrer">
+                          {"Cake Studio"}
                         </Link>
                       </Typography>
                     </Grid>
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Instagram: "}
-                        <Link
-                          href="https://www.instagram.com/thepinkbutter?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <Link target="_blank" rel="noopener noreferrer">
                           {"@thepinkbutter"}
                         </Link>
                       </Typography>
