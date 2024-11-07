@@ -216,7 +216,7 @@ const Landing = () => {
                       <Typography variant="h4">
                         {"Instagram: "}
                         <Link target="_blank" rel="noopener noreferrer">
-                          {"@thepinkbutter"}
+                          {"@cakestudio"}
                         </Link>
                       </Typography>
                     </Grid>
