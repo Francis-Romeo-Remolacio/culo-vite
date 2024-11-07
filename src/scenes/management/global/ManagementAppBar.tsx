@@ -312,7 +312,7 @@ export default function ManagementAppBar({
               noWrap
               sx={{ flexGrow: 1, color: colors.background }}
             >
-              The Pink Butter Cake Studio Management - CULO
+              Cake Studio Management - CULO
             </Typography>
             <Box>
               <IconButton

@@ -75,7 +75,7 @@ const Users = () => {
   return (
     <>
       <Helmet>
-        <title>{"Users - The Pink Butter Cake Studio"}</title>
+        <title>{"Users - Cake Studio"}</title>
       </Helmet>
       <Header title="USERS" subtitle="Managers, Employees, and Customers" />
       <DataGridStyler>

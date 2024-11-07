@@ -325,7 +325,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     color: colors.background,
                   }}
                 >
-                  The Pink Butter Cake Studio
+                  Cake Studio
                 </Typography>
               </Stack>
             </Link>

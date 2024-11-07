@@ -153,7 +153,8 @@ const SuborderItem = ({
         {suborderDetails.map(([key, value]) => (
           <Box key={key} sx={{ marginBottom: 1 }}>
             <Typography variant="body1">
-              <strong>{key}:</strong> {key === "price" ? String(value.full) : String(value)}
+              <strong>{key}:</strong>{" "}
+              {key === "price" ? String(value.full) : String(value)}
             </Typography>
           </Box>
         ))}
@@ -455,7 +456,7 @@ const Orders = () => {
   return (
     <>
       <Helmet>
-        <title>{"Orders - The Pink Butter Cake Studio"}</title>
+        <title>{"Orders - Cake Studio"}</title>
       </Helmet>
       <Header title="ORDERS" subtitle="Order Management and Tracking" />
       <Button
@@ -567,7 +568,10 @@ const Orders = () => {
                 <DialogTitle>BOM Report</DialogTitle>
                 <DialogContent>
                   {breakdownData.length > 0 ? (
-                    <CostBreakdownTable data={breakdownData} orderData={setSelectedOrder as ManagementOrder} />
+                    <CostBreakdownTable
+                      data={breakdownData}
+                      orderData={setSelectedOrder as ManagementOrder}
+                    />
                   ) : (
                     <Typography>No breakdown data available</Typography>
                   )}

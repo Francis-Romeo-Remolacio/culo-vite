@@ -185,7 +185,7 @@ const MyOrders: React.FC = () => {
   return (
     <Container maxWidth="md">
       <Helmet>
-        <title>{"My Orders - The Pink Butter Cake Studio"}</title>
+        <title>{"My Orders - Cake Studio"}</title>
       </Helmet>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange} aria-label="My Orders Tabs">

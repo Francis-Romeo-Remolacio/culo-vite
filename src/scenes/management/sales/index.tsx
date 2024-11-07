@@ -47,7 +47,7 @@ const Sales = () => {
   return (
     <>
       <Helmet>
-        <title>{"Sales - The Pink Butter Cake Studio"}</title>
+        <title>{"Sales - Cake Studio"}</title>
       </Helmet>
       <Header title="SALES" subtitle="Detailed Sales Information" />
       <DataGridStyler>

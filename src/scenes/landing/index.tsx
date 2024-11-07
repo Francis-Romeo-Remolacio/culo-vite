@@ -41,12 +41,12 @@ const Landing = () => {
       />
       <Stack justifyContent="center" spacing={4} sx={{ zIndex: 25 }}>
         <Helmet>
-          <title>{"The Pink Butter Cake Studio"}</title>
+          <title>{"Cake Studio"}</title>
         </Helmet>
         {/* Section: Hero */}
         <Stack alignItems="center" justifyContent="center" minHeight={400}>
           <Typography variant="h1" gutterBottom>
-            {"The Pink Butter Cake Studio"}
+            {"Cake Studio"}
           </Typography>
           <Typography variant="h3" gutterBottom>
             {"Delicious Artistry in Every Bite"}
@@ -160,11 +160,11 @@ const Landing = () => {
                   {/* Text Column */}
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="h1" gutterBottom>
-                      {"About The Pink Butter Cake Studio"}
+                      {"About Cake Studio"}
                     </Typography>
                     <Typography variant="h5">
                       {
-                        "Established in 2017, The Pink Butter Cake Studio has been crafting stunning and delicious cakes for all occasions."
+                        "Established in YEAR, Cake Studio has been crafting stunning and delicious cakes for all occasions."
                       }
                     </Typography>
                     <Typography variant="h5">
@@ -250,7 +250,7 @@ const Landing = () => {
               align="center"
               sx={{ mt: 4 }}
             >
-              {`© ${new Date().getFullYear()} The Pink Butter Cake Studio. All rights reserved.`}
+              {`© ${new Date().getFullYear()} Cake Studio. All rights reserved.`}
             </Typography>
           </Grid>
         </Grid>

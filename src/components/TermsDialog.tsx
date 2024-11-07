@@ -70,7 +70,7 @@ const TermsDialog = ({
         </Typography>
         <Typography variant="body1">
           {
-            "The Client must disclose any adverse road hazards and/or obstacles that may hamper the delivery and quality of finished products. In the case of an unavoidable occurence, such as an act of God, a car accident, poor road conditions, or dropping of cake during delivery - out of The Pink Butter Cake Studio cannot be held liable for more than the price of the cake described in this order."
+            "The Client must disclose any adverse road hazards and/or obstacles that may hamper the delivery and quality of finished products. In the case of an unavoidable occurence, such as an act of God, a car accident, poor road conditions, or dropping of cake during delivery - out of Cake Studio cannot be held liable for more than the price of the cake described in this order."
           }
         </Typography>
         <Typography variant="body1">
@@ -84,7 +84,7 @@ const TermsDialog = ({
         <Typography variant="h5">{"OUR GUARANTEE"}</Typography>
         <Typography variant="body1">
           {
-            "The Pink Butter Cake Studio will provide a professionally decorated dessert in a timely manner as specified in the order form. We are honored that you have chosen us for your special celebration. We guarantee that the flavors, size and general design elements will be met as outlined. If you are not satisfied with our product(s) please let us know at the time you receive your order."
+            "Cake Studio will provide a professionally decorated dessert in a timely manner as specified in the order form. We are honored that you have chosen us for your special celebration. We guarantee that the flavors, size and general design elements will be met as outlined. If you are not satisfied with our product(s) please let us know at the time you receive your order."
           }
         </Typography>
         <Typography variant="h5">{"DESIGN VARIATIONS"}</Typography>
@@ -95,7 +95,8 @@ const TermsDialog = ({
         </Typography>
         <Typography variant="body1">
           {
-            "We do not offer discounts or refunds if the exact shade of a color or design is not achieved or if variation occurs. In the event that a major variation needs to be made, The Pink Butter will communicate this to the customer and seek re-design approval, 5 days before the event."
+            "We do not offer discounts or refunds if the exact shade of a color or design is not achieved or if variation occurs. In the event that a major variation needs to be made, Cake Studio
+             will communicate this to the customer and seek re-design approval, 5 days before the event."
           }
         </Typography>
         <FormControlLabel

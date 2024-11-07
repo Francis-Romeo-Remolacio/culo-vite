@@ -83,7 +83,7 @@ const Register = () => {
       }}
     >
       <Helmet>
-        <title>{"Register - The Pink Butter Cake Studio"}</title>
+        <title>{"Register - Cake Studio"}</title>
       </Helmet>
       <Box position="absolute" left={0}>
         <ButtonBack />
@@ -95,7 +95,7 @@ const Register = () => {
         <Stack spacing={2}>
           <Header
             title="Register"
-            subtitle="Create an account at The Pink Butter Cake Studio"
+            subtitle="Create an account at Cake Studio"
           />
 
           {/* Logo */}

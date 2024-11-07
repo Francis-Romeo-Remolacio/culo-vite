@@ -6,7 +6,7 @@ const Cart = () => {
   return (
     <>
       <Helmet>
-        <title>Cart - The Pink Butter Cake Studio</title>
+        <title>Cart - Cake Studio</title>
       </Helmet>
 
       <Container maxWidth="md">
