@@ -222,8 +222,8 @@ export interface Paymongo {
 }
 
 export interface Notification {
-  notifId: string;
-  dateCreated: Date;
+  id: string;
+  created: Date;
   message: string;
   isRead: boolean;
 }

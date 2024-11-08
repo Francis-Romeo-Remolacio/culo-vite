@@ -317,7 +317,7 @@ export default function ManagementAppBar({
             <Box>
               <IconButton
                 onClick={colorMode.toggleColorMode}
-                style={{ backgroundColor: colors.panel }}
+                sx={{ backgroundColor: colors.panel }}
               >
                 {theme.palette.mode === "dark" ? (
                   <DarkModeOutlinedIcon />
@@ -327,8 +327,7 @@ export default function ManagementAppBar({
               </IconButton>
               <IconButton
                 onClick={handleClick}
-                color="inherit"
-                style={{ backgroundColor: colors.panel }}
+                sx={{ backgroundColor: colors.panel }}
               >
                 <Badge badgeContent={notifications.length} color="default">
                   <NotificationsOutlinedIcon />
@@ -336,7 +335,7 @@ export default function ManagementAppBar({
               </IconButton>
               <IconButton
                 onClick={handleProfileClick}
-                style={{ backgroundColor: colors.panel }}
+                sx={{ backgroundColor: colors.panel }}
               >
                 <PersonOutlinedIcon />
               </IconButton>
@@ -405,7 +404,7 @@ export default function ManagementAppBar({
                         <ListItemText
                           id={labelId}
                           primary={notif.message}
-                          secondary={String(notif.dateCreated)}
+                          secondary={String(notif.created)}
                         />
                       </ListItemButton>
                     </ListItem>
