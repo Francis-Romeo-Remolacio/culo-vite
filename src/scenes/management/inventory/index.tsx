@@ -16,6 +16,8 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import dayjs from "dayjs";
+import { renderTimeViewClock } from "@mui/x-date-pickers";
 import {
   DataGrid,
   GridActionsCellItem,
@@ -30,6 +32,7 @@ import {
   useGridApiRef,
 } from "@mui/x-data-grid";
 import Header from "../../../components/Header";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import api from "../../../api/axiosConfig";
 import DataGridStyler from "./../../../components/DataGridStyler.tsx";
 import {
@@ -130,6 +133,7 @@ const Inventory = () => {
         itemId: batch.itemId,
         price: batch.price,
         quantity: batch.quantity,
+        expiration: batch.expiration,
         created: batch.created,
         lastModified: batch.lastModified,
         lastModifiedBy: batch.lastModifiedBy,
@@ -296,6 +300,7 @@ const Inventory = () => {
       api.post(`ingredients/${values.id}/batches`, {
         price: values.price,
         quantity: values.quantity,
+        expiration: values.expiration
       });
       makeAlert("success", "Successfully added batch");
     } catch (error) {
@@ -662,6 +667,21 @@ const Inventory = () => {
                 }}
                 size="small"
               />
+              <DateTimePicker
+                label="Pickup Date & Time"
+                name="pickupDateTime"
+                value={values.expiration}
+                minTime={dayjs("2018-01-01T09:00")}
+                maxTime={dayjs("2018-01-01T16:00")}
+                onChange={(date) => handleChange("pickupDateTime", date)}
+                viewRenderers={{
+                  hours: renderTimeViewClock,
+                  minutes: renderTimeViewClock,
+                  seconds: renderTimeViewClock,
+                }}
+                ampm={false}
+              />
+
             </Stack>
           </DialogContent>
           <DialogActions>
