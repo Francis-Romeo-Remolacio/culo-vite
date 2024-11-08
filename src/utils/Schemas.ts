@@ -39,6 +39,8 @@ export interface Batch {
   itemId: string;
   price: number;
   quantity: number;
+  lot: string;
+  expiration: Date;
   created: Date;
   lastModified: Date;
   lastModifiedBy: string;
