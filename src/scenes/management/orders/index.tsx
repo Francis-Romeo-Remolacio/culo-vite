@@ -153,7 +153,8 @@ const SuborderItem = ({
         {suborderDetails.map(([key, value]) => (
           <Box key={key} sx={{ marginBottom: 1 }}>
             <Typography variant="body1">
-              <strong>{key}:</strong> {key === "price" ? String(value.full) : String(value)}
+              <strong>{key}:</strong>{" "}
+              {key === "price" ? String(value.full) : String(value)}
             </Typography>
           </Box>
         ))}
@@ -337,7 +338,7 @@ const Orders = () => {
                   color: suborder.color,
                   flavor: suborder.flavor,
                   quantity: suborder.quantity,
-                  price: { full: suborder.price },
+                  price: suborder.price,
                 })),
                 customOrders: response.data.customItems,
               },
@@ -567,7 +568,10 @@ const Orders = () => {
                 <DialogTitle>BOM Report</DialogTitle>
                 <DialogContent>
                   {breakdownData.length > 0 ? (
-                    <CostBreakdownTable data={breakdownData} orderData={setSelectedOrder as ManagementOrder} />
+                    <CostBreakdownTable
+                      data={breakdownData}
+                      orderData={selectedOrder as ManagementOrder}
+                    />
                   ) : (
                     <Typography>No breakdown data available</Typography>
                   )}
