@@ -330,7 +330,7 @@ const Inventory = () => {
       api.post(`ingredients/${values.id}/batches`, {
         price: values.price,
         quantity: values.quantity,
-        lot: values.lot,
+        lotNumber: values.lot,
         expiration: values.expiration,
       });
       makeAlert("success", "Successfully added batch");
@@ -653,11 +653,10 @@ const Inventory = () => {
                   >
                     <AccordionSummary expandIcon={<ArrowDropDown />}>
                       {matchedIngredient
-                        ? `${
-                            matchedIngredient.name
-                          }: ${batch.created.toLocaleString("en-PH", {
-                            timeZone: "UTC",
-                          })}`
+                        ? `${matchedIngredient.name
+                        }: ${batch.created.toLocaleString("en-PH", {
+                          timeZone: "UTC",
+                        })}`
                         : `Unknown Ingredient (${batch.itemId})`}
                     </AccordionSummary>
                     <AccordionDetails>
@@ -757,8 +756,11 @@ const Inventory = () => {
               <DatePicker
                 label="Expiration Date"
                 name="pickupDateTime"
-                value={values.expiration}
-                onChange={(date) => setFieldValue("pickupDateTime", date)}
+                value={values.expiration ? dayjs(values.expiration).startOf('day') : null}
+                onChange={(date) => {
+                  const formattedDate = dayjs(date).format('YYYY-MM-DD'); // Format as 'YYYY-MM-DD'
+                  setFieldValue("pickupDateTime", formattedDate); // Update with formatted date
+                }}
               />
             </Stack>
           </DialogContent>
