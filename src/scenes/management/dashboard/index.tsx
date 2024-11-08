@@ -835,7 +835,17 @@ const Dashboard = () => {
                     enableLabel={false}
                     axisTop={null}
                     axisRight={null}
+                    gridYValues={
+                      tagsUsedOccurenceBarChartData.reduce(
+                        (set, { value }) => set.add(value),
+                        new Set()
+                      ).size
+                    }
                     axisLeft={{
+                      tickValues: tagsUsedOccurenceBarChartData.reduce(
+                        (set, { value }) => set.add(value),
+                        new Set()
+                      ).size,
                       tickSize: 5,
                       tickPadding: 5,
                       tickRotation: 0,
@@ -859,7 +869,17 @@ const Dashboard = () => {
                     enableLabel={false}
                     axisTop={null}
                     axisRight={null}
+                    gridYValues={
+                      tagsUsedOccurenceBarChartData.reduce(
+                        (set, { value }) => set.add(value),
+                        new Set()
+                      ).size
+                    }
                     axisLeft={{
+                      tickValues: tagsUsedOccurenceBarChartData.reduce(
+                        (set, { value }) => set.add(value),
+                        new Set()
+                      ).size,
                       tickSize: 5,
                       tickPadding: 5,
                       tickRotation: 0,
