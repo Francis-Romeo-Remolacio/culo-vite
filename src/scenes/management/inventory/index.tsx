@@ -147,6 +147,7 @@ const Inventory = () => {
         price: batch.price,
         quantity: batch.quantity,
         expiration: batch.expiration,
+        lotNumber: batch.lotNumber,
         created: batch.created,
         lastModified: batch.lastModified,
         lastModifiedBy: batch.lastModifiedBy,
