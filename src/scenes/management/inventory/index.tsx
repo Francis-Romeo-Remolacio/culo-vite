@@ -316,7 +316,7 @@ const Inventory = () => {
       try {
         await api.patch("ingredients", null, { params: { restore: id } });
         makeAlert("success", "Restored ingredient");
-        fetchData(); // Refresh data after restore
+        fetchData();
       } catch (error) {
         console.error("Error restoring ingredient:", error);
         makeAlert("error", "Failed to restore ingredient");
