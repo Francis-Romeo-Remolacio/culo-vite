@@ -39,6 +39,8 @@ export interface Batch {
   itemId: string;
   price: number;
   quantity: number;
+  lot: string;
+  expiration: Date;
   created: Date;
   lastModified: Date;
   lastModifiedBy: string;
@@ -222,8 +224,8 @@ export interface Paymongo {
 }
 
 export interface Notification {
-  notifId: string;
-  dateCreated: Date;
+  id: string;
+  created: Date;
   message: string;
   isRead: boolean;
 }

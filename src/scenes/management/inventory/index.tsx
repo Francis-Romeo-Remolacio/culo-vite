@@ -12,16 +12,24 @@ import {
   DialogTitle,
   Drawer,
   Stack,
+  styled,
   TextField,
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
   Typography,
   useTheme,
 } from "@mui/material";
+import dayjs from "dayjs";
+import { DatePicker, renderTimeViewClock } from "@mui/x-date-pickers";
 import {
   DataGrid,
   GridActionsCellItem,
   GridColDef,
   GridEditInputCell,
   GridEventListener,
+  GridPreProcessEditCellProps,
+  GridRenderEditCellParams,
   GridRowEditStopReasons,
   GridRowId,
   GridRowModes,
@@ -71,7 +79,15 @@ const Inventory = () => {
     price: number,
     measurement: string
   ) => {
-    setValues({ id, name, price, measurement, quantity: 0 });
+    setValues({
+      id,
+      name,
+      price,
+      measurement,
+      quantity: 0,
+      lot: "",
+      expiration: dayjs(),
+    });
     setOpen(true);
   };
 
@@ -130,6 +146,7 @@ const Inventory = () => {
         itemId: batch.itemId,
         price: batch.price,
         quantity: batch.quantity,
+        expiration: batch.expiration,
         created: batch.created,
         lastModified: batch.lastModified,
         lastModifiedBy: batch.lastModifiedBy,
@@ -161,7 +178,7 @@ const Inventory = () => {
       type: "count",
       quantity: 0,
       price: 0,
-      measurements: "Piece",
+      measurement: "Piece",
       good: 0,
       bad: 0,
       isActive: true,
@@ -184,66 +201,83 @@ const Inventory = () => {
   };
 
   const handleClickSave = async (
-    updatedRow: Ingredient,
+    updatedRow: Required<Ingredient>,
     originalRow: Ingredient
   ) => {
-    // Set the mode to view
-    setRowModesModel((prev) => ({
-      ...prev,
-      [updatedRow.id as string]: { mode: GridRowModes.View },
-    }));
+    if (updatedRow.name === "New Item") {
+      makeAlert("error", "Please name the item");
+      setRowModesModel((prev) => ({
+        ...prev,
+        [updatedRow.id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      }));
+    } else if (updatedRow.type === "") {
+      makeAlert("error", "Please select ingredient type");
+      setRowModesModel((prev) => ({
+        ...prev,
+        [updatedRow.id]: { mode: GridRowModes.Edit, fieldToFocus: "type" },
+      }));
+    } else if (updatedRow.measurement === "") {
+      makeAlert("error", "Please select measurement unit");
+      setRowModesModel((prev) => ({
+        ...prev,
+        [updatedRow.id]: {
+          mode: GridRowModes.Edit,
+          fieldToFocus: "measurement",
+        },
+      }));
+    } else {
+      // Check if any fields have changed
+      const hasChanged =
+        originalRow.name !== updatedRow.name ||
+        originalRow.quantity !== updatedRow.quantity ||
+        originalRow.measurement !== updatedRow.measurement ||
+        originalRow.price !== updatedRow.price ||
+        originalRow.type !== updatedRow.type;
 
-    // Check if any fields have changed
-    const hasChanged =
-      originalRow.name !== updatedRow.name ||
-      originalRow.quantity !== updatedRow.quantity ||
-      originalRow.measurement !== updatedRow.measurement ||
-      originalRow.price !== updatedRow.price ||
-      originalRow.type !== updatedRow.type;
-
-    if (!hasChanged) {
-      return updatedRow; // Return the original row since no changes are made
-    }
-
-    // Create an object to hold only the changed fields
-    const changedFields: any = {};
-
-    if (originalRow.name !== updatedRow.name) {
-      changedFields.name = updatedRow.name;
-    }
-    if (originalRow.quantity !== updatedRow.quantity) {
-      changedFields.quantity = updatedRow.quantity;
-    }
-    if (originalRow.measurement !== updatedRow.measurement) {
-      changedFields.measurements = updatedRow.measurement;
-    }
-    if (originalRow.price !== updatedRow.price) {
-      changedFields.price = updatedRow.price;
-    }
-    if (originalRow.type !== updatedRow.type) {
-      changedFields.type = updatedRow.type;
-    }
-
-    // Handle temporary IDs and API calls
-    try {
-      if (String(updatedRow.id).includes("tempId")) {
-        setRows((prevRows) =>
-          prevRows.filter((row) => row.id !== updatedRow.id)
-        );
-        await api.post("ingredients", updatedRow); // For new items, send the entire updatedRow
-        makeAlert("success", "Added new ingredient");
-      } else {
-        await api.patch(`ingredients/${updatedRow.id}`, changedFields); // Send only changed fields
-        makeAlert("success", "Updated ingredient");
+      if (!hasChanged) {
+        return updatedRow; // Return the original row since no changes are made
       }
-      fetchData(); // Refresh data after update
-    } catch (error) {
-      console.error("Error updating ingredient:", error);
-      makeAlert("error", "Error updating ingredient");
-      // You might want to handle the error accordingly
-    }
 
-    return updatedRow; // Return the updated row to the DataGrid
+      // Create an object to hold only the changed fields
+      const changedFields: any = {};
+
+      if (originalRow.name !== updatedRow.name) {
+        changedFields.name = updatedRow.name;
+      }
+      if (originalRow.quantity !== updatedRow.quantity) {
+        changedFields.quantity = updatedRow.quantity;
+      }
+      if (originalRow.measurement !== updatedRow.measurement) {
+        changedFields.measurement = updatedRow.measurement;
+      }
+      if (originalRow.price !== updatedRow.price) {
+        changedFields.price = updatedRow.price;
+      }
+      if (originalRow.type !== updatedRow.type) {
+        changedFields.type = updatedRow.type;
+      }
+
+      // Handle temporary IDs and API calls
+      try {
+        if (String(updatedRow.id).includes("tempId")) {
+          setRows((prevRows) =>
+            prevRows.filter((row) => row.id !== updatedRow.id)
+          );
+          await api.post("ingredients", updatedRow); // For new items, send the entire updatedRow
+          makeAlert("success", "Added new ingredient");
+        } else {
+          await api.patch(`ingredients/${updatedRow.id}`, changedFields); // Send only changed fields
+          makeAlert("success", "Updated ingredient");
+        }
+        fetchData(); // Refresh data after update
+      } catch (error) {
+        console.error("Error updating ingredient:", error);
+        makeAlert("error", "Error updating ingredient");
+        // You might want to handle the error accordingly
+      }
+
+      return updatedRow; // Return the updated row to the DataGrid
+    }
   };
 
   const handleClickCancel = (id: GridRowId) => {
@@ -296,6 +330,8 @@ const Inventory = () => {
       api.post(`ingredients/${values.id}/batches`, {
         price: values.price,
         quantity: values.quantity,
+        lotNumber: values.lot,
+        expiration: values.expiration.format("YYYY-MM-DD"),
       });
       makeAlert("success", "Successfully added batch");
     } catch (error) {
@@ -306,17 +342,63 @@ const Inventory = () => {
     }
   };
 
-  const { values, errors, setValues, isSubmitting, handleChange, resetForm } =
-    useFormik({
-      initialValues: {
-        id: "",
-        name: "",
-        price: 0,
-        quantity: 0,
-        measurement: "",
-      },
-      onSubmit,
+  const {
+    values,
+    errors,
+    setValues,
+    isSubmitting,
+    handleChange,
+    resetForm,
+    setFieldValue,
+  } = useFormik({
+    initialValues: {
+      id: "",
+      name: "",
+      price: 0,
+      quantity: 0,
+      measurement: "",
+      lot: "",
+      expiration: dayjs(),
+    },
+    onSubmit,
+  });
+
+  const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.error.main,
+      color: theme.palette.error.contrastText,
+    },
+  }));
+
+  function NameEditInputCell(props: GridRenderEditCellParams) {
+    const { error } = props;
+
+    return (
+      <StyledTooltip open={!!error} title={error}>
+        <GridEditInputCell {...props} />
+      </StyledTooltip>
+    );
+  }
+
+  function renderEditName(params: GridRenderEditCellParams) {
+    return <NameEditInputCell {...params} />;
+  }
+
+  async function validateName(name: string): Promise<boolean> {
+    return new Promise<any>((resolve) => {
+      resolve(
+        name === "New Item" ? `"${name}" is not allowed as a name.` : null
+      );
     });
+  }
+  const preProcessEditCellProps = async (
+    params: GridPreProcessEditCellProps
+  ) => {
+    const errorMessage = await validateName(params.props.value!.toString());
+    return { ...params.props, error: errorMessage };
+  };
 
   const columns: GridColDef[] = [
     {
@@ -406,6 +488,8 @@ const Inventory = () => {
       cellClassName: "name-column--cell",
       minWidth: 200,
       editable: true,
+      preProcessEditCellProps,
+      renderEditCell: renderEditName,
     },
     {
       field: "type",
@@ -661,6 +745,20 @@ const Inventory = () => {
                   },
                 }}
                 size="small"
+              />
+              <TextField
+                label={`Lot No.`}
+                id="lot"
+                name="lot"
+                value={values.lot}
+                onChange={handleChange}
+                size="small"
+              />
+              <DatePicker
+                label="Expiration Date"
+                name="pickupDateTime"
+                value={values.expiration}
+                onChange={(date) => setFieldValue("pickupDateTime", date)}
               />
             </Stack>
           </DialogContent>

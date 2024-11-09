@@ -339,7 +339,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     placeholder="Search…"
                     onChange={handleTypeSearch}
                     inputProps={{ "aria-label": "search" }}
-                    sx={{ color: colors.subtle }}
+                    sx={{ color: colors.background }}
                   />
                 </Stack>
               </form>

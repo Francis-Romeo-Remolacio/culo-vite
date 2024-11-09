@@ -5,145 +5,376 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
   Typography,
   useTheme,
 } from "@mui/material";
 import Header from "../../../components/Header";
 import { Tokens } from "../../../Theme";
 import api from "../../../api/axiosConfig"; // Ensure this path is correct
-import { ManagementOrder } from "../../../utils/Schemas";
+import {
+  Breakdown,
+  CustomOrder,
+  ManagementCustomOrder,
+  ManagementOrder,
+  ManagementSuborder,
+  Suborder,
+} from "../../../utils/Schemas";
 import { formatDate } from "@fullcalendar/core/index.js";
 import { Helmet } from "react-helmet-async";
+import { toCurrency } from "../../../utils/Formatter";
+import { useAlert } from "../../../components/CuloAlert";
+import { getImageType } from "../../../components/Base64Image";
+import { ArrowDropDown } from "@mui/icons-material";
+import CostBreakdownTable from "../orders/CostBreakdownTable";
 
-interface OrderDetails {
-  orderId: string;
-  status: string;
-  paymentMethod: string;
-  orderType: string;
-  pickupDateTime: Date;
-  orderTotal: number;
-  orderItems: OrderItem[];
-}
+type SuborderItemProps = {
+  suborder: ManagementSuborder | ManagementCustomOrder;
+  index: number;
+  handleAssignClickOpen?: (
+    item: ManagementSuborder | ManagementCustomOrder
+  ) => void;
+  handleOpenUpdateModal?: (
+    item: ManagementSuborder | ManagementCustomOrder
+  ) => void;
+  custom?: boolean;
+};
 
-interface OrderAddons {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  addOnTotal: number;
-}
-interface Order {
-  id: string;
-  customId: string;
-  designId: string;
-  payment: string;
-  customerId: string;
-  customerName: string;
-  status: string;
-  designName: string;
-  pickup: Date;
-  isActive: boolean;
-  created: Date;
-  lastModified: Date;
-  lastUpdatedBy: string;
-}
-interface OrderItem {
-  suborderId: string;
-  customerName: string;
-  employeeName?: string;
-  designName: string;
-  price: number;
-  quantity: number;
-  createdAt: Date;
-  lastUpdatedBy?: string;
-  lastUpdatedAt: Date;
-  description: string;
-  flavor: string;
-  size: string;
-  color: string;
-  shape: string;
-  isActive: boolean;
-  subOrderTotal: number;
-  orderAddons: OrderAddons[];
-}
+const SuborderItem = ({
+  suborder,
+  index,
+  handleAssignClickOpen,
+  handleOpenUpdateModal,
+}: SuborderItemProps) => {
+  const theme = useTheme();
+  const colors = Tokens(theme.palette.mode);
+
+  const isCustom = (
+    item: ManagementSuborder | ManagementCustomOrder
+  ): item is ManagementCustomOrder => {
+    return !!item;
+  };
+
+  // Dynamically get key-value pairs except 'id'
+  const suborderDetails = Object.entries(suborder).filter(
+    ([key, _]) => key !== "id" && key !== "designId" && key !== "designName"
+  );
+
+  // State to store the image
+  const [image, setImage] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<string | null>(null);
+
+  // Fetch the image asynchronously after render
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const response = await api.get(
+          `designs/${suborder.designId}/display-picture-data`
+        );
+        setImage(response.data.displayPictureData); // Assuming the response contains `displayPictureData`
+        setImageType(getImageType(String(response.data.displayPictureData)));
+      } catch (error) {
+        console.error("Error fetching image", error);
+      }
+    };
+
+    fetchImage();
+  }, [suborder.designId]); // Only run when suborder.designId changes
+
+  return (
+    <Accordion key={index} sx={{ backgroundColor: colors.primary[100] }}>
+      <AccordionSummary
+        expandIcon={<ArrowDropDown />}
+        aria-controls={`panel${index}-content`}
+        id={`panel${index}-header`}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography>
+            {isCustom(suborder)
+              ? `Custom Order ID: ${suborder.id}`
+              : `Suborder ID: ${suborder.id}`}
+          </Typography>
+          {handleAssignClickOpen ? (
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                handleAssignClickOpen(suborder);
+              }}
+            >
+              Assign
+            </Button>
+          ) : null}
+          {handleOpenUpdateModal ? (
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation(); // Prevent the accordion from expanding/collapsing
+                handleOpenUpdateModal(suborder);
+              }}
+            >
+              Update
+            </Button>
+          ) : null}
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails>
+        {image && imageType ? (
+          <img
+            src={`data:${imageType};base64,${image}`}
+            style={{
+              width: 400,
+            }}
+          />
+        ) : null}
+        {suborderDetails.map(([key, value]) => (
+          <Box key={key} sx={{ marginBottom: 1 }}>
+            <Typography variant="body1">
+              <strong>{key}:</strong>{" "}
+              {key === "price" ? String(value.full) : String(value)}
+            </Typography>
+          </Box>
+        ))}
+      </AccordionDetails>
+    </Accordion>
+  );
+};
 
 const Calendar = () => {
   const theme = useTheme();
-  const colors = Tokens(theme.palette.mode) || {}; // Default to empty object if tokens is undefined
+  const colors = Tokens(theme.palette.mode);
 
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const { makeAlert } = useAlert();
+
   const [open, setOpen] = useState(false);
+
+  const [orderRows, setOrderRows] = useState<Partial<ManagementOrder>[]>([]);
+
+  const [currentEvents, setCurrentEvents] = useState<any[]>([]);
+
+  const [orderDetails, setOrderDetails] = useState<Omit<
+    ManagementOrder,
+    "customerId" | "customerName" | "isActive"
+  > | null>(null);
+  const [rows, setRows] = useState<Partial<ManagementOrder>[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedOrder, setSelectedOrder] =
+    useState<Partial<ManagementOrder> | null>(null);
   const [viewOrderOpen, setViewOrderOpen] = useState(false);
+  const [selectedOrderItem, setSelectedOrderItem] = useState<
+    Suborder | CustomOrder | null
+  >(null);
 
-  const [orderRows, setOrderRows] = useState<Order[]>([]);
+  const [bomDialogOpen, setBomDialogOpen] = useState(false);
+  const [breakdownData, setBreakdownData] = useState<Breakdown[]>([]);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [selectedSuborder, setSelectedSuborder] = useState<
+    Suborder | CustomOrder | null
+  >(null);
+  const [designName, setDesignName] = useState("");
+  const [price, setPrice] = useState(0);
 
-  const [currentEvents, setCurrentEvents] = useState([]);
+  interface Employee {
+    userId: string;
+    name: string;
+  }
 
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const handleOpenUpdateModal = (item: Suborder | CustomOrder) => {
+    setSelectedSuborder(item); // Set the selected suborder
+    setOpenUpdateModal(true); // Open the modal
+  };
+
+  // Function to close the modal
+  const handleCloseUpdateModal = () => {
+    setOpenUpdateModal(false);
+    setSelectedSuborder(null); // Reset the selected suborder
+  };
+
+  const handleViewOrderClickOpen = (order: ManagementOrder) => {
+    setSelectedOrder(order);
+    setViewOrderOpen(true);
+  };
+
+  const handleAssignClickOpen = (item: Suborder | CustomOrder) => {
+    setSelectedOrderItem(item);
+    setAssignOpen(true);
+  };
+
+  const handleClose = () => {
+    setOrderDetails(null);
+    setViewOrderOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleCloseAssign = () => {
+    setAssignOpen(false);
+    setSelectedEmployee("");
+  };
+
+  const AssignClose = () => {
+    setAssignOpen(false);
+  };
+
+  const fetchBreakdownData = async () => {
+    if (orderDetails) {
       try {
-        // Fetch partial details
-        const ordersRes = await api.get("orders/partial-details");
-        const orders = ordersRes.data;
-
-        const orderData = ordersRes.data.map((order: any) => ({
-          id: order.orderId,
-          customId: order.customId,
-          designId: order.designId,
-          payment: order.payment,
-          customerId: order.customerId,
-          customerName: order.customerName,
-          status: order.status,
-          designName: order.designName,
-          pickup: new Date(order.pickup),
-          isActive: order.isActive,
-          created: new Date(order.createdAt),
-          lastModified: new Date(order.lastUpdatedAt),
-          lastUpdatedBy: order.lastUpdatedBy,
-        }));
-        setOrderRows(orderData);
-
-        const events = orders.map((order: any) => ({
-          id: order.orderId,
-          title: `${order.customerName}'s Order`,
-          start: order.pickup,
-          extendedProps: {
-            pickupDate: order.pickup,
-            orderId: order.orderId, // Add orderId to extendedProps
-          },
-        }));
-
-        setCurrentEvents(events);
+        return await api.get(
+          `data-analysis/ingredient-cost-breakdown/by-order-id${orderDetails.id}`
+        );
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
-    };
+    }
+  };
 
-    fetchOrders();
-  }, []);
   useEffect(() => {
-    const parseOrderDetails = async () => {
-      if (selectedOrder !== undefined && selectedOrder !== null) {
-        try {
-          const response = await api.get(`orders/${selectedOrder.id}/full`);
-
-          const parsedOrderDetails: OrderDetails | null = response.data;
-          setOrderDetails(parsedOrderDetails);
-        } catch {
-          console.error("Error fetching order details:", Error);
-        }
+    const fetchEmployees = async () => {
+      try {
+        const response = await api.get<Employee[]>("orders/employees-name");
+        setEmployees(response.data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
       }
     };
+    fetchEmployees();
+  }, []);
 
-    parseOrderDetails();
-  }, [selectedOrder]);
+  const handleAssignEmployee = async () => {
+    if (!selectedOrderItem || !selectedEmployee || !orderDetails) return;
+
+    try {
+      const requestBody = {
+        employeeId: selectedEmployee,
+      };
+
+      await api.post(
+        `orders/suborders/${selectedOrderItem.id}/assign`,
+        requestBody
+      );
+
+      makeAlert("success", "Task assigned successfully.");
+      handleCloseAssign();
+      fetchData();
+    } catch (error) {
+      console.error("Error assigning employee:", error);
+      makeAlert("error", "Task assignment failed.");
+    }
+  };
+
+  const handleReport = async () => {
+    try {
+      const response = await fetchBreakdownData(); // Fetch breakdown data from API or state
+      if (response) {
+        setBreakdownData(response.data); // Assuming the response is in the format of Breakdown[]
+        setBomDialogOpen(true); // Open the BOM dialog}
+      }
+    } catch (error) {
+      console.error("Failed to generate BOM report", error);
+    }
+  };
+
+  const handleBomDialogClose = () => {
+    setBomDialogOpen(false); // Close the BOM dialog
+  };
+
+  const fetchData = async () => {
+    try {
+      await api.get("orders/partial-details").then((response) => {
+        const parsedOrders: Partial<ManagementOrder>[] = response.data.map(
+          (order: any) => ({
+            id: order.orderId,
+            type: order.type,
+            customerId: order.customerId,
+            customerName: order.customerName,
+            status: order.status,
+            payment: order.payment,
+            pickupDateTime: new Date(order.pickup),
+            isActive: order.isActive,
+          })
+        );
+        setOrderRows(parsedOrders);
+      });
+
+      const events = orderRows.map((order: any) => ({
+        id: order.id,
+        title: `${order.customerName}'s Order`,
+        start: order.pickupDateTime,
+        extendedProps: {
+          pickupDate: order.pickupDateTime,
+          orderId: order.id, // Add orderId to extendedProps
+        },
+      }));
+
+      setCurrentEvents(events);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (viewOrderOpen && selectedOrder) {
+      const fetchOrderDetails = async () => {
+        try {
+          await api.get(`orders/${selectedOrder.id}/full`).then((response) => {
+            const parsedOrder: Omit<
+              ManagementOrder,
+              "customerId" | "customerName" | "isActive"
+            > = {
+              id: response.data.orderId,
+              type: response.data.orderType,
+              pickupDateTime: new Date(response.data.pickupDateTime),
+              payment: response.data.paymentMethod,
+              price: { full: response.data.orderTotal },
+              listItems: {
+                suborders: response.data.orderItems.map((suborder: any) => ({
+                  id: suborder.suborderId,
+                  designId: suborder.designId,
+                  designName: suborder.designName,
+                  pastryId: suborder.pastryId,
+                  description: suborder.description,
+                  size: suborder.size,
+                  color: suborder.color,
+                  flavor: suborder.flavor,
+                  quantity: suborder.quantity,
+                  price: suborder.price,
+                })),
+                customOrders: response.data.customItems,
+              },
+              status: response.data.status,
+            };
+            setOrderDetails(parsedOrder);
+          });
+        } catch (error) {
+          console.error("Error fetching order details:", error);
+        }
+      };
+      fetchOrderDetails();
+    }
+  }, [viewOrderOpen, selectedOrder]);
 
   const handleDateClick = (selected: any) => {
     const title = prompt("Please enter a new title for your event");
@@ -166,7 +397,7 @@ const Calendar = () => {
     // For now, it does nothing as we removed the `handleCustomerNameClick`
     //console.log("Event clicked:", selected.event.extendedProps.orderId);
 
-    const clickedOrder: Order | undefined = orderRows.find(
+    const clickedOrder: Partial<ManagementOrder> | undefined = orderRows.find(
       (value) => value.id === selected.event.id
     );
     setSelectedOrder(clickedOrder === undefined ? null : clickedOrder);
@@ -188,13 +419,6 @@ const Calendar = () => {
         </div>
       </div>
     );
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedOrder(null);
-    setOrderDetails(null);
-    setViewOrderOpen(false);
   };
 
   return (
@@ -233,124 +457,100 @@ const Calendar = () => {
           eventContent={eventContent}
         />
       </Box>
-      <Dialog
-        open={viewOrderOpen}
-        onClose={handleClose}
-        fullWidth
-        maxWidth="md"
-      >
+
+      <Dialog open={viewOrderOpen} onClose={handleClose} maxWidth="md">
         <DialogTitle>Order Details</DialogTitle>
         <DialogContent>
           {orderDetails ? (
             <Box>
-              <Typography variant="h6">
-                Order ID: {orderDetails.orderId}
-              </Typography>
+              <Typography variant="h6">Order ID: {orderDetails.id}</Typography>
               <Typography variant="h6">
                 Status: {orderDetails.status}
               </Typography>
               <Typography variant="h6">
-                Payment Method: {orderDetails.paymentMethod}
+                Payment: {orderDetails.payment}
               </Typography>
               <Typography variant="h6">
-                Order Type: {orderDetails.orderType}
+                Pickup: {String(orderDetails.pickupDateTime)}
               </Typography>
               <Typography variant="h6">
-                Pickup Date and Time:{" "}
-                {formatDate(orderDetails.pickupDateTime, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                Price: {toCurrency(orderDetails.price.full)}
               </Typography>
-              <Typography variant="h6">
-                Order Total: {orderDetails.orderTotal}
-              </Typography>
+
               <Typography variant="h6">Order Items:</Typography>
-              {orderDetails.orderItems.length > 0 ? (
-                <Box>
-                  {orderDetails.orderItems.map((item, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                      <Typography variant="h6">
-                        Suborder ID: {item.suborderId}
-                      </Typography>
-                      <Typography variant="h6">
-                        Customer Name: {item.customerName}
-                      </Typography>
-                      <Typography variant="h6">
-                        Employee Name: {item.employeeName || "Not assigned"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Design Name: {item.designName}
-                      </Typography>
-                      <Typography variant="h6">Price: {item.price}</Typography>
-                      <Typography variant="h6">
-                        Quantity: {item.quantity}
-                      </Typography>
-                      <Typography variant="h6">
-                        Created At:{" "}
-                        {formatDate(item.createdAt, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Typography>
-                      <Typography variant="h6">
-                        Last Updated By: {item.lastUpdatedBy || "Not updated"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Last Updated At:{" "}
-                        {formatDate(item.lastUpdatedAt, {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Typography>
-                      <Typography variant="h6">
-                        Description: {item.description}
-                      </Typography>
-                      <Typography variant="h6">
-                        Flavor: {item.flavor}
-                      </Typography>
-                      <Typography variant="h6">Size: {item.size}</Typography>
-                      <Typography variant="h6">Color: {item.color}</Typography>
-                      <Typography variant="h6">Shape: {item.shape}</Typography>
-                      <Typography variant="h6">
-                        Is Active: {item.isActive ? "Yes" : "No"}
-                      </Typography>
-                      <Typography variant="h6">
-                        Suborder Total: {item.subOrderTotal}
-                      </Typography>
-                      Order Addons:
-                      {item.orderAddons.length > 0
-                        ? item.orderAddons
-                            .map(
-                              (addon) =>
-                                `${addon.name} (Qty: ${
-                                  addon.quantity
-                                }, Total: ${addon.addOnTotal.toFixed(2)})`
-                            )
-                            .join(", ")
-                        : "None"}
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Typography>No items available</Typography>
-              )}
+              {orderDetails.listItems.suborders.map((suborder, index) => (
+                <SuborderItem
+                  suborder={suborder}
+                  index={index}
+                  handleAssignClickOpen={handleAssignClickOpen}
+                  handleOpenUpdateModal={handleOpenUpdateModal} //can you make this only for customorders
+                />
+              ))}
+              {orderDetails.listItems.customOrders.map((customOrder, index) => (
+                <SuborderItem
+                  suborder={customOrder}
+                  index={index}
+                  handleAssignClickOpen={handleAssignClickOpen}
+                  //handleOpenUpdateModal={handleOpenUpdateModal}
+                />
+              ))}
+              <Dialog
+                open={bomDialogOpen}
+                onClose={handleBomDialogClose}
+                maxWidth="md"
+                fullWidth
+              >
+                <DialogTitle>BOM Report</DialogTitle>
+                <DialogContent>
+                  {breakdownData.length > 0 ? (
+                    <CostBreakdownTable
+                      data={breakdownData}
+                      orderData={selectedOrder as ManagementOrder}
+                    />
+                  ) : (
+                    <Typography>No breakdown data available</Typography>
+                  )}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleBomDialogClose}>Close</Button>
+                </DialogActions>
+              </Dialog>
             </Box>
           ) : (
-            <Typography>No details available</Typography>
+            <CircularProgress />
           )}
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleReport}>Generate BOM Report</Button>
           <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={assignOpen} onClose={handleCloseAssign}>
+        <DialogTitle>Assign Employee</DialogTitle>
+        <DialogContent>
+          {selectedOrder && (
+            <FormControl fullWidth variant="standard" margin="dense">
+              <InputLabel>Employee</InputLabel>
+              <Select
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+                label="Employee"
+              >
+                {employees.map((employee) => (
+                  <MenuItem key={employee.userId} value={employee.userId}>
+                    {employee.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleAssignEmployee} disabled={!selectedEmployee}>
+            Assign
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -338,7 +338,7 @@ const Orders = () => {
                   color: suborder.color,
                   flavor: suborder.flavor,
                   quantity: suborder.quantity,
-                  price: { full: suborder.price },
+                  price: suborder.price,
                 })),
                 customOrders: response.data.customItems,
               },
@@ -570,7 +570,7 @@ const Orders = () => {
                   {breakdownData.length > 0 ? (
                     <CostBreakdownTable
                       data={breakdownData}
-                      orderData={setSelectedOrder as ManagementOrder}
+                      orderData={selectedOrder as ManagementOrder}
                     />
                   ) : (
                     <Typography>No breakdown data available</Typography>
