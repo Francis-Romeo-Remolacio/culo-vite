@@ -33,6 +33,7 @@ const Landing = () => {
           top: 0,
           zIndex: -1,
           backgroundColor: colors.primary[100],
+          background: `url(banner.png) center/cover no-repeat`,
           filter: "opacity(50%)",
           maskImage:
             "linear-gradient(to bottom, rgba(0,0,0,1) 0%,  rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%)",
@@ -40,12 +41,12 @@ const Landing = () => {
       />
       <Stack justifyContent="center" spacing={4} sx={{ zIndex: 25 }}>
         <Helmet>
-          <title>{"Cake Studio"}</title>
+          <title>{"The Pink Butter Cake Studio"}</title>
         </Helmet>
         {/* Section: Hero */}
         <Stack alignItems="center" justifyContent="center" minHeight={400}>
           <Typography variant="h1" gutterBottom>
-            {"Cake Studio"}
+            {"The Pink Butter Cake Studio"}
           </Typography>
           <Typography variant="h3" gutterBottom>
             {"Delicious Artistry in Every Bite"}
@@ -121,7 +122,7 @@ const Landing = () => {
                       <iframe
                         width="100%"
                         height="500"
-                        src="https://www.youtube.com/embed/C0DPdy98e4c"
+                        src="https://www.youtube.com/embed/-diIiPnmN58"
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -159,15 +160,17 @@ const Landing = () => {
                   {/* Text Column */}
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="h1" gutterBottom>
-                      {"About Cake Studio"}
+                      {"About The Pink Butter Cake Studio"}
                     </Typography>
                     <Typography variant="h5">
                       {
-                        "Established in YEAR, Cake Studio has been crafting stunning and delicious cakes for all occasions."
+                        "Established in 2017, The Pink Butter Cake Studio has been crafting stunning and delicious cakes for all occasions."
                       }
                     </Typography>
                     <Typography variant="h5">
-                      {"We are located at ADDRESS."}
+                      {
+                        "We are located at 5 Masbate St. Brgy. Nayong Kanluran, Quezon City, Philippines."
+                      }
                     </Typography>
                   </Grid>
                 </Grid>
@@ -201,20 +204,32 @@ const Landing = () => {
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Viber: "}
-                        <Link>{"+63 968 228 1963"}</Link>
+                        <Link href="viber://chat/?number=%2B639682281963">
+                          {"+63 968 228 1963"}
+                        </Link>
                       </Typography>
                     </Grid>
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Facebook: "}
-                        <Link target="_blank">{"Cake Studio"}</Link>
+                        <Link
+                          href="https://www.facebook.com/TPBcakestudio"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {"TBP Cake Studio"}
+                        </Link>
                       </Typography>
                     </Grid>
                     <Grid size={4}>
                       <Typography variant="h4">
                         {"Instagram: "}
-                        <Link target="_blank" rel="noopener noreferrer">
-                          {"@cakestudio"}
+                        <Link
+                          href="https://www.instagram.com/thepinkbutter?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {"@thepinkbutter"}
                         </Link>
                       </Typography>
                     </Grid>
@@ -235,7 +250,7 @@ const Landing = () => {
               align="center"
               sx={{ mt: 4 }}
             >
-              {`© ${new Date().getFullYear()} Cake Studio. All rights reserved.`}
+              {`© ${new Date().getFullYear()} The Pink Butter Cake Studio. All rights reserved.`}
             </Typography>
           </Grid>
         </Grid>

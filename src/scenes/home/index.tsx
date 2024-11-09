@@ -41,7 +41,7 @@ const Shop = () => {
   return (
     <Grid container spacing={2}>
       <Helmet>
-        <title>Shop - Cake Studio</title>
+        <title>Shop - The Pink Butter Cake Studio</title>
       </Helmet>
 
       <Grid size={{ xs: 2 }} sx={{ display: { xs: "none", lg: "block" } }}>
@@ -58,7 +58,7 @@ const Shop = () => {
       <Grid size={{ xs: 12, lg: 10 }}>
         <Paper sx={{ p: 2 }}>
           <Header
-            title="Cake Studio"
+            title="The Pink Butter Cake Studio"
             subtitle="Take a look at our various offerings"
           />
           <DesignGallery

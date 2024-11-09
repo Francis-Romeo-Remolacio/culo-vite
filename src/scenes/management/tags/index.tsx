@@ -120,7 +120,7 @@ const Tags = () => {
   return (
     <>
       <Helmet>
-        <title>{"Tags - Cake Studio"}</title>
+        <title>{"Tags - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="TAGS" subtitle="Tags for categorizing designs" />
       <Stack direction="row" spacing={2}>

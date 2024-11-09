@@ -109,7 +109,7 @@ const PostPayment = () => {
   return (
     <Stack spacing={2} alignItems="center">
       <Helmet>
-        <title>{"Receipt - Cake Studio"}</title>
+        <title>{"Receipt - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Grid
         container

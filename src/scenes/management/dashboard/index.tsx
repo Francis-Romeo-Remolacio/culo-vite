@@ -443,7 +443,7 @@ const Dashboard = () => {
   return (
     <>
       <Helmet>
-        <title>{"Dashboard - Cake Studio"}</title>
+        <title>{"Dashboard - The Pink Butter Cake Studio"}</title>
       </Helmet>
       {/* HEADER */}
       <Box

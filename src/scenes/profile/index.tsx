@@ -117,7 +117,7 @@ const Profile = () => {
   return (
     <Container maxWidth="sm">
       <Helmet>
-        <title>{"Profile - Cake Studio"}</title>
+        <title>{"Profile - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="Profile" />
       <Stack spacing={2}>

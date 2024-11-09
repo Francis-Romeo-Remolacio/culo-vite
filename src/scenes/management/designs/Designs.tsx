@@ -119,7 +119,7 @@ const Designs = () => {
   return (
     <>
       <Helmet>
-        <title>{"Designs - Cake Studio"}</title>
+        <title>{"Designs - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="DESIGNS" subtitle="Gallery of all designs" />
       <Grid

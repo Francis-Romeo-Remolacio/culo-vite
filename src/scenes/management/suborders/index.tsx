@@ -87,6 +87,7 @@ const Suborders = () => {
     }
   };
 
+
   const handleClickDelete = async (id: string) => {
     try {
       await api.delete(`suborders/${id}`);
@@ -204,7 +205,7 @@ const Suborders = () => {
   return (
     <>
       <Helmet>
-        <title>{"To-Do - Cake Studio"}</title>
+        <title>{"To-Do - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="TO-DO" subtitle="Employee updates" />
       <Button

@@ -312,7 +312,7 @@ export default function ManagementAppBar({
               noWrap
               sx={{ flexGrow: 1, color: colors.background }}
             >
-              Cake Studio Management - CULO
+              The Pink Butter Cake Studio Management - CULO
             </Typography>
             <Box>
               <IconButton
@@ -383,16 +383,16 @@ export default function ManagementAppBar({
             <Typography>Notifications</Typography>
             {notifications.length > 0
               ? notifications.map((notif: Notification) => {
-                  const labelId = `checkbox-list-label-${notif.id}`;
+                  const labelId = `checkbox-list-label-${notif.notifId}`;
                   return (
                     <ListItem
-                      key={notif.id}
+                      key={notif.notifId}
                       secondaryAction={
                         notif.isRead === false ? (
                           <IconButton
                             edge="end"
                             aria-label="mark-as-read"
-                            onClick={() => readNotif(notif.id)}
+                            onClick={() => readNotif(notif.notifId)}
                           >
                             <CheckIcon />
                           </IconButton>

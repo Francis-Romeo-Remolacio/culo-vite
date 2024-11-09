@@ -608,7 +608,7 @@ const Inventory = () => {
   return (
     <>
       <Helmet>
-        <title>{"Inventory - Cake Studio"}</title>
+        <title>{"Inventory - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="INVENTORY" subtitle="Manage your ingredients" />
       <Stack direction="row" spacing={2}>

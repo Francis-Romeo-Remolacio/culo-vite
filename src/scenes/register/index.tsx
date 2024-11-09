@@ -83,7 +83,7 @@ const Register = () => {
       }}
     >
       <Helmet>
-        <title>{"Register - Cake Studio"}</title>
+        <title>{"Register - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Box position="absolute" left={0}>
         <ButtonBack />
@@ -95,7 +95,7 @@ const Register = () => {
         <Stack spacing={2}>
           <Header
             title="Register"
-            subtitle="Create an account at Cake Studio"
+            subtitle="Create an account at The Pink Butter Cake Studio"
           />
 
           {/* Logo */}
@@ -109,7 +109,7 @@ const Register = () => {
               />
             )}
             <img
-              src="logo.png"
+              src="logo192.png"
               alt="Logo"
               style={{
                 width: "150px",

@@ -75,7 +75,7 @@ const ForgotPassword = () => {
         }}
       >
         <Helmet>
-          <title>Reset Password - Cake Studio</title>
+          <title>Reset Password - The Pink Butter Cake Studio</title>
         </Helmet>
         <Box position="absolute" left={0}>
           <ButtonBack />
@@ -205,7 +205,7 @@ const ForgotPassword = () => {
         }}
       >
         <Helmet>
-          <title>{"Forgot Password - Cake Studio"}</title>
+          <title>{"Forgot Password - The Pink Butter Cake Studio"}</title>
         </Helmet>
         <Paper sx={{ p: 2 }}>
           <Box position="absolute">

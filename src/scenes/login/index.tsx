@@ -74,14 +74,17 @@ const Login = () => {
       }}
     >
       <Helmet>
-        <title>{"Login - Cake Studio"}</title>
+        <title>{"Login - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Paper sx={{ p: 2 }}>
         <Box position="absolute">
           <ButtonBack />
         </Box>
         <Stack>
-          <Header title="Login" subtitle="Welcome to Cake Studio" />
+          <Header
+            title="Login"
+            subtitle="Welcome to The Pink Butter Cake Studio"
+          />
 
           {/* Logo */}
           <Box display="flex" justifyContent="center" mb={2}>
@@ -94,7 +97,7 @@ const Login = () => {
               />
             )}
             <img
-              src="logo.png"
+              src="logo192.png"
               alt="Logo"
               style={{
                 width: "150px",

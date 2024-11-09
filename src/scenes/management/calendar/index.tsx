@@ -428,7 +428,7 @@ const Calendar = () => {
       }}
     >
       <Helmet>
-        <title>{"Calendar - Cake Studio"}</title>
+        <title>{"Calendar - The Pink Butter Cake Studio"}</title>
       </Helmet>
       <Header title="CALENDAR" subtitle="Full Calendar Interactive Page" />
 

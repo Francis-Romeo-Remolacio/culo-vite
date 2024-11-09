@@ -450,7 +450,7 @@ const ViewDesign = () => {
   return (
     <Container sx={{ maxWidth: "600px" }}>
       <Helmet>
-        <title>{`${design?.name} - Cake Studio`}</title>
+        <title>{`${design?.name} - The Pink Butter Cake Studio`}</title>
       </Helmet>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
@@ -471,7 +471,7 @@ const ViewDesign = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack spacing={2} width="100%" height="100%">
             <Typography variant="subtitle1">
-              Cake Studio Original Design
+              Pink Butter Cake Studio Original Design
             </Typography>
             {design?.name ? (
               <Typography variant="h1" gutterBottom>
