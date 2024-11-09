@@ -35,7 +35,7 @@ export interface Ingredient {
 }
 
 export interface Batch {
-  id?: string;
+  id: string;
   itemId: string;
   price: number;
   quantity: number;

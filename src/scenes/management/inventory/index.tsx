@@ -364,6 +364,18 @@ const Inventory = () => {
     onSubmit,
   });
 
+  const handleDeleteBatch = async (id: string) => {
+    try {
+      api.delete(`ingredients/${id}/batch`);
+      makeAlert("success", "Successfully deleted batch");
+    } catch (error) {
+      console.error(error);
+      makeAlert("error", "Failed to delete batch");
+    } finally {
+      fetchBatches();
+    }
+  };
+
   const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -653,13 +665,29 @@ const Inventory = () => {
                     sx={{ backgroundColor: colors.primary[100] }}
                   >
                     <AccordionSummary expandIcon={<ArrowDropDown />}>
-                      {matchedIngredient
-                        ? `${
-                            matchedIngredient.name
-                          }: ${batch.created.toLocaleString("en-PH", {
-                            timeZone: "UTC",
-                          })}`
-                        : `Unknown Ingredient (${batch.itemId})`}
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        width="100%"
+                      >
+                        {matchedIngredient
+                          ? `${
+                              matchedIngredient.name
+                            }: ${batch.created.toLocaleString("en-PH", {
+                              timeZone: "UTC",
+                            })}`
+                          : `Unknown Ingredient (${batch.itemId})`}
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => {
+                            handleDeleteBatch(batch.id);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                       {details.map(([key, value]) => (
