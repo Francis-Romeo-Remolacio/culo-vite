@@ -307,7 +307,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                   />
                 )}
                 <img
-                  src="logo192.png"
+                  src="logo.png"
                   alt="Logo"
                   style={{
                     width: 32,
@@ -325,7 +325,7 @@ export default function MainAppBar({ children }: MainAppBarProps) {
                     color: colors.background,
                   }}
                 >
-                  The Pink Butter Cake Studio
+                  Cake Studio
                 </Typography>
               </Stack>
             </Link>

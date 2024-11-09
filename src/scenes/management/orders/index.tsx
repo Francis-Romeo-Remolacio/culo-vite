@@ -456,7 +456,7 @@ const Orders = () => {
   return (
     <>
       <Helmet>
-        <title>{"Orders - The Pink Butter Cake Studio"}</title>
+        <title>{"Orders - Cake Studio"}</title>
       </Helmet>
       <Header title="ORDERS" subtitle="Order Management and Tracking" />
       <Button

@@ -289,7 +289,7 @@ const AddOns = () => {
   return (
     <>
       <Helmet>
-        <title>{"Add-Ons - The Pink Butter Cake Studio"}</title>
+        <title>{"Add-Ons - Cake Studio"}</title>
       </Helmet>
       <Header title="ADD-ONS" subtitle="Manage your add-ons" />
       <Stack direction="row" spacing={2}>

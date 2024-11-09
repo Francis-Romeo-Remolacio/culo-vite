@@ -58,7 +58,7 @@ const Form = () => {
   return (
     <Container maxWidth={"sm"}>
       <Helmet>
-        <title>{"Manual Registration - The Pink Butter Cake Studio"}</title>
+        <title>{"Manual Registration - Cake Studio"}</title>
       </Helmet>
       <Header title="REGISTER USER" />
       <form onSubmit={handleSubmit}>
